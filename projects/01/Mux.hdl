@@ -14,5 +14,23 @@ CHIP Mux {
     OUT out;
 
     PARTS:
-    // Put your code here:
+    /**
+     * From the truth table
+     *
+     * V    (Not(a) And     b  And     sel )
+     * VI   (    a  And Not(b) And Not(sel))
+     * VIII (    a  And     b  And Not(sel))
+     * IX   (    a  And     b  And     sel )
+     *
+     * V and IX is true irrespective of a
+     * VI and VIII is true irrespective of b
+     *
+     * Thus the following is equivalent
+     *
+     * (b And sel) Or (a And Not(sel))
+     */
+     Not(in=sel, out=notSel);
+     And(a=b, b=sel, out=bAndSel);
+     And(a=a, b=notSel, out=aAndNotSel);
+     Or(a=bAndSel, b=aAndNotSel, out=out);
 }
