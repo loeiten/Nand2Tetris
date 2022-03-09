@@ -14,5 +14,13 @@ CHIP DMux {
     OUT a, b;
 
     PARTS:
-    // Put your code here:
+    /**
+     * From the truth table
+     *
+     * IV (in And Not(sel))
+     * V  (in And sel)
+     */
+     Not(in=sel, out=notSel);
+     And(a=in, b=notSel, out=a);
+     And(a=in, b=sel, out=b);
 }

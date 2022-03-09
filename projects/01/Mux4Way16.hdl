@@ -16,5 +16,34 @@ CHIP Mux4Way16 {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    // If sel[0] is 0: a is selected
+    // If sel[0] is 1: b is selected
+    Mux16(a=a, b=b, sel=sel[0], out=a0xb1x);
+    // If sel[0] is 0: The first pin is a
+    // If sel[0] is 1: The first pin is b
+    // If sel[0] is 0 AND sel[1] is 0: a is selected 
+    // If sel[0] is 1 then the first pin is b, thus only b can be an output
+    Mux16(a=a0xb1x, b=b, sel=sel[1], out=out);
+    // Mux16(a=a0xb1x, b=b, sel=sel[1], out=a00b1x);
+
+    // // If sel[0] is 0 AND sel[1] is 0: The first pin is a
+    // //     This means that the output of the Mux will always be a as long as all sel is 0
+    // // If sel[0] is 0 AND sel[1] is 1: The first pin is b, and b is selected
+    // // If sel[0] is 1 AND sel[1] is 0: The first pin is b, and c is selected
+    // // If sel[0] is 1 AND sel[1] is 1: The first pin is b, and c is selected
+    // Mux16(a=a00b1x, b=c, sel=sel[0], out=a00b0xc1x);
+    // // If sel[0] is 0 AND sel[1] is 1: The first pin is b, and b is selected
+    // // If sel[0] is 1 AND sel[1] is 0: The first pin is c, and c is selected
+    // // If sel[0] is 1 AND sel[1] is 1: The first pin is c, and b is selected
+    // Mux16(a=a00b0xc1x, b=b, sel=sel[1], out=out);
+    // // Mux16(a=a00b0xc1x, b=b, sel=sel[1], out=a00b01c1x);
+
+    // // If sel[0] is 0 AND sel[1] is 1: The first pin is b, and b is selected
+    // // If sel[0] is 1 AND sel[1] is 0: The first pin is c, and c is selected
+    // // If sel[0] is 1 AND sel[1] is 1: The first pin is b, and b is selected
+    // Mux16(a=a00b01c1x, b=b, sel=sel[0], out=a00b01c1xAgain);
+    // // If sel[0] is 0 AND sel[1] is 1: The first pin is b, and d is selected
+    // // If sel[0] is 1 AND sel[1] is 0: The first pin is c, and c is selected
+    // // If sel[0] is 1 AND sel[1] is 1: The first pin is b, and d is selected
+    // Mux16(a=a00b01c1xAgain, b=d, sel=sel[1], out=out);
 }
