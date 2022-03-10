@@ -18,5 +18,18 @@ CHIP Mux8Way16 {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    // NOTE: 0 index refers to the RIGHTMOST bit
+    // x00 - a
+    // x01 - b
+    // x10 - c
+    // x11 - d
+    Mux4Way16(a=a, b=b, c=c, d=d, sel=sel[0..1], out=aToD);
+    // x00 - e
+    // x01 - f
+    // x10 - g
+    // x11 - h
+    Mux4Way16(a=e, b=f, c=g, d=h, sel=sel[0..1], out=eToH);
+
+    // Distinguish between the two based on the leftmost bit
+    Mux16(a=aToD, b=eToH, sel=sel[2], out=aOrBS0);
 }
