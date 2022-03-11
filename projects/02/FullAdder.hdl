@@ -13,5 +13,11 @@ CHIP FullAdder {
         carry;   // Left bit of a + b + c
 
     PARTS:
-    // Put you code here:
+    HalfAdder(a=a, b=b, sum=aB, carry=c1);
+    HalfAdder(a=aB, b=c, sum=sum, carry=c2);
+    // Both the additions can give a carry, but not both at the same time
+    // To see this use 
+    // a=1, b=0, c=1
+    // a=1, b=1, c=1
+    Xor(a=c1, b=c2, out=carry);
 }

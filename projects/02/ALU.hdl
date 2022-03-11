@@ -42,5 +42,36 @@ CHIP ALU {
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
-   // Put you code here:
+    // zx selection
+    Mux16(a=x, b=false, sel=zx, out=zxOut);
+    // nx selection
+    Not16(in=zxOut, out=notZxOut);
+    Mux16(a=zxOut, b=notZxOut, sel=nx, out=nxOut);
+
+    // zy selection
+    Mux16(a=y, b=false, sel=zy, out=zyOut);
+    // ny selection
+    Not16(in=zyOut, out=notZyOut);
+    Mux16(a=zyOut, b=notZyOut, sel=ny, out=nyOut);
+
+    // f selection
+    Add16(a=nxOut, b=nyOut, out=addOut);
+    And16(a=nxOut, b=nyOut, out=andOut);
+    Mux16(a=andOut, b=addOut, sel=f, out=fOut);
+
+    // no selection
+    Not16(in=fOut, out=notFOut);
+    // NOTE: We fan the output with additional outputs for zr and ng
+    Mux16(a=fOut, b=notFOut, sel=no, out=out, out[0..7]=highSigBits, out[8..15]=lowSigBits, out[15]=ngCheck);
+
+    // zr
+    // True if any of the inputs are true
+    Or8Way(in=highSigBits, out=highOr);
+    Or8Way(in=lowSigBits, out=lowOr);
+    Or(a=highOr, b=lowOr, out=anyBitsTrue);
+    Not(in=anyBitsTrue, out=zr);
+
+    // ng
+    // Check whether most significant bit is 1
+    And(a=ngCheck, b=true, out=ng);
 }
