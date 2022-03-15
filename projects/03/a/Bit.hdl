@@ -14,5 +14,13 @@ CHIP Bit {
     OUT out;
 
     PARTS:
-    // Put your code here:
+    // Remember: The mux returns a if sel == 0
+    // If we are not writing the Bit (i.e. load=sel=0) the previous value
+    // should be outputted.
+    // The previous value is obtained from the output of DFF
+    // NOTE: We are connecting dffOut before it's defined as an output of DFF
+    Mux(a=dffOut, b=in, sel=load, out=muxOut);
+    // In this course DFF is just a magic box which outputs the input from the 
+    // previous timestep
+    DFF(in=muxOut, out=dffOut, out=out);
 }
