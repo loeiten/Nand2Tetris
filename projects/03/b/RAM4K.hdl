@@ -15,5 +15,27 @@ CHIP RAM4K {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    // We can reuse the logic from RAM512
+    // The highest most significant bits (address [9..11]) selects the RAM512 chip
+    // The lowest least significant bits (address [0..8]) selects the register within the RAM512 chip
+    DMux8Way(in=load, sel=address[9..11], a=l0, b=l1, c=l2, d=l3, e=l4, f=l5, g=l6, h=l7);
+    RAM512(in=in, load=l0, address=address[0..8], out=ram0out);
+    RAM512(in=in, load=l1, address=address[0..8], out=ram1out);
+    RAM512(in=in, load=l2, address=address[0..8], out=ram2out);
+    RAM512(in=in, load=l3, address=address[0..8], out=ram3out);
+    RAM512(in=in, load=l4, address=address[0..8], out=ram4out);
+    RAM512(in=in, load=l5, address=address[0..8], out=ram5out);
+    RAM512(in=in, load=l6, address=address[0..8], out=ram6out);
+    RAM512(in=in, load=l7, address=address[0..8], out=ram7out);
+
+    Mux8Way16(a=ram0out,
+              b=ram1out,
+              c=ram2out,
+              d=ram3out,
+              e=ram4out,
+              f=ram5out,
+              g=ram6out,
+              h=ram7out,
+              sel=address[9..11],
+              out=out);
 }
