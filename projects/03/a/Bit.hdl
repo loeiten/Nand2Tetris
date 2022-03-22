@@ -21,6 +21,6 @@ CHIP Bit {
     // NOTE: We are connecting dffOut before it's defined as an output of DFF
     Mux(a=dffOut, b=in, sel=load, out=muxOut);
     // In this course DFF is just a magic box which outputs the input from the 
-    // previous timestep
+    // previous time step
     DFF(in=muxOut, out=dffOut, out=out);
 }

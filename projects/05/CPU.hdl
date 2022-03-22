@@ -39,5 +39,134 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+    // Recap:
+    // The instructions are on the following format:
+    // 15 14 13 12 11 10 9  8  7  6  5  4  3  2  1  0
+    // op x  x  a  c  c  c  c  c  c  d  d  d  j  j  j
+    //        |     comp           |  dest  |   jump
+    // op - if 1: A-instruction: Set the A register to a constant represented by the bits
+    //      if 0: C-instruction: Use the instruction in dest = comp ; jump
+    // x  - only used for A-instruction
+    // a  - if 0: use the A register as y in the ALU
+    //      if 1: use the inM as y in the ALU
+    // c  - set zx, nx, zy, ny, f, no of the ALU
+    // d  - decides where to store the output:
+    //      Sets the control pins of A register, D register and writeM
+    //      writeM is decided by index 3
+    //      D register is decided by index 4
+    //      A register is decided by index 5
+    // j  - decides what the next program counter should be
+    //      if 111: Make a conditional jump to the A register
+    //      else: Compare with ng and zr and jump if true
+
+
+    // Handling A-instructions:
+    // If the most significant bit is 0, then the instruction is an A-instruction
+    // In other words: The instruction will be stored in the A register
+    Mux16(a=instruction, b=aluOut, sel=instruction[15], out=aRegIn);
+
+    // The A register is set by the first d from left, i.e. index 5
+    // We will only load the pin if:
+    // - We are dealing with an A-instruction
+    // - We are dealing with an C-instruction and d1 = 1 (index 5)
+    Not(in=instruction[15], out=isA);
+    And(a=instruction[5], b=instruction[15], out=cAndLoadA);
+    Or(a=isA, b=cAndLoadA, out=loadA);
+    // NOTE: We only output the address to addressM (i.e. we strip the op bit)
+    ARegister(in=aRegIn, load=loadA, out=aRegOut, out[0..14]=addressM);
+
+    // Specifying the y-input of the ALU
+    // If 0 use the A register, if 1 use inM
+    // This is decided by a, i.e. index 12
+    Mux16(a=aRegOut, b=inM, sel=instruction[12], out=yIn);
+
+    // Let us now handle the x input of the ALU
+    // The D register is only written to if the second d is 1 (index 4)
+    // Only the output of the ALU can set the D register (hence the name data register)
+    // We will only load the pin if we are dealing with a C-instruction
+    And(a=instruction[4], b=instruction[15], out=loadD);
+    DRegister(in=aluOut, load=loadD, out=xIn);
+
+    // Finally the last d (index 3) will set the writeM pin
+    // We will only set writeM to 1 if we are dealing with a C-instruction
+    And(a=instruction[3], b=instruction[15], out=writeM);
+
+    // We now have all the input and output we need for the ALU
+    ALU(x=xIn, 
+        y=yIn, 
+        zx=instruction[11], 
+        nx=instruction[10], 
+        zy=instruction[9], 
+        ny=instruction[8], 
+        f=instruction[7], 
+        no=instruction[6], 
+        out=aluOut, 
+        out=outM, 
+        zr=zr, 
+        ng=ng);
+
+    // Now we only have to specify the PC counter correctly
+    // Recall that the program counter is set in the following order
+    // 1. reset pin (output 0)
+    // 2. load pin (output the in pin)
+    // 3. inc pin (increment the current value)
+    // The reset pin is already given
+    // The load pin will be 1 if we have a successful jump statement
+    // The inc pin will be 1 if the reset is 0 and if the load is zero
+    // However, we can rely on the PC chip to do that logic for us, so we can simply set inc to true
+    // Finally we set the jump bits
+
+    // Classify what jump statement we are dealing with
+    Not(in=instruction[0], out=nJ3);
+    Not(in=instruction[1], out=nJ2);
+    Not(in=instruction[2], out=nJ1);
+    And(a=nJ1, b=nJ2, out=nJ1nJ2);
+    And(a=nJ2, b=nJ3, out=nJ2nJ3);
+    And(a=nJ1, b=nJ3, out=nJ1nJ3);
+
+    And(a=instruction[1], b=instruction[0], out=j2j3);
+    And(a=instruction[2], b=instruction[1], out=j1j2);
+    And(a=instruction[2], b=instruction[0], out=j1j3);
+
+    And(a=nJ1nJ2, b=instruction[0], out=jgtTmp);
+    And(a=nJ1nJ3, b=instruction[1], out=jeqTmp);
+    And(a=nJ1, b=j2j3, out=jgeTmp);
+    And(a=instruction[2], b=nJ2nJ3, out=jltTmp);
+    And(a=j1j3, b=nJ2, out=jneTmp);
+    And(a=j1j2, b=nJ3, out=jleTmp);
+    And(a=instruction[2], b=j2j3, out=jmp);
+
+    // Negate the output
+    Not(in=zr, out=nZr);
+    Not(in=ng, out=pos);
+
+    // We need to figure out how the ALU output relates to 0
+    // ALU  > 0, zr=0, ng=0, j1=0, j2=0, j3=1
+    And(a=nZr, b=pos, out=aluGT);
+    And(a=aluGT, b=jgtTmp, out=jgt);
+    // ALU  = 0, zr=1, ng=0, j1=0, j2=1, j3=0
+    And(a=zr, b=jeqTmp, out=jeq);
+    // ALU >= 0, zr=x, ng=0, j1=0, j2=1, j3=1
+    And(a=pos, b=jgeTmp, out=jge);
+    // ALU  < 0, zr=0, ng=1, j1=1, j2=0, j3=0
+    And(a=nZr, b=ng, out=aluLT);
+    And(a=aluLT, b=jltTmp, out=jlt);
+    // ALU != 0, zr=0, ng=x, j1=1, j2=0, j3=1
+    And(a=nZr, b=jneTmp, out=jne);
+    // ALU <= 0, zr=x, ng=x, j1=1, j2=1, j3=0
+    Xor(a=zr, b=ng, out=zrNgXor);
+    And(a=zrNgXor, b=jleTmp, out=jle);
+
+    // Decide whether to jump based on the pins
+    Or(a=jmp, b=jgt, out=or01);
+    Or(a=or01, b=jeq, out=or02);
+    Or(a=or02, b=jge, out=or03);
+    Or(a=or03, b=jlt, out=or04);
+    Or(a=or04, b=jne, out=or05);
+    Or(a=or05, b=jle, out=loadTmp);
+
+    // We should only load if we are not dealing with an A instruction
+    And(a=loadTmp, b=instruction[15], out=loadPC);
+    // NOTE: We strip the op bit in the output
+    PC(in=aRegOut, load=loadPC, inc=true, reset=reset, out[0..14]=pc);
 }

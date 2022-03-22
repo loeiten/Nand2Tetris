@@ -16,7 +16,7 @@ CHIP PC {
     OUT out[16];
 
     PARTS:
-    // Working backwards from the if else statments
+    // Working backwards from the if else statements
 
     // prevOut is to be stored if no control pins are set
     // For this to happen inc must be zero
@@ -25,13 +25,13 @@ CHIP PC {
     Mux16(a=prevOut, b=incOut, sel=inc, out=incOrPrev);
 
     // The increment is only stored if we are not loading
-    Mux16(a=incOrPrev, b=in, sel=load, out=loadOrincOrPrev);
+    Mux16(a=incOrPrev, b=in, sel=load, out=loadOrIncOrPrev);
 
     // Loading in only stored if we are not resetting
     // Reset
-    Mux16(a=loadOrincOrPrev, b=false, sel=reset, out=resetOut);
-    Mux16(a=loadOrincOrPrev, b=resetOut, sel=reset, out=resetOrLoadOrincOrPrev);
+    Mux16(a=loadOrIncOrPrev, b=false, sel=reset, out=resetOut);
+    Mux16(a=loadOrIncOrPrev, b=resetOut, sel=reset, out=resetOrLoadOrIncOrPrev);
 
     // NOTE: The register takes care of the timing 
-    Register(in=resetOrLoadOrincOrPrev, load=true, out=prevOut, out=out);
+    Register(in=resetOrLoadOrIncOrPrev, load=true, out=prevOut, out=out);
 }

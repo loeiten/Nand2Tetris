@@ -20,7 +20,7 @@ CHIP DMux4Way {
     // NOTE: The logic here is best visualized when drawing
     // If the in is zero, everything is zero
     // Therefore: Let us only consider when the in is 1
-    // If sel[1] = 0 (the rigthmost bit):
+    // If sel[1] = 0 (the rightmost bit):
     //     - The a pin will output 1
     //         - If sel[0] = 0 (i.e sel=00):
     //             - The a pin will output 1

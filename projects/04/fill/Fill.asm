@@ -82,7 +82,7 @@
 
 
 // START*CHECKIFPRESSED********************************************************
-// NOTE: We probably wouldn't need a function for this as it's a tenary expression
+// NOTE: We probably wouldn't need a function for this as it's a ternary expression
 // Check if pressed function
 (CHECKIFPRESSED)
     // Check the value of 
@@ -94,14 +94,14 @@
     // Else: Set that the key is not pressed
     @keyPressed
     M=0
-    // Unconditonally jump to the return of checkIfPressed
+    // Unconditionally jump to the return of checkIfPressed
     @RETURNCHECKIFPRESSED
     0;JMP
 
 (SETKEYPRESSED)
     @keyPressed
     M=-1
-    // Unconditonally jump to the return of checkIfPressed
+    // Unconditionally jump to the return of checkIfPressed
     @RETURNCHECKIFPRESSED
     0;JMP
 // END*CHECKIFPRESSED**********************************************************
@@ -129,12 +129,12 @@
     @i
     D=D+M  // This is now the address we would like to manipulate
     @row
-    M=D  // Store the vaule in row (act as pointer)
+    M=D  // Store the value in row (act as pointer)
 
     @screenVal
     D=M
     @row
-    A=M  // Set the address to the adress pointed to by the row
+    A=M  // Set the address to the address pointed to by the row
     M=D  // Set the value of this address to screenVal
 
     // Update counter
@@ -146,7 +146,7 @@
     0;JMP
 
 (ENDSETSCREENVALUELOOP)
-    // Unconditionally jumpt to the return of setScreenValue
+    // Unconditionally jump to the return of setScreenValue
     @RETURNSETSCREENVALUE
     0;JMP
 // END*SETSCREENVALUE**********************************************************
