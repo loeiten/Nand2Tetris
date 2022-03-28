@@ -1,4 +1,9 @@
+"""Module containing the Code class."""
+
+
 class Code:
+    """Class mapping predefined symbols to binary strings."""
+
     dest_dict = {
         "": "000",
         "null": "000",
@@ -72,8 +77,8 @@ class Code:
         Returns:
             str: The corresponding binary code, 7 bits
         """
-        a_bit = 1 if "M" in string else 0
-        return a_bit + self.comp_string[string]
+        a_bit = "1" if "M" in string else "0"
+        return a_bit + self.comp_dict[string]
 
     def jump(self, string: str) -> str:
         """Return the binary code of the jump mnemonic.
