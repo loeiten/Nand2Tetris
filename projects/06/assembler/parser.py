@@ -103,7 +103,12 @@ class Parser:
         Returns:
             str: The symbolic dest part (8 possibilities)
         """
-        pass
+        # NOTE: dest is optional
+        if "=" in self.current_instruction:
+            cur_dest = self.current_instruction.split("=")[0]
+            return cur_dest.replace(" ", "")
+        else:
+            return ""
 
     def comp(self) -> str:
         """Return the symbolic comp part of the current C-instruction.
@@ -113,7 +118,16 @@ class Parser:
         Returns:
             str: The symbolic comp part (28 possibilities)
         """
-        pass
+        cur_comp = self.current_instruction
+        # NOTE: dest is optional
+        if "=" in self.current_instruction:
+            cur_comp = cur_comp.split("=")[1]
+
+        # NOTE: jump is optional 
+        if ";" in self.current_instruction:
+            cur_comp = cur_comp.split(";")[0]
+
+        return cur_comp.replace(" ", "")
 
     def jump(self) -> str:
         """Return the symbolic jump part of the current C-instruction.
@@ -123,4 +137,9 @@ class Parser:
         Returns:
             str: The symbolic jump part (8 possibilities)
         """
-        pass
+        # NOTE: jump is optional
+        if ";" in self.current_instruction:
+            cur_jump = self.current_instruction.split(";")[1]
+            return cur_jump.replace(" ", "")
+        else:
+            return ""
