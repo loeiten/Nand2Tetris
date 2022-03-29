@@ -32,6 +32,6 @@ CHIP PC {
     Mux16(a=loadOrIncOrPrev, b=false, sel=reset, out=resetOut);
     Mux16(a=loadOrIncOrPrev, b=resetOut, sel=reset, out=resetOrLoadOrIncOrPrev);
 
-    // NOTE: The register takes care of the timing 
+    // NOTE: The register takes care of the timing
     Register(in=resetOrLoadOrIncOrPrev, load=true, out=prevOut, out=out);
 }

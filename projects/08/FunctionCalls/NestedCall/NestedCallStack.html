@@ -11,9 +11,9 @@
 	.stack td:first-child + td + td {text-align:left;}
 	.stack td:first-child + td + td + td {text-align:left;}
 	.stack .reg {border-left:1px solid; border-right:1px solid;}
-	.stack .reg th {border:1px solid;} 
+	.stack .reg th {border:1px solid;}
 	.stack .stack {border-left:1px solid; border-right:1px solid;}
-	.stack .stack th {border:1px solid;} 
+	.stack .stack th {border:1px solid;}
 	.stack .tos {border-left:1px solid; border-right:1px solid;border-bottom:1px solid;}
 	.stack .frame {border-left:1px solid; border-right:1px solid;}
 	.stack .frame td:first-child + td {border-left:1px solid;}
@@ -54,7 +54,7 @@
 	<tr class="note"><td colspan="4"><br>
 		This is how my boot&shy;strap code initial&shy;izes the pointers before calling Sys.init().
 		<p>
-		Setting the LCL, ARG, THIS and THAT point&shy;ers to known illegal values helps identify 
+		Setting the LCL, ARG, THIS and THAT point&shy;ers to known illegal values helps identify
 		when a pointer is used before it is initial&shy;ized.
 		<p>
 		(If you are running the NestedCall test with&shy;out boot&shy;strap code, you will not see this state.)</td></tr>
@@ -76,10 +76,10 @@
 	<tr class="bframeb"><td>260</td><td>-4</td><td>Saved THAT</td><td></td></tr>
 	<tr class="tos"><td>261</td><td>???</td><td></td><td>&larr;LCL, SP</td></tr>
 	<tr class="note"><td colspan="4"><br>
-		This is how NestedCall.tst initial&shy;izes the pointers and stack.  This is what RAM looks 
+		This is how NestedCall.tst initial&shy;izes the pointers and stack.  This is what RAM looks
 		like after my boot&shy;strap calls Sys.init().
 		<p>
-		(If your VM trans&shy;lation includes the boot&shy;strap, the -1 through -4 values may be 
+		(If your VM trans&shy;lation includes the boot&shy;strap, the -1 through -4 values may be
 		different if your boot&shy;strap initial&shy;izes them.)</td></tr>
 	</table>
   </td><td>
@@ -131,7 +131,7 @@
 	<tr class="bframeb"><td>270</td><td>0</td><td>local 4</td><td></td></tr>
 	<tr class="tos"><td>271</td><td>???</td><td></td><td>&larr;SP</td></tr>
 	<tr class="note"><td colspan="4"><br>
-		The <i>function prologue</i> is the assembly language code generated for the 
+		The <i>function prologue</i> is the assembly language code generated for the
 		"function" VM command.
 	</table>
   </td><td>

@@ -13,7 +13,7 @@ CHIP Inc16 {
     OUT out[16];
 
     PARTS:
-    // We could've used the full adder, but by using a half adder we save half 
+    // We could've used the full adder, but by using a half adder we save half
     // the chips
     HalfAdder(a=in[0], b=true, sum=out[0], carry=c0);
     HalfAdder(a=in[1], b=c0, sum=out[1], carry=c1);

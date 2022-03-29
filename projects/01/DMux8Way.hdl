@@ -17,7 +17,7 @@ CHIP DMux8Way {
 
     PARTS:
     // NOTE: The logic here is best visualized when drawing
-    // Using the same strategy as in DMux4Way 
+    // Using the same strategy as in DMux4Way
     // The difference is that the first DMux is a 4 way, so 4 output pins
     DMux4Way(in=in, sel=sel[1..2], a=aOrB, b=cOrD, c=eOrF, d=gOrH);
     DMux(in=aOrB, sel=sel[0], a=a, b=b);
