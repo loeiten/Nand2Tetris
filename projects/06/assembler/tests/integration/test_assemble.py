@@ -78,7 +78,7 @@ def test_main(mult_tmp_dir: Path, l_and_hack: Tuple[Path, ...]) -> None:
         "r"
     ) as result_file:
         for expected_line, result_line in zip(
-            expected_file.readline(), result_file.readline()
+            expected_file.readlines(), result_file.readlines()
         ):
             assert result_line == expected_line
 
@@ -87,6 +87,6 @@ def test_main(mult_tmp_dir: Path, l_and_hack: Tuple[Path, ...]) -> None:
         "r"
     ) as result_file:
         for expected_line, result_line in zip(
-            expected_file.readline(), result_file.readline()
+            expected_file.readlines(), result_file.readlines()
         ):
             assert result_line == expected_line

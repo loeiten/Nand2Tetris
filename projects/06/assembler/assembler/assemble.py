@@ -97,6 +97,8 @@ def second_pass(in_path: Path, symbol_table: SymbolTable) -> None:
         while parser.has_more_lines():
             parser.advance()
             # NOTE: L-instructions are not translated
+            if parser.instruction_type() == "L_INSTRUCTION":
+                continue
             if parser.instruction_type() == "A_INSTRUCTION":
                 cur_symbol = parser.symbol()
                 if not cur_symbol.isdigit():
@@ -116,10 +118,13 @@ def second_pass(in_path: Path, symbol_table: SymbolTable) -> None:
                     jump = code.jump(parser.jump())
                     # Add the three leading 1 which marks that this is a C-instruction
                     binary_instruction = f"111{comp}{dest}{jump}"
-                binary_instruction = "Error: parser.current_instruction was not string"
+                else:
+                    binary_instruction = (
+                        "Error: parser.current_instruction was not string"
+                    )
 
-            l_file.write(symbol_instruction)
-            hack_file.write(binary_instruction)
+            l_file.write(f"{symbol_instruction.replace(' ', '')}\n")
+            hack_file.write(f"{binary_instruction}\n")
 
 
 def convert_to_15_bit_binary(decimal: Union[str, int]) -> str:

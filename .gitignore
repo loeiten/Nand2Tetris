@@ -4,3 +4,4 @@ tools/
 *.out
 *.zip
 demo/
+__pycache__/
