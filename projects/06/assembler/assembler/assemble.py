@@ -58,6 +58,7 @@ def first_pass(in_path: Path) -> SymbolTable:
     symbol_table = SymbolTable()
     instruction_line = 0
 
+    a_instruction_symbols = list()
     while parser.has_more_lines():
         parser.advance()
         if parser.instruction_type() == "L_INSTRUCTION":
@@ -68,13 +69,25 @@ def first_pass(in_path: Path) -> SymbolTable:
         else:
             if parser.instruction_type() == "A_INSTRUCTION":
                 cur_symbol = parser.symbol()
-                if not cur_symbol.isdigit() and not symbol_table.contains(cur_symbol):
-                    symbol_table.add_entry(
-                        symbol=cur_symbol, address=symbol_table.get_available_slot()
-                    )
+                if (
+                    not cur_symbol.isdigit()
+                    and not symbol_table.contains(cur_symbol)
+                    and cur_symbol not in a_instruction_symbols
+                ):
+                    a_instruction_symbols.append(cur_symbol)
 
             # Update the instruction line for A and C instructions
             instruction_line += 1
+
+    # pylint: disable=consider-iterating-dictionary
+    for cur_symbol in symbol_table.symbol_table.keys():
+        if cur_symbol in a_instruction_symbols:
+            a_instruction_symbols.remove(cur_symbol)
+
+    for cur_symbol in a_instruction_symbols:
+        symbol_table.add_entry(
+            symbol=cur_symbol, address=symbol_table.get_available_slot()
+        )
 
     return symbol_table
 
