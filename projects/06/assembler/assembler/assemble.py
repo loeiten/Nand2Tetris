@@ -31,7 +31,7 @@ def parse_args() -> argparse.Namespace:
 def main(in_path: Path) -> None:
     """Translate symbolic Hack machine language into binary hack instructions.
 
-    The input xxx.asm will be translated to xxxL.asm and xxx.hack where
+    The input xxx.asm will be translated to xxxNoSymbol.asm and xxx.hack where
     - xxxL.asm is the stripped symbolic instruction where:
         - Comments and whitespace has been stripped
         - Symbols have been translated to decimals
@@ -80,7 +80,7 @@ def first_pass(in_path: Path) -> SymbolTable:
 
 
 def second_pass(in_path: Path, symbol_table: SymbolTable) -> None:
-    """Write the xxxL.asm and xxx.hack file.
+    """Write the xxxNoSymbol.asm and xxx.hack file.
 
     Args:
         in_path (Path): File to translate from

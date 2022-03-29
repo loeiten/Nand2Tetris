@@ -1,51 +1,37 @@
 """Module integration testing the assembler."""
 
 from pathlib import Path
-from typing import Tuple
 
 import pytest
 from assembler.assemble import first_pass, main
 
 
-@pytest.fixture(scope="function", name="mult_tmp_dir")
-def fixture_mult_tmp_dir(tmp_path: Path, mult_path: Path) -> Path:
+@pytest.fixture(scope="function", name="data_tmp_dir")
+def fixture_data_tmp_dir(tmp_path: Path, mult_path: Path, fill_path: Path) -> Path:
     """Return the temporary directory to where Mult.asm has been copied.
 
     Args:
         tmp_path (Path): Path to temporary directory
         mult_path (Path): Path to Mult.asm
+        fill_path (Path): Path to Fill.asm
 
     Returns:
         Path: Path to temporary directory
     """
     tmp_mult = tmp_path.joinpath(mult_path.name)
     tmp_mult.write_text(mult_path.read_text())
-    return tmp_mult
+    tmp_fill = tmp_path.joinpath(fill_path.name)
+    tmp_fill.write_text(fill_path.read_text())
+    return tmp_path
 
 
-@pytest.fixture(scope="session", name="no_symbol_and_hack")
-def fixture_no_symbol_and_hack(mult_path: Path) -> Tuple[Path, ...]:
-    """Return the path to the MultL.asm and Mult.hack files.
-
-    Args:
-        mult_path (Path): Path to Mult.asm
-
-    Returns:
-        Tuple[Path, ...]: Path to MultL.asm and Mult.hack
-    """
-    data_dir = mult_path.parent
-    no_symbol_path = data_dir.joinpath("MultNoSymbol.asm")
-    hack_path = data_dir.joinpath("Mult.hack")
-    return no_symbol_path, hack_path
-
-
-def test_first_pass(mult_tmp_dir: Path) -> None:
-    """Test that first_pass creates the expected symbol table.
+def test_first_pass_mult(data_tmp_dir: Path) -> None:
+    """Test that first_pass creates the expected symbol table for the mult file.
 
     Args:
-        mult_timp_dir (Path): Path to temporary directory containing Mult.asm
+        data_tmp_dir (Path): Path to temporary directory containing Mult.asm
     """
-    symbol_table = first_pass(mult_tmp_dir)
+    symbol_table = first_pass(data_tmp_dir.joinpath("Mult.asm"))
     assert symbol_table.symbol_table["lhs"] == 16
     assert symbol_table.symbol_table["rhs"] == 17
     assert symbol_table.symbol_table["i"] == 18
@@ -53,19 +39,44 @@ def test_first_pass(mult_tmp_dir: Path) -> None:
     assert symbol_table.symbol_table["END"] == 27
 
 
-def test_main(mult_tmp_dir: Path, no_symbol_and_hack: Tuple[Path, ...]) -> None:
-    """Test that main creates the expected L.asm and .hack file.
+def test_first_pass_fill(data_tmp_dir: Path) -> None:
+    """Test that first_pass creates the expected symbol table for the fill file.
 
     Args:
-        mult_timp_dir (Path): Path to temporary directory containing Mult.asm
-        no_symbol_and_hack(Tuple[Path, ...]): Path to the ground truth MultL.asm and Mult.hack
+        data_tmp_dir (Path): Path to temporary directory containing Fill.asm
     """
-    no_symbol_ground_truth_path, hack_ground_truth_path = no_symbol_and_hack
+    symbol_table = first_pass(data_tmp_dir.joinpath("Fill.asm"))
+    assert symbol_table.symbol_table["keyPressed"] == 16
+    assert symbol_table.symbol_table["screenVal"] == 17
+    assert symbol_table.symbol_table["i"] == 18
+    assert symbol_table.symbol_table["row"] == 19
+    assert symbol_table.symbol_table["lastRow"] == 20
+    assert symbol_table.symbol_table["CHECKIFPRESSED"] == 22
+    assert symbol_table.symbol_table["SETSCREENVALUE"] == 34
+    assert symbol_table.symbol_table["MAINLOOP"] == 12
+    assert symbol_table.symbol_table["SETKEYPRESSED"] == 30
+    assert symbol_table.symbol_table["RETURNCHECKIFPRESSED"] == 14
+    assert symbol_table.symbol_table["ENDSETSCREENVALUELOOP"] == 57
+    assert symbol_table.symbol_table["SETSCREENVALUELOOP"] == 36
 
-    main(mult_tmp_dir)
-    tmp_dir = mult_tmp_dir.parent
-    stem = mult_tmp_dir.stem
-    suffix = mult_tmp_dir.suffix
+
+@pytest.mark.parametrize("file_name", ("Mult", "Fill"))
+def test_main(data_tmp_dir: Path, data_path: Path, file_name: str) -> None:
+    """Test that main creates the expected NoSymbol.asm and .hack file.
+
+    Args:
+        data_tmp_dir (Path): Path to temporary directory containing Mult.asm
+        data_path(Path): Path to the data directory
+        file_name (str): Name of file to use for the tests
+    """
+    no_symbol_ground_truth_path = data_path.joinpath(f"{file_name}NoSymbol.asm")
+    hack_ground_truth_path = data_path.joinpath(f"{file_name}.hack")
+
+    file_path = data_tmp_dir.joinpath(f"{file_name}.asm")
+    main(file_path)
+    tmp_dir = file_path.parent
+    stem = file_path.stem
+    suffix = file_path.suffix
     no_symbol_path = tmp_dir.joinpath(f"{stem}NoSymbol{suffix}")
     hack_path = tmp_dir.joinpath(f"{stem}.hack")
 
