@@ -87,13 +87,13 @@ def second_pass(in_path: Path, symbol_table: SymbolTable) -> None:
         symbol_table (SymbolTable): Symbol table to use
     """
     # The l-path will contain the stripped file without symbols
-    l_path = in_path.parent.joinpath(f"{in_path.stem}L{in_path.suffix}")
+    no_symbol_path = in_path.parent.joinpath(f"{in_path.stem}NoSymbol{in_path.suffix}")
     hack_path = in_path.with_suffix(".hack")
 
     parser = Parser(str(in_path))
     code = Code()
 
-    with l_path.open("w") as l_file, hack_path.open("w") as hack_file:
+    with no_symbol_path.open("w") as l_file, hack_path.open("w") as hack_file:
         while parser.has_more_lines():
             parser.advance()
             # NOTE: L-instructions are not translated
