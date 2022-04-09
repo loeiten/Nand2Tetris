@@ -1,8 +1,35 @@
 """Module containing Parser class."""
 
 import re
+from enum import Enum
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal
+
+
+class CommandEnum(Enum):
+    """
+    Enum describing the possible commands.
+
+    - has been replaced with _
+    """
+
+    ADD = "C_ARITHMETIC"
+    SUB = "C_ARITHMETIC"
+    NEG = "C_ARITHMETIC"
+    EQ = "C_ARITHMETIC"
+    GT = "C_ARITHMETIC"
+    LT = "C_ARITHMETIC"
+    AND = "C_ARITHMETIC"
+    OR = "C_ARITHMETIC"
+    NOT = "C_ARITHMETIC"
+    PUSH = "C_PUSH"
+    POP = "C_POP"
+    LABEL = "C_LABEL"
+    GOTO = "C_GOTO"
+    IF_GOTO = "C_GOTO"
+    FUNCTION = "C_FUNCTION"
+    RETURN = "C_RETURN"
+    CALL = "C_CALL"
 
 
 class Parser:
@@ -15,7 +42,7 @@ class Parser:
             path (str): Path to file to parse
         """
         self.file = Path(path).resolve().open("r")
-        self.current_instruction: Optional[str] = None
+        self.current_instruction = ""
         # Regexes
         starting_with_comment = r"^\s*(\/{2,}|\n)"
         self.ignore_re = re.compile(starting_with_comment)
@@ -52,7 +79,7 @@ class Parser:
             line = self.file.readline()
             # Check if we are at the end of the file
             if line == "":
-                self.current_instruction = None
+                self.current_instruction = ""
                 return
 
             # Check if this line can be skipped
@@ -63,16 +90,14 @@ class Parser:
             found_line = True
             self.current_instruction = line
 
-        if isinstance(self.current_instruction, str):
-            # Remove any comments
-            self.current_instruction = self.current_instruction.split("//")[0]
-            # Remove trailing whitespaces
-            self.current_instruction = self.current_instruction.rstrip().lstrip()
+        # Remove any comments
+        self.current_instruction = self.current_instruction.split("//")[0]
+        # Remove trailing whitespaces
+        self.current_instruction = self.current_instruction.rstrip().lstrip()
 
     def command_type(
         self,
     ) -> Literal[
-        "",
         "C_ARITHMETIC",
         "C_PUSH",
         "C_POP",
@@ -97,10 +122,11 @@ class Parser:
         - C_CALL for calls
 
         Returns:
-            Literal["", "C_ARITHMETIC", "C_PUSH", "C_POP", "C_LABEL", "C_GOTO",
+            Literal["C_ARITHMETIC", "C_PUSH", "C_POP", "C_LABEL", "C_GOTO",
             "C_IF", "C_FUNCTION", "C_RETURN", "C_CALL"]:
                 The command type
         """
+        return CommandEnum[self.current_instruction.split()[0].upper()].value
 
     def arg1(self) -> str:
         """Return the first argument of the current command.
@@ -111,6 +137,10 @@ class Parser:
         Returns:
             str: The first argument of the current command
         """
+        command = self.current_instruction.split()[0]
+        if CommandEnum[command] == "C_ARITHMETIC":
+            return command
+        return self.current_instruction.split()[1]
 
     def arg2(self) -> int:
         """Return the second argument of the current command.
@@ -120,3 +150,4 @@ class Parser:
         Returns:
             int: The index of the virtual segment to use
         """
+        return int(self.current_instruction.split()[2])
