@@ -49,16 +49,14 @@ class CodeWriter:
 
         # We always need to dereference the decremented stack pointer
         self.file.write(
-            f"//{' '*4}Dereferencing the decremeneted stack pointer\n"
-            "@SP  // Set A to 0 (side effect: M is set to RAM[0])\n"
-            "AM=M-1  // This can be written in two steps\n"
-            "        // 1. M=M-1\n"
-            "        // 2. A=M\n"
-            "        //\n"
-            "        // 1. Move stack pointer so that it now points at the top\n"
-            "        //    of the stack (set RAM[0] to RAM[0]-1)\n"
-            "        // 2. Set A to M-1 (side effect {not used}: M is set to RAM[M-1])\n"
-            "D=A  // Set D to RAM[M-1]\n"
+            f"//{' '*4}Move stack pointer to top of stack, save content to D\n"
+            "@SP  // Set A to 0 (side effect: M is set to content of RAM[0])\n"
+            "AM=M-1  // 1. Move stack pointer so that it now points at the\n"
+            "        //    top of the stack\n"
+            "        //    (set the content of RAM[0] to RAM[0]-1)\n"
+            "        // 2. Set A to M-1\n"
+            "        //    (side effect: M is set to the content of RAM[M-1])\n"
+            "D=M  // 3. Set D to the content of RAM[M-1]\n"
         )
 
         # Decrement the stack pointer for binary operations
@@ -67,15 +65,24 @@ class CodeWriter:
             "not",
         )
         if command not in unary_operators:
+            self.file.write(
+                f"//{' '*4}Dereference stack pointer -1, save content to A\n"
+                "@SP  // Set A to 0\n"
+                "     // (side effect: M is set to the content of RAM[0])\n"
+                "A=M-1  // Set A to M-1\n"
+                "       // (side effect: M is set to the content of RAM[M-1])\n"
+            )
             # Binary operator
             if command == "add":
                 self.file.write(
-                    f"//{' '*4}Neg on the stack pointer\n"
-                    "@SP  // Set A to 0 (side effect: M is set to RAM[0])\n"
-                    "M=-D  // Negate D, and store it to RAM[0]\n"
+                    f"//{' '*4}Add stack pointer and stack pointer -1\n"
+                    "M=D+M  // Set the content of stack pointer -1 to D+M\n"
                 )
             elif command == "sub":
-                pass
+                self.file.write(
+                    f"//{' '*4}Subtract stack pointer and stack pointer -1\n"
+                    "M=D-M  // Set the content of stack pointer -1 to D-M\n"
+                )
             elif command == "eq":
                 pass
             elif command == "lt":
