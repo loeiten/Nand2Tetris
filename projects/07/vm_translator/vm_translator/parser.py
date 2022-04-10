@@ -126,7 +126,9 @@ class Parser:
             "C_IF", "C_FUNCTION", "C_RETURN", "C_CALL"]:
                 The command type
         """
-        return CommandEnum[self.current_instruction.split()[0].upper()].value
+        return CommandEnum[
+            self.current_instruction.split()[0].replace("-", "_").upper()
+        ].value
 
     def arg1(self) -> str:
         """Return the first argument of the current command.
