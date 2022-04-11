@@ -15,6 +15,7 @@ class CodeWriter:
             path (str): Path to file to write to.
         """
         self.file = Path(path).resolve().open("r")
+        self._lt_counter = 0
 
     def write_arithmetic(self, command: str) -> None:
         """
@@ -49,14 +50,14 @@ class CodeWriter:
 
         # We always need to dereference the decremented stack pointer
         self.file.write(
-            f"//{' '*4}Move stack pointer to top of stack, save content to D\n"
-            "@SP  // Set A to 0 (side effect: M is set to content of RAM[0])\n"
-            "AM=M-1  // 1. Move stack pointer so that it now points at the\n"
-            "        //    top of the stack\n"
-            "        //    (set the content of RAM[0] to RAM[0]-1)\n"
-            "        // 2. Set A to M-1\n"
-            "        //    (side effect: M is set to the content of RAM[M-1])\n"
-            "D=M  // 3. Set D to the content of RAM[M-1]\n"
+            f"   //{' '*4}Move stack pointer to top of stack, save content to D\n"
+            "   @SP  // Set A to 0 (side effect: M is set to content of RAM[0])\n"
+            "   AM=M-1  // 1. Move stack pointer so that it now points at the\n"
+            "           //    top of the stack\n"
+            "           //    (set the content of RAM[0] to RAM[0]-1)\n"
+            "           // 2. Set A to M-1\n"
+            "           //    (side effect: M is set to the content of RAM[M-1])\n"
+            "   D=M  // 3. Set D to the content of RAM[M-1]\n"
         )
 
         # Decrement the stack pointer for binary operations
@@ -66,31 +67,73 @@ class CodeWriter:
         )
         if command not in unary_operators:
             self.file.write(
-                f"//{' '*4}Dereference stack pointer -1, save content to A\n"
-                "@SP  // Set A to 0\n"
-                "     // (side effect: M is set to the content of RAM[0])\n"
-                "A=M-1  // Set A to M-1\n"
-                "       // (side effect: M is set to the content of RAM[M-1])\n"
+                f"   //{' '*4}Dereference stack pointer -1, save content to A\n"
+                "   @SP  // Set A to 0\n"
+                "        // (side effect: M is set to the content of RAM[0])\n"
+                "   A=M-1  // Set A to M-1\n"
+                "          // (side effect: M is set to the content of RAM[M-1])\n"
             )
             # Binary operator
             if command == "add":
                 self.file.write(
-                    f"//{' '*4}Add stack pointer and stack pointer -1\n"
-                    "M=D+M  // Set the content of stack pointer -1 to D+M\n"
+                    f"   //{' '*4}Add stack pointer and stack pointer -1\n"
+                    "   M=D+M  // Set the content of stack pointer -1 to D+M\n"
                 )
             elif command == "sub":
                 self.file.write(
-                    f"//{' '*4}Subtract stack pointer and stack pointer -1\n"
-                    "M=D-M  // Set the content of stack pointer -1 to D-M\n"
+                    f"   //{' '*4}Subtract stack pointer and stack pointer -1\n"
+                    "   M=D-M  // Set the content of stack pointer -1 to D-M\n"
                 )
             elif command == "eq":
-                pass
+                self.file.write(
+                    f"   //{' '*4}Check for equality\n"
+                    "   M=D-M  // Set the content of stack pointer -1 to D-M\n"
+                    "   D=0  // Set D to 0\n"
+                    "   M=D|M  // If M is non-zero, we have inequality\n"
+                    "          // OR(0, M) is 1 only if M is non-zero\n"
+                    "   M=!M  // The new M will be 1 (true) only if the previous was 0\n"
+                )
             elif command == "lt":
-                pass
+                self.file.write(
+                    f"   //{' '*4}Check for less than\n"
+                    "   M=D-M  // Set the content of stack pointer -1 to D-M\n"
+                    "   D=A  // Store the current stack pointer address to D\n"
+                    "   @CUR_SP_ADDRESS  // Set A to CUR_SP_ADDRESS\n"
+                    "                    // (side effect: M is set to the content of RAM[A])\n"
+                    "   M=D  // Store the current address to a register\n"
+                    "   A=M  // Set A to M\n"
+                    "        // (side effect: M is set to the content of RAM[A].\n"
+                    "        //  This is now equal to *SP - *(SP-1))\n"
+                    "   D=M  // Set D to the content of stack pointer - 1\n"
+                    f"   @LT_TRUE_{self._lt_counter}\n"
+                    f"   D;JLT  // Jump to LT_TRUE_{self._lt_counter} if D<0\n"
+                    f"   //{' '*8}If D is not less than 0, continue on this branch:\n"
+                    "   @CUR_SP_ADDRESS  // Retrieve the memory address of stack pointer -1\n"
+                    "   A=M  // Retrieve the memory address of stack pointer -1\n"
+                    "        // (side effect: M is set to the content of RAM[M-1])\n"
+                    "   M=0  // Set the memory of stack pointer -1 to false\n"
+                    f"   @LT_TRUE_{self._lt_counter}_END\n"
+                    f"   0;JMP  // Unconditionally jump to LT_TRUE_{self._lt_counter}_END\n"
+                    "\n"
+                    f"(LT_TRUE_{self._lt_counter})\n"
+                    "   @CUR_SP_ADDRESS  // Retrieve the memory address of stack pointer -1\n"
+                    "   A=M  // Retrieve the memory address of stack pointer -1\n"
+                    "        // (side effect: M is set to the content of RAM[M-1])\n"
+                    "   M=1  // Set the memory of stack pointer -1 to true\n"
+                    "\n"
+                    f"(LT_TRUE_{self._lt_counter}_END)\n"
+                )
+                self._lt_counter += 1
             elif command == "and":
-                pass
+                self.file.write(
+                    f"   //{' '*4}Logic stack pointer AND stack pointer -1\n"
+                    "   M=D&M  // Set the content of stack pointer -1 to D&M\n"
+                )
             elif command == "or":
-                pass
+                self.file.write(
+                    f"   //{' '*4}Logic stack pointer OR stack pointer -1\n"
+                    "   M=D|M  // Set the content of stack pointer -1 to D|M\n"
+                )
 
             self.file.write(
                 f"//{' '*4}Binary operation: SP points to the correct address\n"
@@ -117,8 +160,8 @@ class CodeWriter:
                 "M=M+1  // Set RAM[0] to RAM[0]+1\n"
             )
 
-        # In all cases: Add a newline to make the code more readable
-        self.file.write("\n")
+        # In all cases: Add 2 newlines to make the code more readable
+        self.file.write("\n" * 2)
 
     def write_push_pop(
         self,
