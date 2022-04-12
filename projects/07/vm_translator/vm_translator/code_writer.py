@@ -31,20 +31,6 @@ class CodeWriter:
         Args:
             command (str): The command to translate into assembly
         """
-        # Memory mapping:
-        # SP - 0 - points to the next free stack address
-        # LCL - 1
-        # ARG - 2
-        # THIS - 3
-        # THAT - 4
-        # temp - 5-17
-        # static - 16-255
-        # stack - 256-2047
-        # pointer - 3-4 - pointer 0 => RAM[3], pointer 1 => RAM[4]
-        # general purpose registers - 13-15
-        # constant i => RAM[i]
-        # segment i => RAM[*segment_pointer + i]
-
         # Write the command
         self.file.write(f"// {command}\n")
 
@@ -174,6 +160,22 @@ class CodeWriter:
         """Write to the output file the assembly code that implements the given command.
 
         The command can be either C_PUSH or C_POP
+
+        Memory mapping:
+        SP - 0 - points to the next free stack address
+        LCL - 1
+        ARG - 2
+        THIS - 3
+        THAT - 4
+        temp - 5-17
+        static - 16-255
+        stack - 256-2047
+        pointer - 3-4 - pointer 0 => RAM[3], pointer 1 => RAM[4]
+        general purpose registers - 13-15
+        constant i => RAM[i]
+        segment i => RAM[*segment_pointer + i]
+
+        NOTE: Standard mapping of LCL and ARG is extended in the next project
 
         Args:
             command (Literal["C_PUSH", "C_POP"]): The command to translate into assembly
