@@ -15,6 +15,8 @@ class CodeWriter:
             path (str): Path to file to write to.
         """
         self.file = Path(path).resolve().open("r")
+
+        # Initialize the less than counter
         self._lt_counter = 0
 
     def write_arithmetic(self, command: str) -> None:
@@ -175,7 +177,9 @@ class CodeWriter:
         constant i => RAM[i]
         segment i => RAM[*segment_pointer + i]
 
-        NOTE: Standard mapping of LCL and ARG is extended in the next project
+        NOTE: The base address of the "local", "argument", "this" and "that" allocations are kept
+              the segment pointers LCL, ARG, THIS, THAT
+              The standard mapping will be extended in the next project
 
         Args:
             command (Literal["C_PUSH", "C_POP"]): The command to translate into assembly
@@ -184,6 +188,77 @@ class CodeWriter:
                 Which virtual memory segment to push from/pop to
             index (int): Segment index to push from/pop to
         """
+        # Write the command
+        self.file.write(f"// {command}\n")
+        if command == "C_PUSH":
+            # Push from a virtual register to the stack
+
+            self.file.write(
+                f"   //{' '*4}Get the memory address to obtain the memory from\n"
+                f"   @{index}  // Set A to 'index'\n"
+                "             // (unused side effect: M is set to content of RAM['index'])\n"
+            )
+
+            if segment == "local":
+                self.file.write(
+                    "   @LCL  // Set A to the base address of the 'local' allocation\n"
+                    "         // (unused side effect: M is set to content of RAM[LCL])\n"
+                )
+            elif segment == "argument":
+                self.file.write(
+                    "   @ARG  // Set A to the base address of the 'argument' allocation\n"
+                    "         // (unused side effect: M is set to content of RAM[ARG])\n"
+                )
+            elif segment == "this":
+                self.file.write(
+                    "   @THIS  // Set A to the base address of the 'this' allocation\n"
+                    "         // (unused side effect: M is set to content of RAM[THIS])\n"
+                )
+            elif segment == "that":
+                self.file.write(
+                    "   @THAT  // Set A to the base address of the 'that' allocation\n"
+                    "         // (unused side effect: M is set to content of RAM[THAT])\n"
+                )
+            elif segment == "constant":
+                self.file.write("   D=A  // Store the address to D\n")
+            elif segment == "static":
+                # Since "static" is allocated from address 16, thus we must add 16 to the index
+                self.file.write(
+                    "   @16  // Set A to the base address of the 'static' allocation\n"
+                    "         // (unused side effect: M is set to content of RAM[16])\n"
+                )
+            elif segment == "pointer":
+                # Since "pointer" is allocated from address 3, thus we must add 3 to the index
+                self.file.write(
+                    "   @3  // Set A to the base address of the 'pointer' allocation\n"
+                    "         // (unused side effect: M is set to content of RAM[3])\n"
+                )
+
+            if segment != "constant":
+                # Constant is constant, we don't need to add anything to get what we need
+                self.file.write(
+                    "   A=D+A  // Set A to the desired address\n"
+                    "          // (side effect: M is set to content of RAM[D+A])\n"
+                    "   D=M  // Store the content of RAM[D+A] to D\n"
+                )
+
+            self.file.write(
+                f"   //{' '*4}Set the content of the address the SP is pointing to to D\n"
+                "   @SP  // Set A to 0 (side effect: M is set to content of RAM[0])\n"
+                "   A=M  // Set A to RAM[0] (side effect: M is set to content of RAM[RAM[0]])\n"
+                "   M=D  // Set the content of RAM[RAM[0]] to D\n"
+                f"   //{' '*4}Increment the stack pointer to the next free memory address\n"
+                "   @SP  // Set A to 0 (unused side effect: M is set to content of RAM[0])\n"
+                "   M=M+1  // Increment the content of RAM[0]\n"
+            )
+        elif command == "C_POP":
+            # Pop from the stack to a virtual register
+            # FIXME: YOU ARE HERE
+            # We must always decrement the stack pointer after a pop
+            self.file.write(
+                f"   //{' '*4}Move stack pointer to top of stack, save content to D\n"
+                "   @SP  // Set A to 0 (side effect: M is set to content of RAM[0])\n"
+            )
 
     def close(self) -> None:
         """Close the output file."""
