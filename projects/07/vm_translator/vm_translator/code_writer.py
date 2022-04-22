@@ -18,8 +18,9 @@ class CodeWriter:
         self.file = pure_path.resolve().open("r")
         self.file_name = pure_path.with_suffix("").name
 
-        # Initialize the less than counter
+        # Initialize the less than and greater than counter
         self._lt_counter = 0
+        self._gt_counter = 0
 
     def write_arithmetic(self, command: str) -> None:
         """
@@ -83,7 +84,37 @@ class CodeWriter:
                     "          // OR(0, M) is 1 only if M is non-zero\n"
                     "   M=!M  // The new M will be 1 (true) only if the previous was 0\n"
                 )
-            # FIXME: gt missing
+            elif command == "gt":
+                self.file.write(
+                    f"   //{' '*4}Check for less than\n"
+                    "   M=D-M  // Set the content of stack pointer -1 to D-M\n"
+                    "   D=A  // Store the current stack pointer address to D\n"
+                    "   @CUR_SP_ADDRESS  // Set A to CUR_SP_ADDRESS\n"
+                    "                    // (side effect: M is set to the content of RAM[A])\n"
+                    "   M=D  // Store the current address to a register\n"
+                    "   A=M  // Set A to M\n"
+                    "        // (side effect: M is set to the content of RAM[A].\n"
+                    "        //  This is now equal to *SP - *(SP-1))\n"
+                    "   D=M  // Set D to the content of stack pointer - 1\n"
+                    f"   @GT_TRUE_{self._gt_counter}\n"
+                    f"   D;JGT  // Jump to GT_TRUE_{self._gt_counter} if D<0\n"
+                    f"   //{' '*8}If D is not greater than 0, continue on this branch:\n"
+                    "   @CUR_SP_ADDRESS  // Retrieve the memory address of stack pointer -1\n"
+                    "   A=M  // Retrieve the memory address of stack pointer -1\n"
+                    "        // (side effect: M is set to the content of RAM[M-1])\n"
+                    "   M=0  // Set the memory of stack pointer -1 to false\n"
+                    f"   @GT_TRUE_{self._gt_counter}_END\n"
+                    f"   0;JMP  // Unconditionally jump to GT_TRUE_{self._gt_counter}_END\n"
+                    "\n"
+                    f"(GT_TRUE_{self._gt_counter})\n"
+                    "   @CUR_SP_ADDRESS  // Retrieve the memory address of stack pointer -1\n"
+                    "   A=M  // Retrieve the memory address of stack pointer -1\n"
+                    "        // (side effect: M is set to the content of RAM[M-1])\n"
+                    "   M=1  // Set the memory of stack pointer -1 to true\n"
+                    "\n"
+                    f"(GT_TRUE_{self._gt_counter}_END)\n"
+                )
+                self._gt_counter += 1
             elif command == "lt":
                 self.file.write(
                     f"   //{' '*4}Check for less than\n"
@@ -219,6 +250,7 @@ class CodeWriter:
             if segment != "constant":
                 self.file.write("   D=M  // Store the content of RAM[D+A] to D\n")
 
+            # Set the new content of the SP, and increment the SP
             self.file.write(
                 f"   //{' '*4}Set the content of the address the SP is pointing to to D\n"
                 "   @SP  // Set A to 0 (side effect: M is set to content of RAM[0])\n"
@@ -236,13 +268,32 @@ class CodeWriter:
                 f"   //{' '*4}Decrement the stack pointer to the first non-free memory address\n"
                 "   @SP  // Set A to 0 (side effect: M is set to content of RAM[0])\n"
                 "   M=M-1  // Decrement the content of RAM[0]\n"
+                f"   //{' '*4}Store the content of the stack pointer to a variable\n"
+                "   D=M  // Store the content of SP to D\n"
+                "   @SP_CONTENT  // Set A to the SP_CONTENT variable\n"
+                "                // (side effect: M is set to content of RAM[SP_CONTENT])\n"
+                "   M=D  // Set the content of RAM[SP_CONTENT] to D\n"
             )
 
             # Obtain the address
             self._write_address(segment=segment, index=index)
-            # FIXME: YOU ARE HERE
 
-            # FIXME: Slide 75: pop static i -> @filename.i...must know the file name
+            # Set the M of the address to the current stack pointer
+            self.file.write(
+                f"   //{' '*4}Store the current address to the ADDR variable\n"
+                "   D=A  // Store the current address to D\n"
+                "   @ADDR  // Set A to the ADDR variable\n"
+                "          // (side effect: M is set to content of RAM[ADDR])\n"
+                "   M=D  // Store the address to RAM[ADDR]\n"
+                f"   //{' '*4}Retrieve the content of the stack pointer\n"
+                "   @SP_CONTENT  // Set A to the SP_CONTENT variable\n"
+                "                // (side effect: M is set to content of RAM[SP_CONTENT])\n"
+                "   D=M  // Store the content of the stack pointer to D \n"
+                f"   //{' '*4}Store the content of the stack pointer to the content of ADDR\n"
+                "   @ADDR  // Set A to the ADDR variable\n"
+                "          // (side effect: M is set to content of RAM[ADDR])\n"
+                "   M=D  // Store the content of the stack pointer to the ADDR memory\n"
+            )
 
         # In all cases: Add 2 newlines to make the code more readable
         self.file.write("\n" * 2)

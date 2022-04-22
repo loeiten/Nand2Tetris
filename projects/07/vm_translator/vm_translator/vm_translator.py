@@ -5,6 +5,9 @@
 import argparse
 from pathlib import Path
 
+from vm_translator.code_writer import CodeWriter
+from vm_translator.parser import Parser
+
 
 def parse_args() -> argparse.Namespace:
     """Parse input arguments.
@@ -31,7 +34,25 @@ def main(in_path: Path) -> None:
     Args:
         in_path (Path): File to translate
     """
-    print(in_path)
+    parser = Parser(str(in_path))
+    code_writer = CodeWriter(str(in_path))
+
+    while parser.has_more_commands():
+        parser.advance()
+        command_type = parser.command_type()
+        arg1 = parser.arg1()
+        if command_type == "C_ARITHMETIC":
+            code_writer.write_arithmetic(command=arg1)
+        # mypy throws error when using in
+        # pylint: disable=consider-using-in
+        elif command_type == "C_PUSH" or command_type == "C_POP":
+            index = parser.arg2()
+            # mypy correctly complains that segment want's a literal, and not a str
+            # However, as we know that we are not dealing with C_ARITHMETIC we know
+            # that the argument can only be one of the literals
+            code_writer.write_push_pop(
+                command=command_type, segment=arg1, index=index  # type: ignore
+            )
 
 
 if __name__ == "__main__":
