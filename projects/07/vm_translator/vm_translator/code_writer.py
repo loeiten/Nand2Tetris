@@ -15,14 +15,17 @@ class CodeWriter:
             path (str): Path to file to write to.
         """
         pure_path = Path(path)
-        self.file = pure_path.resolve().open("r")
+        self.file = pure_path.resolve().open("w")
         self.file_name = pure_path.with_suffix("").name
 
         # Initialize the less than and greater than counter
         self._lt_counter = 0
         self._gt_counter = 0
 
-    def write_arithmetic(self, command: str) -> None:
+    def write_arithmetic(
+        self,
+        command: Literal["add", "sub", "eq", "gt", "lt", "and", "or", "neg", "not"],
+    ) -> None:
         """
         Write to the output file the assembly code that implements the given arithmetic command.
 
@@ -34,7 +37,8 @@ class CodeWriter:
         This is because the two topmost element of the stack will be collapsed to one.
 
         Args:
-            command (str): The command to translate into assembly
+            command (Literal["add", "sub", "eq", "gt", "lt", "and", "or", "neg", "not"]):
+                The command to translate into assembly
         """
         # Write the command
         self.file.write(f"// {command}\n")
@@ -203,7 +207,8 @@ class CodeWriter:
         ARG - 2
         THIS - 3
         THAT - 4
-        temp - 5-17
+        temp - 5-12
+        general purpose registers (not used by VM) - 13-15
         static - 16-255
         stack - 256-2047
         pointer - 3-4 - pointer 0 => RAM[3], pointer 1 => RAM[4]
@@ -240,13 +245,15 @@ class CodeWriter:
             index (int): Segment index to push from/pop to
         """
         # Write the command
-        self.file.write(f"// {command}\n")
+        command_map = {"C_PUSH": "push", "C_POP": "pop"}
+        self.file.write(f"// {command_map[command]} {segment} {index}\n")
+
+        # Obtain the address
+        self._write_address(command=command, segment=segment, index=index)
 
         if command == "C_PUSH":
             # Push from a virtual allocation to the stack
 
-            # Obtain the address
-            self._write_address(segment=segment, index=index)
             if segment != "constant":
                 self.file.write("   D=M  // Store the content of RAM[D+A] to D\n")
 
@@ -263,36 +270,35 @@ class CodeWriter:
         elif command == "C_POP":
             # Pop from the stack to a virtual allocation
 
+            # We here take advantage of a trick that both value and address can be stored in a
+            # variable
+            # This is perhaps less readable, but more efficient
+
+            # An alternative approach:
+            # //    Store address to general purpose register
+            # @13  // General purpose register
+            # M=D  // Store the address to the general purpose register
+            # //    Get the memory address to obtain the memory from
+            # @SP  // Set A to 0 (side effect: M is set to content of RAM[0])
+            # M=M-1  // Decrement the content of RAM[0]
+            # A=M  // Set the address to the memory address RAM[0] is pointing to
+            # D=M  // Store the content of the address pointed to by RAM[0]
+            # //    Store the content of the stack pointer to the address stored in @13
+            # @13 // Select the general purpose register
+            # A=M // Set the address to the address pointed to by 13
+            # M=D // Store D into the address pointed to by 13
+
             # We must always decrement the stack pointer before a pop
             self.file.write(
-                f"   //{' '*4}Decrement the stack pointer to the first non-free memory address\n"
+                f"   //{' '*4}Add the top of the stack to D, so that D holds RAM[SP] + addr\n"
                 "   @SP  // Set A to 0 (side effect: M is set to content of RAM[0])\n"
-                "   M=M-1  // Decrement the content of RAM[0]\n"
-                f"   //{' '*4}Store the content of the stack pointer to a variable\n"
-                "   D=M  // Store the content of SP to D\n"
-                "   @SP_CONTENT  // Set A to the SP_CONTENT variable\n"
-                "                // (side effect: M is set to content of RAM[SP_CONTENT])\n"
-                "   M=D  // Set the content of RAM[SP_CONTENT] to D\n"
-            )
-
-            # Obtain the address
-            self._write_address(segment=segment, index=index)
-
-            # Set the M of the address to the current stack pointer
-            self.file.write(
-                f"   //{' '*4}Store the current address to the ADDR variable\n"
-                "   D=A  // Store the current address to D\n"
-                "   @ADDR  // Set A to the ADDR variable\n"
-                "          // (side effect: M is set to content of RAM[ADDR])\n"
-                "   M=D  // Store the address to RAM[ADDR]\n"
-                f"   //{' '*4}Retrieve the content of the stack pointer\n"
-                "   @SP_CONTENT  // Set A to the SP_CONTENT variable\n"
-                "                // (side effect: M is set to content of RAM[SP_CONTENT])\n"
-                "   D=M  // Store the content of the stack pointer to D \n"
-                f"   //{' '*4}Store the content of the stack pointer to the content of ADDR\n"
-                "   @ADDR  // Set A to the ADDR variable\n"
-                "          // (side effect: M is set to content of RAM[ADDR])\n"
-                "   M=D  // Store the content of the stack pointer to the ADDR memory\n"
+                "   AM=M-1  // Decrement the content of RAM[0] and set this to the new address\n"
+                "           // Side effect: M is set to content of RAM[RAM[0]-1]\n"
+                "   D=D+M  // RHS: D holds the 'address', M holds the content of RAM[RAM[0]-1]\n"
+                f"   //{' '*4}Select the address to pop to and store D\n"
+                "   A=D-M  // A <- ('addr' + content of RAM[RAM[0]-1]) - content of RAM[RAM[0]-1]\n"
+                "          // Side effect: M is set to the content of the 'address'\n"
+                "   M=D-A  // M <- ('address; + content of RAM[RAM[0]-1]) - 'address'\n"
             )
 
         # In all cases: Add 2 newlines to make the code more readable
@@ -300,6 +306,7 @@ class CodeWriter:
 
     def _write_address(
         self,
+        command: Literal["C_PUSH", "C_POP"],
         segment: Literal[
             "local", "argument", "this", "that", "constant", "static", "pointer", "temp"
         ],
@@ -311,6 +318,7 @@ class CodeWriter:
         See "Pseudocode" in write_push_pop for details.
 
         Args:
+            command (Literal["C_PUSH", "C_POP"]): The command to translate into assembly
             segment (Literal["local", "argument", "this", "that", "constant", "static", "pointer",
             "temp"]):
                 Which virtual memory segment to push from/pop to
@@ -344,7 +352,8 @@ class CodeWriter:
                 "         // (unused side effect: M is set to content of RAM[THAT])\n"
             )
         elif segment == "constant":
-            self.file.write("   D=A  // Store the address to D\n")
+            # Address already stored to A
+            pass
         elif segment == "static":
             # Since "static" is allocated from address 16, thus we must add 16 to the index
             self.file.write(
@@ -360,10 +369,13 @@ class CodeWriter:
 
         if segment != "constant":
             # Constant is constant, we don't need to add anything to get what we need
-            self.file.write(
-                "   A=D+A  // Set A to the desired address\n"
-                "          // (side effect: M is set to content of RAM[D+A])\n"
-            )
+            if command == "C_PUSH":
+                self.file.write(
+                    "   A=D+M  // Set A to the desired address\n"
+                    "          // (side effect: M is set to content of RAM[D+A])\n"
+                )
+            elif command == "C_POP":
+                self.file.write("   D=D+M  // Set D to index (D) + base address (M)\n")
 
     def close(self) -> None:
         """Close the output file."""

@@ -140,7 +140,7 @@ class Parser:
             str: The first argument of the current command
         """
         command = self.current_instruction.split()[0]
-        if CommandEnum[command] == "C_ARITHMETIC":
+        if CommandEnum[command.upper()].value == "C_ARITHMETIC":
             return command
         return self.current_instruction.split()[1]
 

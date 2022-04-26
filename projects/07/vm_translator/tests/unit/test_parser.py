@@ -1,4 +1,4 @@
-"""Mocule unit testing the Parser."""
+"""Module unit testing the Parser."""
 
 from pathlib import Path
 
@@ -37,7 +37,7 @@ def test_advance(full_test_parser: Parser) -> None:
     Args:
         full_test_parser (Parser): Parser to FullTest.vm
     """
-    assert full_test_parser.current_instruction is None
+    assert full_test_parser.current_instruction == ""
     full_test_parser.advance()
     assert full_test_parser.current_instruction == "push constant 0"
     full_test_parser.advance()
@@ -46,7 +46,7 @@ def test_advance(full_test_parser: Parser) -> None:
         full_test_parser.advance()
     assert full_test_parser.current_instruction == "not"
     full_test_parser.advance()
-    assert full_test_parser.current_instruction is None
+    assert full_test_parser.current_instruction == ""
 
 
 def test_command_type(full_test_parser: Parser) -> None:
@@ -57,7 +57,7 @@ def test_command_type(full_test_parser: Parser) -> None:
     """
     full_test_parser.advance()
     assert full_test_parser.command_type() == "C_PUSH"
-    for _ in range(8):
+    for _ in range(9):
         full_test_parser.advance()
     assert full_test_parser.command_type() == "C_POP"
     for _ in range(2):
@@ -73,7 +73,7 @@ def test_arg1(full_test_parser: Parser) -> None:
     """
     full_test_parser.advance()
     assert full_test_parser.arg1() == "constant"
-    for _ in range(8):
+    for _ in range(9):
         full_test_parser.advance()
     assert full_test_parser.arg1() == "local"
     for _ in range(2):
@@ -89,6 +89,6 @@ def test_arg2(full_test_parser: Parser) -> None:
     """
     full_test_parser.advance()
     assert full_test_parser.arg2() == 0
-    for _ in range(8):
+    for _ in range(9):
         full_test_parser.advance()
     assert full_test_parser.arg2() == 2
