@@ -8,6 +8,41 @@ from typing import Literal
 class CodeWriter:
     """Class which writes symbolic Hack assembly code."""
 
+    # See the docstring of write_push_pop for explanation of addresses
+    segment_address_map = {
+        "local": (
+            "   @LCL  // Set A to the base address of the 'local' allocation\n"
+            "         // (unused side effect: M is set to content of RAM[LCL])\n"
+        ),
+        "argument": (
+            "   @ARG  // Set A to the base address of the 'argument' allocation\n"
+            "         // (unused side effect: M is set to content of RAM[ARG])\n"
+        ),
+        "this": (
+            "   @THIS  // Set A to the base address of the 'this' allocation\n"
+            "          // (unused side effect: M is set to content of RAM[THIS])\n"
+        ),
+        "that": (
+            "   @THAT  // Set A to the base address of the 'that' allocation\n"
+            "          // (unused side effect: M is set to content of RAM[THAT])\n"
+        ),
+        # Since "static" is allocated from address 16, thus we must add 16 to the index
+        "static": (
+            "   @16  // Set A to the base address of the 'static' allocation\n"
+            "        // (unused side effect: M is set to content of RAM[16])\n"
+        ),
+        # Since "temp" is allocated from address 5, thus we must add 5 to the index
+        "temp": (
+            "   @5  // Set A to the base address of the 'temp' allocation\n"
+            "       // (unused side effect: M is set to content of RAM[5])\n"
+        ),
+        # Since "pointer" is allocated from address 3, thus we must add 3 to the index
+        "pointer": (
+            "   @3  // Set A to the base address of the 'pointer' allocation\n"
+            "       // (unused side effect: M is set to content of RAM[3])\n"
+        ),
+    }
+
     def __init__(self, path: str) -> None:
         """Open the output file/stream and gets ready to write into it.
 
@@ -72,26 +107,26 @@ class CodeWriter:
             if command == "add":
                 self.file.write(
                     f"   //{' '*4}Add stack pointer and stack pointer -1\n"
-                    "   M=D+M  // Set the content of stack pointer -1 to D+M\n"
+                    "   M=M+D  // Set the content of stack pointer -1 to M+D\n"
                 )
             elif command == "sub":
                 self.file.write(
                     f"   //{' '*4}Subtract stack pointer and stack pointer -1\n"
-                    "   M=D-M  // Set the content of stack pointer -1 to D-M\n"
+                    "   M=M-D  // Set the content of stack pointer -1 to M-D\n"
                 )
             elif command == "eq":
                 self.file.write(
                     f"   //{' '*4}Check for equality\n"
-                    "   M=D-M  // Set the content of stack pointer -1 to D-M\n"
+                    "   M=M-D  // Set the content of stack pointer -1 to M-D\n"
                     "   D=0  // Set D to 0\n"
-                    "   M=D|M  // If M is non-zero, we have inequality\n"
+                    "   M=M|D  // If M is non-zero, we have inequality\n"
                     "          // OR(0, M) is 1 only if M is non-zero\n"
                     "   M=!M  // The new M will be 1 (true) only if the previous was 0\n"
                 )
             elif command == "gt":
                 self.file.write(
                     f"   //{' '*4}Check for less than\n"
-                    "   M=D-M  // Set the content of stack pointer -1 to D-M\n"
+                    "   M=M-D  // Set the content of stack pointer -1 to M-D\n"
                     "   D=A  // Store the current stack pointer address to D\n"
                     "   @CUR_SP_ADDRESS  // Set A to CUR_SP_ADDRESS\n"
                     "                    // (side effect: M is set to the content of RAM[A])\n"
@@ -122,7 +157,7 @@ class CodeWriter:
             elif command == "lt":
                 self.file.write(
                     f"   //{' '*4}Check for less than\n"
-                    "   M=D-M  // Set the content of stack pointer -1 to D-M\n"
+                    "   M=M-D  // Set the content of stack pointer -1 to M-D\n"
                     "   D=A  // Store the current stack pointer address to D\n"
                     "   @CUR_SP_ADDRESS  // Set A to CUR_SP_ADDRESS\n"
                     "                    // (side effect: M is set to the content of RAM[A])\n"
@@ -153,17 +188,17 @@ class CodeWriter:
             elif command == "and":
                 self.file.write(
                     f"   //{' '*4}Logic stack pointer AND stack pointer -1\n"
-                    "   M=D&M  // Set the content of stack pointer -1 to D&M\n"
+                    "   M=M&D  // Set the content of stack pointer -1 to M&D\n"
                 )
             elif command == "or":
                 self.file.write(
                     f"   //{' '*4}Logic stack pointer OR stack pointer -1\n"
-                    "   M=D|M  // Set the content of stack pointer -1 to D|M\n"
+                    "   M=M|D  // Set the content of stack pointer -1 to M|D\n"
                 )
 
             self.file.write(
                 f"//{' '*4}Binary operation: SP points to the correct address\n"
-                f"//{' '*6}as we decremented it at the start of this op\n"
+                f"//{' '*4}as we decremented it at the start of this op\n"
             )
         else:
             # Unary operator
@@ -331,51 +366,33 @@ class CodeWriter:
             f"   D=A  // Store the index to the D register\n"
         )
 
-        if segment == "local":
-            self.file.write(
-                "   @LCL  // Set A to the base address of the 'local' allocation\n"
-                "         // (unused side effect: M is set to content of RAM[LCL])\n"
-            )
-        elif segment == "argument":
-            self.file.write(
-                "   @ARG  // Set A to the base address of the 'argument' allocation\n"
-                "         // (unused side effect: M is set to content of RAM[ARG])\n"
-            )
-        elif segment == "this":
-            self.file.write(
-                "   @THIS  // Set A to the base address of the 'this' allocation\n"
-                "         // (unused side effect: M is set to content of RAM[THIS])\n"
-            )
-        elif segment == "that":
-            self.file.write(
-                "   @THAT  // Set A to the base address of the 'that' allocation\n"
-                "         // (unused side effect: M is set to content of RAM[THAT])\n"
-            )
-        elif segment == "constant":
-            # Address already stored to A
-            pass
-        elif segment == "static":
-            # Since "static" is allocated from address 16, thus we must add 16 to the index
-            self.file.write(
-                "   @16  // Set A to the base address of the 'static' allocation\n"
-                "         // (unused side effect: M is set to content of RAM[16])\n"
-            )
-        elif segment == "pointer":
-            # Since "pointer" is allocated from address 3, thus we must add 3 to the index
-            self.file.write(
-                "   @3  // Set A to the base address of the 'pointer' allocation\n"
-                "         // (unused side effect: M is set to content of RAM[3])\n"
-            )
-
         if segment != "constant":
+            # NOTE: if segment != "constant": The address already stored to A, and we
+            #       don't need to add a base address to get what we need
+            self.file.write(self.segment_address_map[segment])
+
             # Constant is constant, we don't need to add anything to get what we need
             if command == "C_PUSH":
-                self.file.write(
-                    "   A=D+M  // Set A to the desired address\n"
-                    "          // (side effect: M is set to content of RAM[D+A])\n"
-                )
+                if segment in ("local", "argument", "this", "that"):
+                    self.file.write(
+                        "   A=D+M  // Set A to the desired address\n"
+                        "          // (side effect: M is set to content of RAM[D+M])\n"
+                    )
+                elif segment in ("static", "temp", "pointer"):
+                    self.file.write(
+                        "   A=D+A  // Set A to the desired address\n"
+                        "          // (side effect: M is set to content of RAM[D+A])\n"
+                    )
+
             elif command == "C_POP":
-                self.file.write("   D=D+M  // Set D to index (D) + base address (M)\n")
+                if segment in ("local", "argument", "this", "that"):
+                    self.file.write(
+                        "   D=D+M  // Set D to index (D) + base address (M)\n"
+                    )
+                elif segment in ("static", "temp", "pointer"):
+                    self.file.write(
+                        "   D=D+A  // Set D to index (D) + constant address (A)\n"
+                    )
 
     def close(self) -> None:
         """Close the output file."""
