@@ -26,11 +26,6 @@ class CodeWriter:
             "   @THAT  // Set A to the base address of the 'that' allocation\n"
             "          // (unused side effect: M is set to content of RAM[THAT])\n"
         ),
-        # Since "static" is allocated from address 16, thus we must add 16 to the index
-        "static": (
-            "   @16  // Set A to the base address of the 'static' allocation\n"
-            "        // (unused side effect: M is set to content of RAM[16])\n"
-        ),
         # Since "temp" is allocated from address 5, thus we must add 5 to the index
         "temp": (
             "   @5  // Set A to the base address of the 'temp' allocation\n"
@@ -53,9 +48,11 @@ class CodeWriter:
         self.file = pure_path.resolve().open("w")
         self.file_name = pure_path.with_suffix("").name
 
-        # Initialize the less than and greater than counter
-        self._lt_counter = 0
+        # Initialize boolean counters
+        self._bool_counter = 0
+        self._eq_counter = 0
         self._gt_counter = 0
+        self._lt_counter = 0
 
     def write_arithmetic(
         self,
@@ -64,12 +61,22 @@ class CodeWriter:
         """
         Write to the output file the assembly code that implements the given arithmetic command.
 
-        We first dereference the decremented stack pointer.
-        This will give us the top of the stack.
-        If we do a unary operation we need to increment the stack pointer.
-        In this way it will point to the next free address>
-        If we do a unary binary operation we need do not need to increment the stack pointer.
-        This is because the two topmost element of the stack will be collapsed to one.
+        This is done by:
+        1. Dereference the decremented stack pointer to give us the top of the stack
+        2. If unary operation: Increment the stack pointer to point to the next free address
+
+        If we do a binary operation we need do not need to increment the stack pointer, since
+        the two topmost element of the stack will be collapsed to one.
+
+        NOTE:
+        "eq", "gt", "lt", "and", "or", and "not" will be treated like LOGICAL operators
+        (working on booleans), not BITWISE operators (working on individual bits).
+        The difference is exemplified in
+        https://www.tutorialspoint.com/what-are-the-differences-between-bitwise-and-logical-and-operators-in-c-cplusplus
+
+        Also note that the boolean corresponds to the following integers
+        True = 11...1 (in base 2) = -1 (in decimal with 2's compliment)
+        False = 00...0 (in base 2) = 0 (in decimal)
 
         Args:
             command (Literal["add", "sub", "eq", "gt", "lt", "and", "or", "neg", "not"]):
@@ -80,7 +87,7 @@ class CodeWriter:
 
         # We always need to dereference the decremented stack pointer
         self.file.write(
-            f"   //{' '*4}Move stack pointer to top of stack, save content to D\n"
+            f"   //{' '*4}Move stack pointer to top of stack\n"
             "   @SP  // Set A to 0 (side effect: M is set to content of RAM[0])\n"
             "   AM=M-1  // 1. Move stack pointer so that it now points at the\n"
             "           //    top of the stack\n"
@@ -89,6 +96,18 @@ class CodeWriter:
             "           //    (side effect: M is set to the content of RAM[M-1])\n"
             "   D=M  // 3. Set D to the content of RAM[M-1]\n"
         )
+
+        boolean_op = command in ("eq", "gt", "lt", "and", "or", "not")
+        if boolean_op:
+            self.cast_d_to_boolean()
+            self.file.write(
+                f"   //{' '*4}Store boolean D to current SP\n"
+                "   @SP  // Set A to 0 (side effect: M is set to content of RAM[0])\n"
+                "   A=M  // Dereference (side effect: M is set to content of RAM[RAM[0]])\n"
+                "   MD=D  // Store the boolean D to the address pointed to by SP and to D\n"
+            )
+
+        # FIXME: You are here: For binary operations: Cast D to boolean for the second operand
 
         # Decrement the stack pointer for binary operations
         unary_operators = (
@@ -223,6 +242,21 @@ class CodeWriter:
 
         # In all cases: Add 2 newlines to make the code more readable
         self.file.write("\n" * 2)
+
+    def cast_d_to_boolean(self):
+        """Cast D to a boolean."""
+        self.file.write(
+            f"   //{' '*4}Cast M to boolean\n"
+            f"   @NOT_ZERO_{self._bool_counter}\n"
+            f"   D;JNE  // Jump to NOT_ZERO_{self._bool_counter} if D!=0\n"
+            f"   @END_BOOL_{self._bool_counter}\n"
+            f"   0;JMP  // D is zero, unconditionally jump to END_BOOL_{self._bool_counter}\n"
+            f"(NOT_ZERO_{self._bool_counter})\n"
+            "   D=-1  // Set D to true (-1 in two's complement)\n"
+            f"(END_BOOL_{self._bool_counter})\n"
+        )
+        # Increment the counter
+        self._bool_counter += 1
 
     def write_push_pop(
         self,
@@ -359,15 +393,22 @@ class CodeWriter:
                 Which virtual memory segment to push from/pop to
             index (int): Segment index to push from/pop to
         """
-        self.file.write(
-            f"   //{' '*4}Get the memory address to obtain the memory from\n"
-            f"   @{index}  // Set A to 'index'\n"
-            "             // (unused side effect: M is set to content of RAM['index'])\n"
-            f"   D=A  // Store the index to the D register\n"
-        )
+        if segment != "static":
+            self.file.write(
+                f"   //{' '*4}Get the memory address to obtain the memory from\n"
+                f"   @{index}  // Set A to 'index'\n"
+                "             // (unused side effect: M is set to content of RAM['index'])\n"
+                f"   D=A  // Store the index to the D register\n"
+            )
+        else:
+            self.file.write(
+                f"   //{' '*4}Get the memory address to obtain the memory from\n"
+                f"   @{self.file_name}{index}  // Define {self.file_name}{index}\n"
+                f"        // Side effect: M is set to RAM['{self.file_name}{index}']\n"
+            )
 
-        if segment != "constant":
-            # NOTE: if segment != "constant": The address already stored to A, and we
+        if segment not in ("constant", "static"):
+            # NOTE: if segment in ("constant", "static"): The address already stored to A, and we
             #       don't need to add a base address to get what we need
             self.file.write(self.segment_address_map[segment])
 
@@ -378,7 +419,7 @@ class CodeWriter:
                         "   A=D+M  // Set A to the desired address\n"
                         "          // (side effect: M is set to content of RAM[D+M])\n"
                     )
-                elif segment in ("static", "temp", "pointer"):
+                elif segment in ("temp", "pointer"):
                     self.file.write(
                         "   A=D+A  // Set A to the desired address\n"
                         "          // (side effect: M is set to content of RAM[D+A])\n"
@@ -389,7 +430,7 @@ class CodeWriter:
                     self.file.write(
                         "   D=D+M  // Set D to index (D) + base address (M)\n"
                     )
-                elif segment in ("static", "temp", "pointer"):
+                elif segment in ("temp", "pointer"):
                     self.file.write(
                         "   D=D+A  // Set D to index (D) + constant address (A)\n"
                     )
