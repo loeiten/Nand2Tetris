@@ -48,7 +48,7 @@ class CodeWriter:
         self.file = pure_path.resolve().open("w")
         self.file_name = pure_path.with_suffix("").name
 
-        # Initialize boolean counters
+        # Initialize counters for boolean results
         self._bool_counter = 0
         self._eq_counter = 0
         self._gt_counter = 0
@@ -97,17 +97,10 @@ class CodeWriter:
             "   D=M  // 3. Set D to the content of RAM[M-1]\n"
         )
 
-        boolean_op = command in ("eq", "gt", "lt", "and", "or", "not")
-        if boolean_op:
-            self.cast_d_to_boolean()
-            self.file.write(
-                f"   //{' '*4}Store boolean D to current SP\n"
-                "   @SP  // Set A to 0 (side effect: M is set to content of RAM[0])\n"
-                "   A=M  // Dereference (side effect: M is set to content of RAM[RAM[0]])\n"
-                "   MD=D  // Store the boolean D to the address pointed to by SP and to D\n"
-            )
-
-        # FIXME: You are here: For binary operations: Cast D to boolean for the second operand
+        work_on_boolean = command in ("and", "or", "not")
+        if work_on_boolean:
+            self._cast_d_to_boolean()
+            self._store_bool_d_to_sp()
 
         # Decrement the stack pointer for binary operations
         unary_operators = (
@@ -122,6 +115,22 @@ class CodeWriter:
                 "   A=M-1  // Set A to M-1\n"
                 "          // (side effect: M is set to the content of RAM[M-1])\n"
             )
+            if work_on_boolean:
+                self.file.write(
+                    f"   //{' '*4}Store M to D (so that we can cast to bool)\n"
+                    "   D=M  // Set M to D\n"
+                )
+                self._cast_d_to_boolean()
+                self._store_bool_d_to_sp()
+                self.file.write(
+                    f"   //{' '*4}Restore D=RAM[RAM[0]] and A=RAM[0]-1\n"
+                    "   @SP  // Set A to 0\n"
+                    "        // (side effect: M is set to the content of RAM[0])\n"
+                    "   D=M  // Set D to M\n"
+                    "   A=M-1  // Set A to M-1\n"
+                    "          // (side effect: M is set to the content of RAM[M-1])\n"
+                )
+
             # Binary operator
             if command == "add":
                 self.file.write(
@@ -133,77 +142,9 @@ class CodeWriter:
                     f"   //{' '*4}Subtract stack pointer and stack pointer -1\n"
                     "   M=M-D  // Set the content of stack pointer -1 to M-D\n"
                 )
-            elif command == "eq":
-                self.file.write(
-                    f"   //{' '*4}Check for equality\n"
-                    "   M=M-D  // Set the content of stack pointer -1 to M-D\n"
-                    "   D=0  // Set D to 0\n"
-                    "   M=M|D  // If M is non-zero, we have inequality\n"
-                    "          // OR(0, M) is 1 only if M is non-zero\n"
-                    "   M=!M  // The new M will be 1 (true) only if the previous was 0\n"
-                )
-            elif command == "gt":
-                self.file.write(
-                    f"   //{' '*4}Check for less than\n"
-                    "   M=M-D  // Set the content of stack pointer -1 to M-D\n"
-                    "   D=A  // Store the current stack pointer address to D\n"
-                    "   @CUR_SP_ADDRESS  // Set A to CUR_SP_ADDRESS\n"
-                    "                    // (side effect: M is set to the content of RAM[A])\n"
-                    "   M=D  // Store the current address to a register\n"
-                    "   A=M  // Set A to M\n"
-                    "        // (side effect: M is set to the content of RAM[A].\n"
-                    "        //  This is now equal to *SP - *(SP-1))\n"
-                    "   D=M  // Set D to the content of stack pointer - 1\n"
-                    f"   @GT_TRUE_{self._gt_counter}\n"
-                    f"   D;JGT  // Jump to GT_TRUE_{self._gt_counter} if D<0\n"
-                    f"   //{' '*8}If D is not greater than 0, continue on this branch:\n"
-                    "   @CUR_SP_ADDRESS  // Retrieve the memory address of stack pointer -1\n"
-                    "   A=M  // Retrieve the memory address of stack pointer -1\n"
-                    "        // (side effect: M is set to the content of RAM[M-1])\n"
-                    "   M=0  // Set the memory of stack pointer -1 to false\n"
-                    f"   @GT_TRUE_{self._gt_counter}_END\n"
-                    f"   0;JMP  // Unconditionally jump to GT_TRUE_{self._gt_counter}_END\n"
-                    "\n"
-                    f"(GT_TRUE_{self._gt_counter})\n"
-                    "   @CUR_SP_ADDRESS  // Retrieve the memory address of stack pointer -1\n"
-                    "   A=M  // Retrieve the memory address of stack pointer -1\n"
-                    "        // (side effect: M is set to the content of RAM[M-1])\n"
-                    "   M=1  // Set the memory of stack pointer -1 to true\n"
-                    "\n"
-                    f"(GT_TRUE_{self._gt_counter}_END)\n"
-                )
-                self._gt_counter += 1
-            elif command == "lt":
-                self.file.write(
-                    f"   //{' '*4}Check for less than\n"
-                    "   M=M-D  // Set the content of stack pointer -1 to M-D\n"
-                    "   D=A  // Store the current stack pointer address to D\n"
-                    "   @CUR_SP_ADDRESS  // Set A to CUR_SP_ADDRESS\n"
-                    "                    // (side effect: M is set to the content of RAM[A])\n"
-                    "   M=D  // Store the current address to a register\n"
-                    "   A=M  // Set A to M\n"
-                    "        // (side effect: M is set to the content of RAM[A].\n"
-                    "        //  This is now equal to *SP - *(SP-1))\n"
-                    "   D=M  // Set D to the content of stack pointer - 1\n"
-                    f"   @LT_TRUE_{self._lt_counter}\n"
-                    f"   D;JLT  // Jump to LT_TRUE_{self._lt_counter} if D<0\n"
-                    f"   //{' '*8}If D is not less than 0, continue on this branch:\n"
-                    "   @CUR_SP_ADDRESS  // Retrieve the memory address of stack pointer -1\n"
-                    "   A=M  // Retrieve the memory address of stack pointer -1\n"
-                    "        // (side effect: M is set to the content of RAM[M-1])\n"
-                    "   M=0  // Set the memory of stack pointer -1 to false\n"
-                    f"   @LT_TRUE_{self._lt_counter}_END\n"
-                    f"   0;JMP  // Unconditionally jump to LT_TRUE_{self._lt_counter}_END\n"
-                    "\n"
-                    f"(LT_TRUE_{self._lt_counter})\n"
-                    "   @CUR_SP_ADDRESS  // Retrieve the memory address of stack pointer -1\n"
-                    "   A=M  // Retrieve the memory address of stack pointer -1\n"
-                    "        // (side effect: M is set to the content of RAM[M-1])\n"
-                    "   M=1  // Set the memory of stack pointer -1 to true\n"
-                    "\n"
-                    f"(LT_TRUE_{self._lt_counter}_END)\n"
-                )
-                self._lt_counter += 1
+            elif command in ("eq", "gt", "lt"):
+                # mypy does not notice that the command above restricts the input of `command`
+                self._write_eq_gt_lt_result(command)  # type: ignore
             elif command == "and":
                 self.file.write(
                     f"   //{' '*4}Logic stack pointer AND stack pointer -1\n"
@@ -243,7 +184,7 @@ class CodeWriter:
         # In all cases: Add 2 newlines to make the code more readable
         self.file.write("\n" * 2)
 
-    def cast_d_to_boolean(self):
+    def _cast_d_to_boolean(self):
         """Cast D to a boolean."""
         self.file.write(
             f"   //{' '*4}Cast M to boolean\n"
@@ -257,6 +198,51 @@ class CodeWriter:
         )
         # Increment the counter
         self._bool_counter += 1
+
+    def _store_bool_d_to_sp(self):
+        """Store boolean D to the current stack pointer."""
+        self.file.write(
+            f"   //{' '*4}Store boolean D to current SP\n"
+            "   @SP  // Set A to 0 (side effect: M is set to content of RAM[0])\n"
+            "   A=M  // Dereference (side effect: M is set to content of RAM[RAM[0]])\n"
+            "   MD=D  // Store the boolean D to the address pointed to by SP and to D\n"
+        )
+
+    def _write_eq_gt_lt_result(self, command: Literal["eq", "gt", "lt"]):
+        """Write the result of "eq", "gt" and "lt".
+
+        Args:
+            command (Literal["eq", "gt", "lt"]): Command to write result of
+        """
+        command_counter = {
+            "eq": self._eq_counter,
+            "lt": self._lt_counter,
+            "gt": self._gt_counter,
+        }
+        jump_statement = {
+            "eq": "JEQ",
+            "lt": "JLT",
+            "gt": "JGT",
+        }
+        counter = command_counter[command]
+        jump = jump_statement[command]
+        self.file.write(
+            f"   //{' '*4}Check for '{command}'\n"
+            "   D=M-D  // By subtracting M and D we can check for equality\n"
+            f"   @{command.capitalize()}_{counter}\n"
+            f"   D;{jump}  // Jump to label above if true\n"
+            "   @SP  // Select the current stack pointer (first non-free address)\n"
+            "   A=M  // Dereference\n"
+            "   M=0  // Condition checked for was false\n"
+            f"   @END_{command.capitalize()}_{counter}\n"
+            "   0;JMP  // Always jump to the end\n"
+            f"({command.capitalize()}_{counter})\n"
+            "   @SP  // Select the current stack pointer (first non-free address)\n"
+            "   A=M  // Dereference\n"
+            "   M=-1  // Condition checked for was true\n"
+            f"(END_{command.capitalize()}_{counter})\n"
+        )
+        counter += 1
 
     def write_push_pop(
         self,
