@@ -26,15 +26,20 @@ class CodeWriter:
             "   @THAT  // Set A to the base address of the 'that' allocation\n"
             "          // (unused side effect: M is set to content of RAM[THAT])\n"
         ),
-        # Since "temp" is allocated from address 5, thus we must add 5 to the index
-        "temp": (
-            "   @5  // Set A to the base address of the 'temp' allocation\n"
-            "       // (unused side effect: M is set to content of RAM[5])\n"
+        # Since "static" is allocated from address 16, thus we must add 16 to the index
+        "static": (
+            "   @16  // Set A to the base address of the 'static' allocation\n"
+            "       // (unused side effect: M is set to content of RAM[16])\n"
         ),
         # Since "pointer" is allocated from address 3, thus we must add 3 to the index
         "pointer": (
             "   @3  // Set A to the base address of the 'pointer' allocation\n"
             "       // (unused side effect: M is set to content of RAM[3])\n"
+        ),
+        # Since "temp" is allocated from address 5, thus we must add 5 to the index
+        "temp": (
+            "   @5  // Set A to the base address of the 'temp' allocation\n"
+            "       // (unused side effect: M is set to content of RAM[5])\n"
         ),
     }
 
@@ -46,7 +51,6 @@ class CodeWriter:
         """
         pure_path = Path(path)
         self.file = pure_path.resolve().open("w")
-        self.file_name = pure_path.with_suffix("").name
 
         # Initialize counters for boolean results
         self._eq_counter = 0
@@ -242,8 +246,8 @@ class CodeWriter:
                 - push constant i => *SP=i, SP++
                 - No pop command
             - If segment == static
-                - push static i => addr = 16 + i, *SP=*addr, SP++ (use @filename.i)
-                - pop static i => addr = 16 + i, SP--, *addr=*SP (use @filename.i)
+                - push static i => addr = 16 + i, *SP=*addr, SP++
+                - pop static i => addr = 16 + i, SP--, *addr=*SP
             - If segment == pointer
                 - push pointer 0/1 => addr = 3 + 0/1, *SP=*addr, SP++
                 - pop pointer 0/1 => addr = 3 + 0/1, SP--, *addr=*SP
@@ -338,22 +342,15 @@ class CodeWriter:
                 Which virtual memory segment to push from/pop to
             index (int): Segment index to push from/pop to
         """
-        if segment != "static":
-            self.file.write(
-                f"   //{' '*4}Get the memory address to obtain the memory from\n"
-                f"   @{index}  // Set A to 'index'\n"
-                "             // (unused side effect: M is set to content of RAM['index'])\n"
-                f"   D=A  // Store the index to the D register\n"
-            )
-        else:
-            self.file.write(
-                f"   //{' '*4}Get the memory address to obtain the memory from\n"
-                f"   @{self.file_name}{index}  // Define {self.file_name}{index}\n"
-                f"        // Side effect: M is set to RAM['{self.file_name}{index}']\n"
-            )
+        self.file.write(
+            f"   //{' '*4}Get the memory address to obtain the memory from\n"
+            f"   @{index}  // Set A to 'index'\n"
+            "             // (unused side effect: M is set to content of RAM['index'])\n"
+            f"   D=A  // Store the index to the D register\n"
+        )
 
-        if segment not in ("constant", "static"):
-            # NOTE: if segment in ("constant", "static"): The address already stored to A, and we
+        if segment != "constant":
+            # NOTE: if segment != "constant": The address already stored to A, and we
             #       don't need to add a base address to get what we need
             self.file.write(self.segment_address_map[segment])
 
@@ -364,7 +361,7 @@ class CodeWriter:
                         "   A=D+M  // Set A to the desired address\n"
                         "          // (side effect: M is set to content of RAM[D+M])\n"
                     )
-                elif segment in ("temp", "pointer"):
+                elif segment in ("static", "temp", "pointer"):
                     self.file.write(
                         "   A=D+A  // Set A to the desired address\n"
                         "          // (side effect: M is set to content of RAM[D+A])\n"
@@ -375,7 +372,7 @@ class CodeWriter:
                     self.file.write(
                         "   D=D+M  // Set D to index (D) + base address (M)\n"
                     )
-                elif segment in ("temp", "pointer"):
+                elif segment in ("static", "temp", "pointer"):
                     self.file.write(
                         "   D=D+A  // Set D to index (D) + constant address (A)\n"
                     )
