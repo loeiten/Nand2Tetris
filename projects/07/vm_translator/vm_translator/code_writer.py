@@ -26,11 +26,6 @@ class CodeWriter:
             "   @THAT  // Set A to the base address of the 'that' allocation\n"
             "          // (unused side effect: M is set to content of RAM[THAT])\n"
         ),
-        # Since "static" is allocated from address 16, thus we must add 16 to the index
-        "static": (
-            "   @16  // Set A to the base address of the 'static' allocation\n"
-            "       // (unused side effect: M is set to content of RAM[16])\n"
-        ),
         # Since "pointer" is allocated from address 3, thus we must add 3 to the index
         "pointer": (
             "   @3  // Set A to the base address of the 'pointer' allocation\n"
@@ -51,6 +46,8 @@ class CodeWriter:
         """
         pure_path = Path(path)
         self.file = pure_path.resolve().open("w")
+
+        self.file_name = pure_path.resolve().with_suffix("").name
 
         # Initialize counters for boolean results
         self._eq_counter = 0
@@ -246,8 +243,8 @@ class CodeWriter:
                 - push constant i => *SP=i, SP++
                 - No pop command
             - If segment == static
-                - push static i => addr = 16 + i, *SP=*addr, SP++
-                - pop static i => addr = 16 + i, SP--, *addr=*SP
+                - push static i => addr = 16 + i, *SP=*addr, SP++ (use @file_name.i)
+                - pop static i => addr = 16 + i, SP--, *addr=*SP (use @file_name.i)
             - If segment == pointer
                 - push pointer 0/1 => addr = 3 + 0/1, *SP=*addr, SP++
                 - pop pointer 0/1 => addr = 3 + 0/1, SP--, *addr=*SP
@@ -272,7 +269,7 @@ class CodeWriter:
         if command == "C_PUSH":
             # Push from a virtual allocation to the stack
 
-            if segment != "constant":
+            if segment not in ("constant", "static"):
                 self.file.write("   D=M  // Store the content of RAM[D+A] to D\n")
 
             # Set the new content of the SP, and increment the SP
@@ -342,14 +339,30 @@ class CodeWriter:
                 Which virtual memory segment to push from/pop to
             index (int): Segment index to push from/pop to
         """
-        self.file.write(
-            f"   //{' '*4}Get the memory address to obtain the memory from\n"
-            f"   @{index}  // Set A to 'index'\n"
-            "             // (unused side effect: M is set to content of RAM['index'])\n"
-            f"   D=A  // Store the index to the D register\n"
-        )
+        if segment != "static":
+            self.file.write(
+                f"   //{' '*4}Get the memory address to obtain the memory from\n"
+                f"   @{index}  // Set A to 'index'\n"
+                "             // (unused side effect: M is set to content of RAM['index'])\n"
+                f"   D=A  // Store the index to the D register\n"
+            )
+        else:
+            self.file.write(
+                f"   //{' '*4}Get the static memory address\n"
+                f"   @{self.file_name}.{index}  // Set A to the static memory\n"
+            )
+            if command == "C_PUSH":
+                self.file.write(
+                    f"     // (side effect: M is set to RAM['{self.file_name}.{index}'])\n"
+                    f"   D=M  // Store M to the D register\n"
+                )
+            elif command == "C_POP":
+                self.file.write(
+                    f"     // (unused side effect: M is set to RAM['{self.file_name}.{index}'])\n"
+                    f"   D=A  // Store the address to the D register\n"
+                )
 
-        if segment != "constant":
+        if segment not in ("constant", "static"):
             # NOTE: if segment != "constant": The address already stored to A, and we
             #       don't need to add a base address to get what we need
             self.file.write(self.segment_address_map[segment])
