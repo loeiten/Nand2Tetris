@@ -26,7 +26,7 @@ class CommandEnum(Enum):
     POP = "C_POP"
     LABEL = "C_LABEL"
     GOTO = "C_GOTO"
-    IF_GOTO = "C_GOTO"
+    IF_GOTO = "C_IF"
     FUNCTION = "C_FUNCTION"
     RETURN = "C_RETURN"
     CALL = "C_CALL"
@@ -115,8 +115,8 @@ class Parser:
         - C_PUSH for push
         - C_POP for pop
         - C_LABEL for labels
-        - C_GOTO for go to statements
-        - C_IF for if statements
+        - C_GOTO for go-to statements
+        - C_IF for if-go-to statements
         - C_FUNCTION for functions
         - C_RETURN for returns
         - C_CALL for calls
@@ -140,7 +140,7 @@ class Parser:
             str: The first argument of the current command
         """
         command = self.current_instruction.split()[0]
-        if CommandEnum[command.upper()].value == "C_ARITHMETIC":
+        if CommandEnum[command.upper().replace("-", "_")].value == "C_ARITHMETIC":
             return command
         return self.current_instruction.split()[1]
 

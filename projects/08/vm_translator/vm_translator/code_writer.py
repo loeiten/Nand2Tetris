@@ -438,7 +438,7 @@ class CodeWriter:
         self.file.write(
             f"// if-goto {label}\n"
             "   @SP  // Set A to 0 (side effect: M is set to content of RAM[0])\n"
-            "   A=M-1  // Set A to the first non-free location in the stack"
+            "   AM=M-1  // Pop SP and set A to the first non-free location in the stack"
             "          // (side effect: M is set to content of RAM[RAM[0]-1])\n"
             "   D=M  // Store the content of RAM[RAM[0]-1] to D\n"
             f"   @{label}  // Select label to jump to\n"
