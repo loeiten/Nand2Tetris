@@ -411,7 +411,7 @@ class CodeWriter:
         Args:
             label (str): The label to effect
         """
-        self.file.write(f"({label})")
+        self.file.write(f"({label})\n")
         # Add 2 newlines to make the code more readable
         self.file.write("\n" * 2)
 
@@ -454,6 +454,23 @@ class CodeWriter:
             function_name (str): Name of the function
             num_vars (int): Number of local variables in the function
         """
+        self.file.write(
+            f"// function {function_name} {num_vars}\n"
+            f"({function_name})\n"
+            f"   //{' '*4}Initialise the local variables\n"
+        )
+        for num_var in range(num_vars):
+            self.file.write(
+                f"   @{num_var}  // Set A to the number LCL should be incremented to\n"
+                "   D=A  // Store this number to D\n"
+                "   @LCL  // Set A to 1 (side effect: M is set to content of RAM[1])\n"
+                "   A=M+D  // Set A the address to the address pointed to by LCL + D\n"
+                "          // (side effect: M is set to content of RAM[RAM[1] + D])\n"
+                "   M=0  // Set the dereferenced address to 0\n"
+            )
+
+        # Add 2 newlines to make the code more readable
+        self.file.write("\n" * 2)
 
     def write_call(self, function_name: str, num_args: int) -> None:
         """Write assembly code that effects the `call` command.
@@ -465,6 +482,38 @@ class CodeWriter:
 
     def write_return(self) -> None:
         """Write assembly code that effects the `return` command."""
+        self.file.write(
+            "// return\n"
+            f"   //{' '*4}Store endFrame as a temporary variable\n"
+            "   @LCL  // Get the local address (side effect: M is set to the content of RAM[LCL])\n"
+            "   D=A  // Store the address of LCL to D\n"
+            "   @5  // Select the first temp address\n"
+            "       // (side effect: M is set to content of RAM[5])\n"
+            "   M=D  // Store the previous LCL address to tmp\n"
+            f"   //{' '*4}Store retAddr as a temporary variable\n"
+            "   D=D-A  // retAddr = *(endFrame - 5)\n"
+            "   @6  // Select the second temp address\n"
+            "       // (side effect: M is set to content of RAM[5])\n"
+            "   M=D  // Store the return address to tmp\n"
+            f"   //{' '*4}Pop the return value for the caller to ARG\n"
+            "   @SP  // Set A to 0 (side effect: M is set to content of RAM[0])\n"
+            "   A=M-1  // Decrement the content of RAM[0]\n"
+            "          // Side effect: M is set to content of RAM[RAM[0]-1]\n"
+            "   D=M  // Store the return value to D\n"
+            "   @ARG  // Get the ARG address (side effect: M is set to the content of RAM[ARG])\n"
+            "   A=M  // Dereference ARG (side effect: M is set to the content of RAM[RAM[ARG]])\n"
+            "   M=D  // Set the value ARG is pointing on to the return value\n"
+            f"   //{' '*4}Reposition SP of the caller\n"
+            "   @ARG  // Get the ARG address\n"
+            "         // (unused side effect: M is set to the content of RAM[ARG])\n"
+            "   D=A+1  // Store the address + 1 to D\n"
+            "   @SP  // Set A to 0 (side effect: M is set to content of RAM[0])\n"
+            "   M=D  // Set the SP to ARG + 1\n"
+            # FIXME: You are here
+        )
+
+        # Add 2 newlines to make the code more readable
+        self.file.write("\n" * 2)
 
     def close(self) -> None:
         """Close the output file."""
