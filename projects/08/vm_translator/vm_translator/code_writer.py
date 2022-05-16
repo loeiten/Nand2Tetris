@@ -461,12 +461,16 @@ class CodeWriter:
         )
         for num_var in range(num_vars):
             self.file.write(
+                f"   //{' '*4}Initialize local variable {num_var}\n"
                 f"   @{num_var}  // Set A to the number LCL should be incremented to\n"
                 "   D=A  // Store this number to D\n"
                 "   @LCL  // Set A to 1 (side effect: M is set to content of RAM[1])\n"
                 "   A=M+D  // Set A the address to the address pointed to by LCL + D\n"
                 "          // (side effect: M is set to content of RAM[RAM[1] + D])\n"
                 "   M=0  // Set the dereferenced address to 0\n"
+                f"   //{' '*4}Update the stack pointer\n"
+                "   @SP  // Set A to 0 (side effect: M is set to content of RAM[0])\n"
+                "   M=M+1  // Increment the stack pointer\n"
             )
 
         # Add 2 newlines to make the code more readable
@@ -486,7 +490,7 @@ class CodeWriter:
             "// return\n"
             f"   //{' '*4}Store endFrame as a temporary variable\n"
             "   @LCL  // Get the local address (side effect: M is set to the content of RAM[LCL])\n"
-            "   D=A  // Store the address of LCL to D\n"
+            "   D=M  // Store the address of LCL to D\n"
             "   @5  // Select the first temp address\n"
             "       // (side effect: M is set to content of RAM[5])\n"
             "   M=D  // Store the previous LCL address to tmp\n"
@@ -505,11 +509,30 @@ class CodeWriter:
             "   M=D  // Set the value ARG is pointing on to the return value\n"
             f"   //{' '*4}Reposition SP of the caller\n"
             "   @ARG  // Get the ARG address\n"
-            "         // (unused side effect: M is set to the content of RAM[ARG])\n"
-            "   D=A+1  // Store the address + 1 to D\n"
+            "         // (side effect: M is set to the content of RAM[ARG])\n"
+            "   D=M+1  // Store the address + 1 to D\n"
             "   @SP  // Set A to 0 (side effect: M is set to content of RAM[0])\n"
             "   M=D  // Set the SP to ARG + 1\n"
-            # FIXME: You are here
+            f"   //{' '*4}Restore THAT of the caller\n"
+            "   @5  // Get the endFrame address (side effect: M is set to the content of RAM[5])\n"
+            "   D=M-1  // THAT should be set to endFrame-1\n"
+            "   @THAT  // Get the THAT address (side effect: M is set to content of RAM[THAT])\n"
+            "   M=D  // Store endFrame-1 to THAT\n"
+            f"   //{' '*4}Restore THIS of the caller\n"
+            "   D=D-1  // THIS should be set to endFrame-2 = THAT-1\n"
+            "   @THIS  // Get the THIS address (side effect: M is set to content of RAM[THIS])\n"
+            "   M=D  // Store endFrame-2 to THIS\n"
+            f"   //{' '*4}Restore ARG of the caller\n"
+            "   D=D-1  // ARG should be set to endFrame-3 = THIS-1\n"
+            "   @ARG  // Get the ARG address (side effect: M is set to the content of RAM[ARG])\n"
+            "   M=D  // Store endFrame-3 to ARG\n"
+            f"   //{' '*4}Restore LCL of the caller\n"
+            "   D=D-1  // LCL should be set to endFrame-4 = ARG-1\n"
+            "   @LCL  // Get the ARG address (side effect: M is set to the content of RAM[LCL])\n"
+            "   M=D  // Store endFrame-4 to LCL\n"
+            f"   //{' '*4}Jump to the retAddr\n"
+            "   @6  // Select the second temp address (where we stored retAddr)\n"
+            "   0;JMP\n"
         )
 
         # Add 2 newlines to make the code more readable
