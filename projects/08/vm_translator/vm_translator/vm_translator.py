@@ -35,8 +35,9 @@ def main(in_path: Path) -> None:
     Args:
         in_path (Path): File or directory to translate
     """
-    files_to_parse = list(in_path.glob("*.asm")) if in_path.is_dir() else [in_path]
-    code_writer = CodeWriter(str(in_path.with_suffix(".asm")))
+    files_to_parse = list(in_path.glob("*.vm")) if in_path.is_dir() else [in_path]
+    in_dir = files_to_parse[0].parent
+    code_writer = CodeWriter(str(in_dir.joinpath(in_dir.name).with_suffix(".asm")))
 
     for file_to_parse in files_to_parse:
         parser = Parser(str(file_to_parse))

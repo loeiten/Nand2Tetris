@@ -54,6 +54,9 @@ class CodeWriter:
         self._gt_counter = 0
         self._lt_counter = 0
 
+        # Initialize the current function (needed for adding a return label during calls)
+        self._current_function = ""
+
     def set_file_name(self, file_name: str) -> None:
         """Inform the object that the translation of a new VM file has started.
 
@@ -454,6 +457,8 @@ class CodeWriter:
             function_name (str): Name of the function
             num_vars (int): Number of local variables in the function
         """
+        # Update the current function (needed for adding a return label during calls)
+        self._current_function = function_name
         self.file.write(
             f"// function {function_name} {num_vars}\n"
             f"({function_name})\n"
@@ -483,6 +488,71 @@ class CodeWriter:
             function_name (str): Name of the function
             num_args (int): Number of arguments passed to the function
         """
+        self.file.write(
+            f"// call {function_name} {num_args}\n"
+            f"   //{' '*4}Push the return address to the stack\n"
+        )
+        self._push_address_to_stack(f"{self._current_function}$return", label=True)
+        self.file.write(f"   //{' '*4}Push LCL of the caller to the stack\n")
+        self._push_address_to_stack("LCL")
+        self.file.write(f"   //{' '*4}Push ARG of the caller to the stack\n")
+        self._push_address_to_stack("ARG")
+        self.file.write(f"   //{' '*4}Push THIS of the caller to the stack\n")
+        self._push_address_to_stack("THIS")
+        self.file.write(f"   //{' '*4}Push THAT of the caller to the stack\n")
+        self._push_address_to_stack("THAT")
+        self.file.write(
+            f"   //{' '*4}Reposition ARG to ARG = SP-5-nArgs\n"
+            f"   //{' '*8}Store how much to subtract to D\n"
+            "   @5  // Set A to 5 (M unused)\n"
+            "   D=A  // Store 5 to D\n"
+            f"   @{num_args}  // Set A to the number of arguments (M unused)\n"
+            "   D=D+A  // Store 5 + number of arguments to D\n"
+            "   @SP  // Set A to the SP, M is set to the content of RAM[SP]\n"
+            "   D=M-D  // SP-5-nArgs\n"
+            f"   @ARG  // Set A to point to ARG (M is pointing to RAM[ARG])\n"
+            "   M=D  // Let ARG point to SP-5-nArgs\n"
+            f"   //{' '*4}Reposition LCL to LCL = SP\n"
+            "   @SP  // Set A to the SP, M is set to the content of RAM[SP]\n"
+            "   D=M  // Set D to the address which SP is pointing to\n"
+            "   @LCL  // Set A to LCL, M is set to the content of RAM[LCL]\n"
+            "   M=D  // Let LCL point to SP\n"
+            f"   //{' '*4}Transfers control to the called function: goto {function_name}\n"
+            f"   @{function_name}\n"
+            "   0;JMP\n"
+            f"   //{' '*4}Make the return label\n"
+            f"({self._current_function}$return)\n"
+        )
+
+        # Add 2 newlines to make the code more readable
+        self.file.write("\n" * 2)
+
+    def _push_address_to_stack(self, address: str, label: bool = False) -> None:
+        """Push an address to the stack.
+
+        Args:
+            address (str): Address to be pushed
+            label (bool): If the address is a label
+        """
+        self.file.write(f"    @{address}\n")
+
+        if label:
+            self.file.write("    D=A  // Store the current address to D\n")
+        else:
+            self.file.write(
+                f"    D=M  // Store the address pointed to by {address} to D\n"
+            )
+
+        self.file.write(
+            "    @0  // Set the address to the address of the next free position on the stack\n"
+            "        // Side effect: M is set to the content of RAM[0]\n"
+            "    A=M  // Let the address point to the next free position in the stack\n"
+            f"    M=D  // Store the value of {address}\n"
+            f"   //{' '*8}Increment the SP\n"
+            "    @0  // Set the address to the address of the next free position on the stack\n"
+            "        // Side effect: M is set to the content of RAM[0]\n"
+            "    M=M+1  // Increment the SP\n"
+        )
 
     def write_return(self) -> None:
         """Write assembly code that effects the `return` command."""
@@ -495,7 +565,8 @@ class CodeWriter:
             "       // (side effect: M is set to content of RAM[5])\n"
             "   M=D  // Store the previous LCL address to tmp\n"
             f"   //{' '*4}Store retAddr as a temporary variable\n"
-            "   D=D-A  // retAddr = *(endFrame - 5)\n"
+            "   A=D-A  // Get the content of RAM[endFrame - 5]\n"
+            "   D=M  // Store the content of endFrame - 5 to D\n"
             "   @6  // Select the second temp address\n"
             "       // (side effect: M is set to content of RAM[5])\n"
             "   M=D  // Store the return address to tmp\n"
@@ -515,23 +586,37 @@ class CodeWriter:
             "   M=D  // Set the SP to ARG + 1\n"
             f"   //{' '*4}Restore THAT of the caller\n"
             "   @5  // Get the endFrame address (side effect: M is set to the content of RAM[5])\n"
-            "   D=M-1  // THAT should be set to endFrame-1\n"
+            "   A=M-1  // THAT should be set to the content of endFrame-1\n"
+            "   D=M  // Store the content of endFrame-1\n"
             "   @THAT  // Get the THAT address (side effect: M is set to content of RAM[THAT])\n"
-            "   M=D  // Store endFrame-1 to THAT\n"
+            "   M=D  // Store the content of endFrame-1 to THAT\n"
             f"   //{' '*4}Restore THIS of the caller\n"
-            "   D=D-1  // THIS should be set to endFrame-2 = THAT-1\n"
+            "   @2  // Get the number 2 (unused side effect: M is set to the content of RAM[2])\n"
+            "   D=A  // Store 2 to D\n"
+            "   @5  // Get the endFrame address (side effect: M is set to the content of RAM[5])\n"
+            "   A=M-D  // THIS should be set to the content of endFrame-2\n"
+            "   D=M  // Store the content of endFrame-2\n"
             "   @THIS  // Get the THIS address (side effect: M is set to content of RAM[THIS])\n"
-            "   M=D  // Store endFrame-2 to THIS\n"
+            "   M=D  // Store the content of endFrame-2 to THIS\n"
             f"   //{' '*4}Restore ARG of the caller\n"
-            "   D=D-1  // ARG should be set to endFrame-3 = THIS-1\n"
-            "   @ARG  // Get the ARG address (side effect: M is set to the content of RAM[ARG])\n"
-            "   M=D  // Store endFrame-3 to ARG\n"
+            "   @3  // Get the number 3 (unused side effect: M is set to the content of RAM[3])\n"
+            "   D=A  // Store 3 to D\n"
+            "   @5  // Get the endFrame address (side effect: M is set to the content of RAM[5])\n"
+            "   A=M-D  // ARG should be set to the content of endFrame-3\n"
+            "   D=M  // Store the content of endFrame-3\n"
+            "   @ARG  // Get the ARG address (side effect: M is set to content of RAM[ARG])\n"
+            "   M=D  // Store the content of endFrame-3 to ARG\n"
             f"   //{' '*4}Restore LCL of the caller\n"
-            "   D=D-1  // LCL should be set to endFrame-4 = ARG-1\n"
-            "   @LCL  // Get the ARG address (side effect: M is set to the content of RAM[LCL])\n"
-            "   M=D  // Store endFrame-4 to LCL\n"
+            "   @4  // Get the number 4 (unused side effect: M is set to the content of RAM[4])\n"
+            "   D=A  // Store 4 to D\n"
+            "   @5  // Get the endFrame address (side effect: M is set to the content of RAM[5])\n"
+            "   A=M-D  // LCL should be set to the content of endFrame-4\n"
+            "   D=M  // Store the content of endFrame-4\n"
+            "   @LCL  // Get the LC address (side effect: M is set to content of RAM[LCL])\n"
+            "   M=D  // Store the content of endFrame-4 to LCL\n"
             f"   //{' '*4}Jump to the retAddr\n"
             "   @6  // Select the second temp address (where we stored retAddr)\n"
+            "   A=M  // Get the content of RAM[6]\n"
             "   0;JMP\n"
         )
 
