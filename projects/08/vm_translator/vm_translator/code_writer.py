@@ -2,7 +2,7 @@
 
 
 from pathlib import Path
-from typing import Literal
+from typing import Dict, Literal
 
 
 class CodeWriter:
@@ -38,24 +38,43 @@ class CodeWriter:
         ),
     }
 
-    def __init__(self, path: str) -> None:
+    def __init__(self, path: str, bootstrap=False) -> None:
         """Open the output file/stream and gets ready to write into it.
 
         Args:
             path (str): Path to file to write to.
+            boostrap (bool): Whether or not to write the bootstrap code
         """
-        pure_path = Path(path)
-        self.file = pure_path.resolve().open("w")
+        self.out_path = Path(path)
+        self.file = self.out_path.resolve().open("w")
 
-        self.file_name = pure_path.resolve().with_suffix("").name
+        self.file_name = self.out_path.resolve().with_suffix("").name
 
         # Initialize counters for boolean results
-        self._eq_counter = 0
-        self._gt_counter = 0
-        self._lt_counter = 0
+        self._counter_map = {
+            "eq": 0,
+            "gt": 0,
+            "lt": 0,
+        }
+
+        # Initialize return map
+        self._return_map: Dict[str, int] = {}
 
         # Initialize the current function (needed for adding a return label during calls)
         self._current_function = ""
+
+        if bootstrap:
+            # Boostrap code
+            self.file.write(
+                "// Boostrap code\n"
+                "    @256  // Set A to 256\n"
+                "    D=A  // Store 256 to D\n"
+                "    @SP  // Set A to the stack pointer\n"
+                "    M=D  // Set the stack pointer to 256\n"
+                "\n"
+            )
+            self.write_call(function_name="Sys.init", num_args=0)
+            self.file.write("// End Boostrap code\n\n\n\n\n")
 
     def set_file_name(self, file_name: str) -> None:
         """Inform the object that the translation of a new VM file has started.
@@ -190,17 +209,12 @@ class CodeWriter:
         Args:
             command (Literal["eq", "gt", "lt"]): Command to write result of
         """
-        command_counter = {
-            "eq": self._eq_counter,
-            "lt": self._lt_counter,
-            "gt": self._gt_counter,
-        }
         jump_statement = {
             "eq": "JEQ",
             "lt": "JLT",
             "gt": "JGT",
         }
-        counter = command_counter[command]
+        counter = self._counter_map[command]
         jump = jump_statement[command]
         self.file.write(
             f"   //{' '*4}Check for '{command}'\n"
@@ -219,8 +233,7 @@ class CodeWriter:
             f"(END_{command.upper()}_{counter})\n"
         )
         # Increment counter
-        setattr(self, f"_{command}_counter", getattr(self, f"_{command}_counter") + 1)
-        counter += 1
+        self._counter_map[command] += 1
 
     def write_push_pop(
         self,
@@ -488,11 +501,21 @@ class CodeWriter:
             function_name (str): Name of the function
             num_args (int): Number of arguments passed to the function
         """
+        # Update return map
+        if self._current_function not in self._return_map.keys():
+            self._return_map[self._current_function] = 1
+        else:
+            self._return_map[self._current_function] += 1
+
+        # Write code
         self.file.write(
             f"// call {function_name} {num_args}\n"
             f"   //{' '*4}Push the return address to the stack\n"
         )
-        self._push_address_to_stack(f"{self._current_function}$return", label=True)
+        self._push_address_to_stack(
+            f"{self._current_function}$return.{self._return_map[self._current_function]}",
+            label=True,
+        )
         self.file.write(f"   //{' '*4}Push LCL of the caller to the stack\n")
         self._push_address_to_stack("LCL")
         self.file.write(f"   //{' '*4}Push ARG of the caller to the stack\n")
@@ -521,7 +544,7 @@ class CodeWriter:
             f"   @{function_name}\n"
             "   0;JMP\n"
             f"   //{' '*4}Make the return label\n"
-            f"({self._current_function}$return)\n"
+            f"({self._current_function}$return.{self._return_map[self._current_function]})\n"
         )
 
         # Add 2 newlines to make the code more readable
