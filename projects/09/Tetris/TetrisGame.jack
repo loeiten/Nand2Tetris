@@ -1,0 +1,73 @@
+/**
+ * Implements the Tetris game.
+ */
+
+class TetrisGame {
+  field int delme;
+  /** Constructs a new Tetris Game. */
+  constructor TetrisGame new() {
+    var int frameStartX;
+    var int frameStartY;
+    var int xLen;
+    var int yLen;
+
+    let frameStartX = 15;
+    let frameStartY = 15;
+    let xLen = 50;
+    let yLen = 100;
+
+    do Screen.setColor(true);
+    do Screen.drawLine(frameStartX, frameStartY, frameStartX + xLen, frameStartY);
+    do Screen.drawLine(frameStartX, frameStartY, frameStartX, frameStartY + yLen);
+    do Screen.drawLine(frameStartX + xLen, frameStartY, frameStartX + xLen, frameStartY + yLen);
+    do Screen.drawLine(frameStartX, frameStartY + yLen, frameStartX + xLen, frameStartY + yLen);
+
+    return this;
+  }
+
+  /** Disposes this game. */
+  method void dispose() {
+    do Memory.deAlloc(this);
+    return;
+  }
+
+  // /** Runs the game: handles the user's inputs and moves the tetris accordingly */
+  method void run() {
+
+
+    var int size;
+    var int x;
+    var int y;
+
+    let size = 10;
+    let x = 10;
+    let y = 10;
+
+    while (true){
+      do Screen.setColor(true);
+      do Screen.drawRectangle(x, y, x + size, y + size);
+    }
+
+    // while (~exit) {
+    //    // waits for a key to be pressed
+    //    while (key = 0) {
+    //       let key = Keyboard.keyPressed();
+    //       do moveTetris();
+    //    }
+    //    if (key = 81)  { let exit = true; }     // q key
+    //    if (key = 90)  { do tetris.decSize(); } // z key
+    //    if (key = 88)  { do tetris.incSize(); } // x key
+    //    if (key = 131) { let direction = 1; }   // up arrow
+    //    if (key = 133) { let direction = 2; }   // down arrow
+    //    if (key = 130) { let direction = 3; }   // left arrow
+    //    if (key = 132) { let direction = 4; }   // right arrow
+
+    //    // waits for the key to be released
+    //    while (~(key = 0)) {
+    //       let key = Keyboard.keyPressed();
+    //       do moveTetris();
+    //    }
+    // } // while
+    return;
+  }
+}

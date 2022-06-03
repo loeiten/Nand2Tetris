@@ -1,0 +1,98 @@
+function TetrisGame.new 4
+push constant 1
+call Memory.alloc 1
+pop pointer 0
+push constant 15
+pop local 0
+push constant 15
+pop local 1
+push constant 50
+pop local 2
+push constant 100
+pop local 3
+push constant 0
+not
+call Screen.setColor 1
+pop temp 0
+push local 0
+push local 1
+push local 0
+push local 2
+add
+push local 1
+call Screen.drawLine 4
+pop temp 0
+push local 0
+push local 1
+push local 0
+push local 1
+push local 3
+add
+call Screen.drawLine 4
+pop temp 0
+push local 0
+push local 2
+add
+push local 1
+push local 0
+push local 2
+add
+push local 1
+push local 3
+add
+call Screen.drawLine 4
+pop temp 0
+push local 0
+push local 1
+push local 3
+add
+push local 0
+push local 2
+add
+push local 1
+push local 3
+add
+call Screen.drawLine 4
+pop temp 0
+push pointer 0
+return
+function TetrisGame.dispose 0
+push argument 0
+pop pointer 0
+push pointer 0
+call Memory.deAlloc 1
+pop temp 0
+push constant 0
+return
+function TetrisGame.run 3
+push argument 0
+pop pointer 0
+push constant 10
+pop local 0
+push constant 10
+pop local 1
+push constant 10
+pop local 2
+label WHILE_EXP0
+push constant 0
+not
+not
+if-goto WHILE_END0
+push constant 0
+not
+call Screen.setColor 1
+pop temp 0
+push local 1
+push local 2
+push local 1
+push local 0
+add
+push local 2
+push local 0
+add
+call Screen.drawRectangle 4
+pop temp 0
+goto WHILE_EXP0
+label WHILE_END0
+push constant 0
+return

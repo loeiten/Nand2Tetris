@@ -4,6 +4,8 @@ Text: 23 rows of 64 characters
 Screen: 256 rows of 512 pixels
 (256 for half screen)
 
+Play field = 10x20
+
 ## Random number generator
 
 - [Linear Congruential Generator](https://web.archive.org/web/20201022060109/http://nand2tetris-questions-and-answers-forum.32033.n3.nabble.com/Pseudo-Random-Number-Generator-td4026059.html), **NOTE**: The bug in `randRange` (addressed by Mark in some posts below)
@@ -30,6 +32,42 @@ Screen: 256 rows of 512 pixels
 - [7-bag Random Generator](https://tetris.fandom.com/wiki/Random_Generator)
 - [Standard Rotation System](https://tetris.fandom.com/wiki/SRS)
 
+## Design
+
+### Main
+
+Starts the app, initializes the game and launches it
+
+| **Routine** | **Arguments** | **Returns** | **Function** |
+|-------------|---------------|-------------|--------------|
+|             |               |             |              |
+
+### TetrisGame
+
+- Captures the user's input
+- Moves the tetrominos
+
+| **Routine** | **Arguments** | **Returns** | **Function** |
+|-------------|---------------|-------------|--------------|
+|             |               |             |              |
+
+### TetrominoX
+
+- Deals with the manipulation of the Tetrominos
+- Deals with Tetrominos coordinate
+
+| **Routine** | **Arguments** | **Returns** | **Function** |
+|-------------|---------------|-------------|--------------|
+|             |               |             |              |
+
+### Grid
+
+- Deals with the game grid
+- Remove lines when needed
+
+| **Routine** | **Arguments** | **Returns** | **Function** |
+|-------------|---------------|-------------|--------------|
+|             |               |             |              |
 
 ### Delme
 
