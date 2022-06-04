@@ -1,0 +1,16 @@
+/**
+ * Implements the general purpose algorithms
+ */
+
+ class Algorithm {
+
+   function int mod(int dividend, int divisor){
+     var int modolus;
+
+     // Note dividend/divisor is the trucated division
+     let modolus = dividend - (divisor * (dividend/divisor));
+
+     return modolus;
+   }
+
+ }

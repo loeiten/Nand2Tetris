@@ -3,18 +3,18 @@
  */
 
 class TetrisGame {
-  field int delme;
+  field int frameStartX;
+  field int frameStartY;
+
   /** Constructs a new Tetris Game. */
   constructor TetrisGame new() {
-    var int frameStartX;
-    var int frameStartY;
     var int xLen;
     var int yLen;
 
-    let frameStartX = 15;
-    let frameStartY = 15;
-    let xLen = 50;
-    let yLen = 100;
+    let frameStartX = 1;
+    let frameStartY = 6;
+    let xLen = 122;
+    let yLen = 242;  // 240 + 1 for next line + 1 for frame line
 
     do Screen.setColor(true);
     do Screen.drawLine(frameStartX, frameStartY, frameStartX + xLen, frameStartY);
@@ -31,21 +31,74 @@ class TetrisGame {
     return;
   }
 
-  // /** Runs the game: handles the user's inputs and moves the tetris accordingly */
+  /** Runs the game: handles the user's inputs and moves the tetris accordingly */
   method void run() {
-
-
     var int size;
     var int x;
     var int y;
+    var int startX;
+    var int startY;
 
+    var int counter;
+
+    var Mesh frameMesh;
+
+    let counter = 0;
     let size = 10;
-    let x = 10;
-    let y = 10;
+    let startX = frameStartX + 2;  // +1 for fram line and +1 for whitespace padding
+    let startY = frameStartY + 2;  // +1 for fram line and +1 for whitespace padding
+
+    do Screen.setColor(true);
+
+    // FIXME: Old manual method
+    // // Draw 20 vertical blocks
+    // while(counter < 20){
+    //   let y = startY + (size*counter) + (2*counter);
+
+    //   do Screen.drawRectangle(startX, y, startX + size, y + size);
+
+    //   let counter = counter + 1;
+    // }
+
+    // // Draw 10 horizontal blocks
+    // let counter = 0;
+    // while(counter < 10){
+    //   let x = startX + (size*counter) + (2*counter);
+
+    //   do Screen.drawRectangle(x, startY, x + size, startY + size);
+
+    //   let counter = counter + 1;
+    // }
+
+    // Test mesh
+    // frame start +1 for padding, +1 for next line
+    let frameMesh = Mesh.new(10, 20, frameStartX + 2, frameStartY + 2, size);
+    // do frameMesh.setState(0, 0, true);
+    // do frameMesh.setState(1, 1, true);
+    // do frameMesh.setState(2, 0, true);
+    // do frameMesh.setState(3, 1, true);
+    while (counter < 20){
+      do frameMesh.setState(0, counter, true);
+      do frameMesh.setState(1, counter, true);
+      let counter = counter + 1;
+    }
+    let counter = 0;
+    while (counter < 10){
+      do frameMesh.setState(counter, 0, true);
+      do frameMesh.setState(counter, 1, true);
+      let counter = counter + 1;
+    }
+    do frameMesh.draw();
+    do frameMesh.dispose();
+
+
+    do Output.moveCursor(3, 30);
+    do Output.printString("Done!");
+
 
     while (true){
       do Screen.setColor(true);
-      do Screen.drawRectangle(x, y, x + size, y + size);
+      // do Screen.drawRectangle(x, y, x + size, y + size);
     }
 
     // while (~exit) {

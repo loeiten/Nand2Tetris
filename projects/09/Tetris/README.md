@@ -2,9 +2,55 @@
 
 Text: 23 rows of 64 characters
 Screen: 256 rows of 512 pixels
-(256 for half screen)
+
+## Calculation of frame size
+
+### Play field
 
 Play field = 10x20
+
+Largest block set by vertical/20
+Min bottom separation = 1
+Bottom line = 1
+Min top separation = 1
+Top line = 1
+Top separation line and block = 1
+
+Total = 5
+Each block will occupy: Blocksize + 1 (assume that +1 is for bottom)
+
+The max is obtained when the left-over pixels are less than the size of a block
+256 - 5 - 20*(size + 1) > size
+251 - 20*size - 20 *1 > size
+231 > size + 20*size
+231 > 21*size
+231/21 > size
+11 > size
+
+So max size is 10
+
+All 20 blocks will therefore occupy
+
+```text
+[Num blocks] * (size + spacing + [1 for the start position of next block])
+20*(10 + 1 + 1) = 240
+```
+
+If we pad equally top and bottom, we get
+
+```text
+256-240 = 16
+16 - bottom line - top line =
+16 - 2 = 14
+14/2 = 7
+```
+
+Thus, we get `frameStartY = 6`
+
+### Next frame
+
+Idea:
+Could actually make a class for just drawing tetrominos where input is center pixel...or make it part of tetromino class :)
 
 ## Random number generator
 

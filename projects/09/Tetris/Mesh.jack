@@ -1,0 +1,94 @@
+/**
+ * Implements the Mesh class
+ */
+
+ class Mesh {
+  field int cols;
+  field int rows;
+  field int elementSize;
+  field int meshStartX;
+  field int meshStartY;
+  field Array meshArray;
+  field int meshLenght;
+
+  constructor Mesh new(int cols_, int rows_, int meshStartX_, int meshStartY_, int elementSize_) {
+    let cols = cols_;
+    let rows = rows_;
+    let meshStartX = meshStartX_;
+    let meshStartY = meshStartY_;
+    let meshLenght = cols * rows;
+    let meshArray = Array.new(meshLenght);
+    let elementSize = elementSize_;
+
+    return this;
+  }
+
+  method void dispose (){
+    do meshArray.dispose();
+    do Memory.deAlloc(this);
+    return;
+  }
+
+  method bool getState(int xInd, int yInd){
+    var int index;
+    var bool state;
+
+    let index = getMeshArrayIndex(xInd, yInd);
+    let state = meshArray[index];
+
+    return state;
+  }
+
+  method void setState(int xInd, int yInd, bool state){
+    var int index;
+
+    let index = getMeshArrayIndex(xInd, yInd);
+    let meshArray[index] = state;
+    return;
+  }
+
+  method void draw(){
+    var int index;
+    var Array indices;
+    var int xInd;
+    var int yInd;
+    var int xStartPixel;
+    var int yStartPixel;
+    var bool state;
+
+    let index = 0;
+    while (index < meshLenght){
+      let state = meshArray[index];
+      let indices = getMeshIndices(index);
+      let xInd = indices[0];
+      let yInd = indices[1];
+
+      let xStartPixel = meshStartX + (elementSize*xInd) + (2*xInd);
+      let yStartPixel = meshStartY + (elementSize*yInd) + (2*yInd);
+
+      do Screen.setColor(state);
+      do Screen.drawRectangle(xStartPixel, yStartPixel, xStartPixel+elementSize, yStartPixel+elementSize);
+
+      let index = index + 1;
+    }
+    return;
+  }
+
+  method int getMeshArrayIndex(int xInd, int yInd){
+    return xInd + (yInd*cols);
+  }
+
+  method Array getMeshIndices(int index){
+    var Array indices;
+    let indices = Array.new(2);
+
+    // x-index (integer division)
+    let indices[0] = Algorithm.mod(index, cols);
+
+    // y-index (modolus operator)
+    let indices[1] = index/cols;
+
+    return indices;
+  }
+
+ }
