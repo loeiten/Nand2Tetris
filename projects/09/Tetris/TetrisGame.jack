@@ -40,12 +40,15 @@ class TetrisGame {
     var int startY;
 
     var int counter;
+    var int gameSpeed;
 
     var Mesh gameMesh;
     var Frame gameFrame;
 
     var Mesh tetrominoMesh;
     var Tetromino curTetromino;
+
+    var TetrominoSpawner tetrominoSpawner;
 
     let counter = 0;
     let size = 10;
@@ -54,7 +57,7 @@ class TetrisGame {
 
     do Screen.setColor(true);
 
-    // FIXME: Old manual method
+    // Test draw rectangles
     // // Draw 20 vertical blocks
     // while(counter < 20){
     //   let y = startY + (size*counter) + (2*counter);
@@ -73,52 +76,70 @@ class TetrisGame {
 
     //   let counter = counter + 1;
     // }
-
-    // FIXME: Real mesh must have some rows hidden for user
+    // // // // //
 
     // Test mesh
-    // frame start +1 for padding, +1 for next line
-    let gameFrame = Frame.new(frameStartX + 2, frameStartY + 2, size);
-    let gameMesh = Mesh.new(10, 20);
-    // do gameMesh.setState(0, 0, true);
-    // do gameMesh.setState(1, 1, true);
-    // do gameMesh.setState(2, 0, true);
-    // do gameMesh.setState(3, 1, true);
-    while (counter < 20){
-      do gameMesh.setState(0, counter, true);
-      do gameMesh.setState(1, counter, true);
-      let counter = counter + 1;
-    }
-    let counter = 0;
-    while (counter < 10){
-      do gameMesh.setState(counter, 0, true);
-      do gameMesh.setState(counter, 1, true);
-      let counter = counter + 1;
-    }
-    do gameFrame.draw(gameMesh);
+    // // frame start +1 for padding, +1 for next line
+    // let gameFrame = Frame.new(frameStartX + 2, frameStartY + 2, size);
+    // let gameMesh = Mesh.new(10, 20);
+    // // do gameMesh.setState(0, 0, true);
+    // // do gameMesh.setState(1, 1, true);
+    // // do gameMesh.setState(2, 0, true);
+    // // do gameMesh.setState(3, 1, true);
+    // while (counter < 20){
+    //   do gameMesh.setState(0, counter, true);
+    //   do gameMesh.setState(1, counter, true);
+    //   let counter = counter + 1;
+    // }
+    // let counter = 0;
+    // while (counter < 10){
+    //   do gameMesh.setState(counter, 0, true);
+    //   do gameMesh.setState(counter, 1, true);
+    //   let counter = counter + 1;
+    // }
+    // do gameFrame.draw(gameMesh);
+    // // // // //
 
-    let tetrominoMesh = Mesh.new(2, 2);
-    do tetrominoMesh.setState(0, 0, true);
-    do tetrominoMesh.setState(0, 1, true);
-    do tetrominoMesh.setState(1, 0, true);
-    do tetrominoMesh.setState(1, 1, true);
-    // frame start +1 for padding, +1 for next line
-    let curTetromino = Tetromino.new(tetrominoMesh, 4, 0, 10, frameStartX + 2, frameStartY + 2);
-    let counter = 0;
+    // // Test falling tetrominos
+    // let tetrominoMesh = Mesh.new(2, 2);
+    // do tetrominoMesh.setState(0, 0, true);
+    // do tetrominoMesh.setState(0, 1, true);
+    // do tetrominoMesh.setState(1, 0, true);
+    // do tetrominoMesh.setState(1, 1, true);
+    // // frame start +1 for padding, +1 for next line
+    // let curTetromino = Tetromino.new(tetrominoMesh, 4, 0, 10, frameStartX + 2, frameStartY + 2);
+    // let counter = 0;
 
-   do curTetromino.spawn();
-    while (counter < 18){
-      do Sys.wait(100);
-      // FIXME: Must also
-      do curTetromino.moveDown();
-    let counter = counter+1;
+    // do curTetromino.spawn();
+    // while (counter < 18){
+    //   do Sys.wait(100);
+    //   do curTetromino.moveDown();
+    // let counter = counter+1;
+    // }
+    // // // // //
+
+    let gameSpeed = 100;
+
+    // Test locking tetrominos
+    let tetrominoSpawner = TetrominoSpawner.new(frameStartX, frameStartY);
+    let counter = 0;
+    while (counter < 5){
+      let curTetromino = tetrominoSpawner.spawnO();
+      do tetrominoFall(curTetromino, gameSpeed);
+
+
+      // FIXME: For cell in tetromino get gameMesh coordinates and set state to true
+      let counter = counter+1;
     }
+
+    // FIXME: Real mesh must have some rows hidden for user
 
     // We can now free the memory as these are no longer needed
     do gameMesh.dispose();
     do gameFrame.dispose();
     do tetrominoMesh.dispose();
     do curTetromino.dispose();
+    do tetrominoSpawner.dispose();
 
 
     do Output.moveCursor(3, 30);
@@ -147,6 +168,38 @@ class TetrisGame {
     //       do moveTetris();
     //    }
     // } // while
+    return;
+  }
+
+  method void tetrominoFall(Tetromino curTetromino, int gameSpeed){
+    var bool falling;
+    var int index;
+    var Array tetrominoIndexArray;
+
+    let falling = true;
+    while(falling){
+      do Sys.wait(gameSpeed);
+
+      // FIXME: YOU ARE HERE
+      if(curTetromino.canMoveDown(gameMesh)){
+        do curTetromino.moveDown();
+      }
+      else{
+        let falling = false;
+        // Add tetromino to the game mesh
+        while(index < curTetromino.getTetrominoMesh().getMeshLenght()){
+          let tetrominoIndexArray = curTetromino.getTetrominoMesh().getMeshIndices(index);
+          let gameXInd = curTetromino.getRelativeMeshX() + tetrominoIndexArray[0];
+          let gameYInd = curTetromino.getRelativeMeshY() + tetrominoIndexArray[1];
+          do gameMesh.setState(gameXInd, gameYInd, true);
+        }
+        do gameFrame.draw(gameMesh);
+        // The tetromino can now be destroyed
+        curTetromino.dispose()
+      }
+    }
+
+    // FIXME: dispose array???
     return;
   }
 }

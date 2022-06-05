@@ -46,6 +46,7 @@
       let index = index + 1;
     }
 
+    // FIXME: Unsure if should dispose Array here
     // FIXME: Unsure if should dispose mesh here, think no as everything is passed by reference
     return;
   }

@@ -38,11 +38,73 @@
       return;
   }
 
+  method bool canMove(Mesh gameMesh, int newRelativeMeshX, int newRelativeMeshY){
+    var int tetrominoMeshIndex;
+    var Array tetrominoIndices;
+    var int tetrominoXIndex;
+    var int tetrominoYIndex;
+    var int gameXInd;
+    var int gameYInd;
+
+    while(tetrominoMeshIndex < tetrominoMesh.getMeshLenght()){
+      let tetrominoIndices = tetrominoMesh.getMeshIndices(tetrominoMeshIndex);
+      let tetrominoXIndex = tetrominoIndices[0];
+      let tetrominoYIndex = tetrominoIndices[1];
+      // FIXME: Unsure if need to dispose this
+      // do tetrominoIndices.dispose();
+
+      let gameXInd = newRelativeMeshX + tetrominoXIndex;
+      let gameYInd = newRelativeMeshY + tetrominoYIndex;
+
+      // Check that x is within limits
+      if (gameXInd < 0){
+        return false;
+      }
+      if (gameXInd > gameMesh.getCols()){
+        return false;
+      }
+
+      // Check that y is within limits
+      if (gameYInd < 0){
+        return false;
+      }
+      if (gameYInd > gameMesh.getRows()){
+        return false;
+      }
+
+      // Check whether we would collide
+      if (gameMesh.getState(gameXInd, gameYInd)){
+        return false;
+      }
+      let tetrominoMeshIndex = tetrominoMeshIndex + 1;
+    }
+    return true;
+  }
+
+  method bool canMoveDown(Mesh gameMesh){
+    var int newRelativeMeshY;
+
+    let newRelativeMeshY = relativeMeshY + 1;
+    return canMove(gameMesh, relativeMeshX, newRelativeMeshY);
+  }
+
   method void moveDown(){
     do erase();
     let relativeMeshY = relativeMeshY + 1;
     do draw();
     return;
+  }
+
+  method int getTetrominoMesh(){
+    return tetrominoMesh;
+  }
+
+  method int getRelativeMeshX(){
+    return relativeMeshX;
+  }
+
+  method int getRelativeMeshY(){
+    return relativeMeshY;
   }
 
   method void draw(){

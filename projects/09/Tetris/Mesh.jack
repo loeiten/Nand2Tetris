@@ -62,4 +62,12 @@
     return meshLenght;
   }
 
+  method int getCols(){
+    return cols;
+  }
+
+  method int getRows(){
+    return rows;
+  }
+
  }

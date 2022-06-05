@@ -40,6 +40,110 @@ call Tetromino.draw 1
 pop temp 0
 push constant 0
 return
+function Tetromino.canMove 6
+push argument 0
+pop pointer 0
+label WHILE_EXP0
+push local 0
+push this 0
+call Mesh.getMeshLenght 1
+lt
+not
+if-goto WHILE_END0
+push this 0
+push local 0
+call Mesh.getMeshIndices 2
+pop local 1
+push constant 0
+push local 1
+add
+pop pointer 1
+push that 0
+pop local 2
+push constant 1
+push local 1
+add
+pop pointer 1
+push that 0
+pop local 3
+push argument 2
+push local 2
+add
+pop local 4
+push argument 3
+push local 3
+add
+pop local 5
+push local 4
+push constant 0
+lt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 0
+return
+label IF_FALSE0
+push local 4
+push argument 1
+call Mesh.getCols 1
+gt
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push constant 0
+return
+label IF_FALSE1
+push local 5
+push constant 0
+lt
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push constant 0
+return
+label IF_FALSE2
+push local 5
+push argument 1
+call Mesh.getRows 1
+gt
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push constant 0
+return
+label IF_FALSE3
+push argument 1
+push local 4
+push local 5
+call Mesh.getState 3
+if-goto IF_TRUE4
+goto IF_FALSE4
+label IF_TRUE4
+push constant 0
+return
+label IF_FALSE4
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+push constant 0
+not
+return
+function Tetromino.canMoveDown 1
+push argument 0
+pop pointer 0
+push this 2
+push constant 1
+add
+pop local 0
+push pointer 0
+push argument 1
+push this 1
+push local 0
+call Tetromino.canMove 4
+return
 function Tetromino.moveDown 0
 push argument 0
 pop pointer 0
@@ -54,6 +158,21 @@ push pointer 0
 call Tetromino.draw 1
 pop temp 0
 push constant 0
+return
+function Tetromino.getTetrominoMesh 0
+push argument 0
+pop pointer 0
+push this 0
+return
+function Tetromino.getRelativeMeshX 0
+push argument 0
+pop pointer 0
+push this 1
+return
+function Tetromino.getRelativeMeshY 0
+push argument 0
+pop pointer 0
+push this 2
 return
 function Tetromino.draw 7
 push argument 0

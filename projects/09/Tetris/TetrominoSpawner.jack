@@ -1,0 +1,39 @@
+/**
+ * Implements the TetrominoSpawner class
+ */
+
+class TetrominoSpawner {
+
+  field int frameStartX;
+  field int frameStartY;
+
+  constructor TetrominoSpawner new(int frameStartX_, int frameStartY_){
+    let frameStartX = frameStartX_;
+    let frameStartY = frameStartY_;
+
+    return this;
+  }
+
+  method void dispose(){
+    do Memory.deAlloc(this);
+    return;
+  }
+
+  method Tetromino spawnO(){
+    var Mesh tetrominoMesh;
+    var Tetromino tetromino;
+
+    let tetrominoMesh = Mesh.new(2, 2);
+    do tetrominoMesh.setState(0, 0, true);
+    do tetrominoMesh.setState(0, 1, true);
+    do tetrominoMesh.setState(1, 0, true);
+    do tetrominoMesh.setState(1, 1, true);
+    // frame start +1 for padding, +1 for next line
+    let tetromino = Tetromino.new(tetrominoMesh, 4, 0, 10, frameStartX + 2, frameStartY + 2);
+    do tetromino.spawn();
+
+    // FIXME: Dispose tetrominoMesh?
+
+    return tetromino;
+  }
+}
