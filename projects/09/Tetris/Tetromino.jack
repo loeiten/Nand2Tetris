@@ -1,0 +1,113 @@
+/**
+ * Implements the Tetromino class
+ */
+
+ class Tetromino {
+  field Mesh tetrominoMesh;
+  // Relative to top left corner of relativeMesh
+  field int relativeMeshX;
+  field int relativeMeshY;
+  field int tetrominoElementSize;
+  field int frameStartX;
+  field int frameStartY;
+
+  constructor Tetromino new(Mesh tetrominoMesh_, int relativeMeshX_, int relativeMeshY_, int tetrominoElementSize_, int frameStartX_, int frameStartY_) {
+    let tetrominoMesh = tetrominoMesh_;
+    let relativeMeshX = relativeMeshX_;
+    let relativeMeshY = relativeMeshY_;
+    let tetrominoElementSize = tetrominoElementSize_;
+    let frameStartX = frameStartX_;
+    let frameStartY = frameStartY_;
+
+    return this;
+  }
+
+  method void dispose (){
+    do tetrominoMesh.dispose();
+    do Memory.deAlloc(this);
+    return;
+  }
+
+// FIXME:
+  method void rotate(){
+    return;
+  }
+
+  method void spawn(){
+      do draw();
+      return;
+  }
+
+  method void moveDown(){
+    do erase();
+    let relativeMeshY = relativeMeshY + 1;
+    do draw();
+    return;
+  }
+
+  method void draw(){
+    // FIXME: Some rows should not be drawn (e.g. spawn area)
+    var int index;
+    var Array indices;
+    var int xInd;
+    var int yInd;
+    var int xStartPixel;
+    var int yStartPixel;
+    var bool state;
+
+    let index = 0;
+    while (index < tetrominoMesh.getMeshLenght()){
+      // Reference system is tetromino
+      let indices = tetrominoMesh.getMeshIndices(index);
+      let xInd = indices[0];
+      let yInd = indices[1];
+      let state = tetrominoMesh.getState(xInd, yInd);
+
+      // Reference system is relativeMesh
+      let xInd = relativeMeshX + indices[0];
+      let yInd = relativeMeshY + indices[1];
+
+      let xStartPixel = frameStartX + (tetrominoElementSize*xInd) + (2*xInd);
+      let yStartPixel = frameStartY + (tetrominoElementSize*yInd) + (2*yInd);
+
+      do Screen.setColor(state);
+      do Screen.drawRectangle(xStartPixel, yStartPixel, xStartPixel+tetrominoElementSize, yStartPixel+tetrominoElementSize);
+
+      let index = index + 1;
+    }
+
+    // FIXME: Unsure if should dispose mesh here, think no as everything is passed by reference
+    return;
+  }
+
+  method void erase(){
+    // FIXME: Some rows should not be drawn (e.g. spawn area)
+    var int index;
+    var Array indices;
+    var int xInd;
+    var int yInd;
+    var int xStartPixel;
+    var int yStartPixel;
+    var bool state;
+
+    let index = 0;
+    while (index < tetrominoMesh.getMeshLenght()){
+      // Reference system is relativeMesh
+      let indices = tetrominoMesh.getMeshIndices(index);
+      let xInd = relativeMeshX + indices[0];
+      let yInd = relativeMeshY + indices[1];
+
+      let xStartPixel = frameStartX + (tetrominoElementSize*xInd) + (2*xInd);
+      let yStartPixel = frameStartY + (tetrominoElementSize*yInd) + (2*yInd);
+
+      do Screen.setColor(false);
+      do Screen.drawRectangle(xStartPixel, yStartPixel, xStartPixel+tetrominoElementSize, yStartPixel+tetrominoElementSize);
+
+      let index = index + 1;
+    }
+
+    // FIXME: Unsure if should dispose mesh here, think no as everything is passed by reference
+    return;
+  }
+
+ }

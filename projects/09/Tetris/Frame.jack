@@ -1,0 +1,53 @@
+/**
+ * Implements the Frame class
+ */
+
+ class Frame {
+  field int frameStartX;
+  field int frameStartY;
+  field int meshElementSize;
+
+  constructor Frame new(int frameStartX_, int frameStartY_, int meshElementSize_) {
+    let frameStartX = frameStartX_;
+    let frameStartY = frameStartY_;
+    let meshElementSize = meshElementSize_;
+
+    return this;
+  }
+
+  method void dispose (){
+    do Memory.deAlloc(this);
+    return;
+  }
+
+  method void draw(Mesh frameMesh){
+    // FIXME: Some rows should not be drawn (e.g. spawn area)
+    var int index;
+    var Array indices;
+    var int xInd;
+    var int yInd;
+    var int xStartPixel;
+    var int yStartPixel;
+    var bool state;
+
+    let index = 0;
+    while (index < frameMesh.getMeshLenght()){
+      let indices = frameMesh.getMeshIndices(index);
+      let xInd = indices[0];
+      let yInd = indices[1];
+      let state = frameMesh.getState(xInd, yInd);
+
+      let xStartPixel = frameStartX + (meshElementSize*xInd) + (2*xInd);
+      let yStartPixel = frameStartY + (meshElementSize*yInd) + (2*yInd);
+
+      do Screen.setColor(state);
+      do Screen.drawRectangle(xStartPixel, yStartPixel, xStartPixel+meshElementSize, yStartPixel+meshElementSize);
+
+      let index = index + 1;
+    }
+
+    // FIXME: Unsure if should dispose mesh here, think no as everything is passed by reference
+    return;
+  }
+
+ }

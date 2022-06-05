@@ -41,7 +41,11 @@ class TetrisGame {
 
     var int counter;
 
-    var Mesh frameMesh;
+    var Mesh gameMesh;
+    var Frame gameFrame;
+
+    var Mesh tetrominoMesh;
+    var Tetromino curTetromino;
 
     let counter = 0;
     let size = 10;
@@ -70,36 +74,58 @@ class TetrisGame {
     //   let counter = counter + 1;
     // }
 
+    // FIXME: Real mesh must have some rows hidden for user
+
     // Test mesh
     // frame start +1 for padding, +1 for next line
-    let frameMesh = Mesh.new(10, 20, frameStartX + 2, frameStartY + 2, size);
-    // do frameMesh.setState(0, 0, true);
-    // do frameMesh.setState(1, 1, true);
-    // do frameMesh.setState(2, 0, true);
-    // do frameMesh.setState(3, 1, true);
+    let gameFrame = Frame.new(frameStartX + 2, frameStartY + 2, size);
+    let gameMesh = Mesh.new(10, 20);
+    // do gameMesh.setState(0, 0, true);
+    // do gameMesh.setState(1, 1, true);
+    // do gameMesh.setState(2, 0, true);
+    // do gameMesh.setState(3, 1, true);
     while (counter < 20){
-      do frameMesh.setState(0, counter, true);
-      do frameMesh.setState(1, counter, true);
+      do gameMesh.setState(0, counter, true);
+      do gameMesh.setState(1, counter, true);
       let counter = counter + 1;
     }
     let counter = 0;
     while (counter < 10){
-      do frameMesh.setState(counter, 0, true);
-      do frameMesh.setState(counter, 1, true);
+      do gameMesh.setState(counter, 0, true);
+      do gameMesh.setState(counter, 1, true);
       let counter = counter + 1;
     }
-    do frameMesh.draw();
-    do frameMesh.dispose();
+    do gameFrame.draw(gameMesh);
+
+    let tetrominoMesh = Mesh.new(2, 2);
+    do tetrominoMesh.setState(0, 0, true);
+    do tetrominoMesh.setState(0, 1, true);
+    do tetrominoMesh.setState(1, 0, true);
+    do tetrominoMesh.setState(1, 1, true);
+    // frame start +1 for padding, +1 for next line
+    let curTetromino = Tetromino.new(tetrominoMesh, 4, 0, 10, frameStartX + 2, frameStartY + 2);
+    let counter = 0;
+
+   do curTetromino.spawn();
+    while (counter < 18){
+      do Sys.wait(100);
+      // FIXME: Must also
+      do curTetromino.moveDown();
+    let counter = counter+1;
+    }
+
+    // We can now free the memory as these are no longer needed
+    do gameMesh.dispose();
+    do gameFrame.dispose();
+    do tetrominoMesh.dispose();
+    do curTetromino.dispose();
 
 
     do Output.moveCursor(3, 30);
     do Output.printString("Done!");
 
+    do Sys.wait(2000);
 
-    while (true){
-      do Screen.setColor(true);
-      // do Screen.drawRectangle(x, y, x + size, y + size);
-    }
 
     // while (~exit) {
     //    // waits for a key to be pressed
