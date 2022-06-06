@@ -5,6 +5,11 @@
 class TetrisGame {
   field int frameStartX;
   field int frameStartY;
+  field int elementSize;
+  field int gameSpeed;
+
+  field Frame gameFrame;
+  field Mesh gameMesh;
 
   /** Constructs a new Tetris Game. */
   constructor TetrisGame new() {
@@ -16,107 +21,49 @@ class TetrisGame {
     let xLen = 122;
     let yLen = 242;  // 240 + 1 for next line + 1 for frame line
 
+    let elementSize = 10;
+
+    let gameSpeed = 50;
+
+    // Draw background frame
     do Screen.setColor(true);
     do Screen.drawLine(frameStartX, frameStartY, frameStartX + xLen, frameStartY);
     do Screen.drawLine(frameStartX, frameStartY, frameStartX, frameStartY + yLen);
     do Screen.drawLine(frameStartX + xLen, frameStartY, frameStartX + xLen, frameStartY + yLen);
     do Screen.drawLine(frameStartX, frameStartY + yLen, frameStartX + xLen, frameStartY + yLen);
 
+    // Initialize the game frame and the game mesh
+    let gameFrame = Frame.new(frameStartX + 2, frameStartY + 2, elementSize);
+    let gameMesh = Mesh.new(10, 20);
     return this;
   }
 
   /** Disposes this game. */
   method void dispose() {
+    do gameFrame.dispose();
+    do gameMesh.dispose();
     do Memory.deAlloc(this);
     return;
   }
 
   /** Runs the game: handles the user's inputs and moves the tetris accordingly */
   method void run() {
-    var int size;
     var int x;
     var int y;
     var int startX;
     var int startY;
 
     var int counter;
-    var int gameSpeed;
 
-    var Mesh gameMesh;
-    var Frame gameFrame;
-
-    var Mesh tetrominoMesh;
     var Tetromino curTetromino;
 
     var TetrominoSpawner tetrominoSpawner;
 
     let counter = 0;
-    let size = 10;
     let startX = frameStartX + 2;  // +1 for fram line and +1 for whitespace padding
     let startY = frameStartY + 2;  // +1 for fram line and +1 for whitespace padding
 
     do Screen.setColor(true);
-
-    // Test draw rectangles
-    // // Draw 20 vertical blocks
-    // while(counter < 20){
-    //   let y = startY + (size*counter) + (2*counter);
-
-    //   do Screen.drawRectangle(startX, y, startX + size, y + size);
-
-    //   let counter = counter + 1;
-    // }
-
-    // // Draw 10 horizontal blocks
-    // let counter = 0;
-    // while(counter < 10){
-    //   let x = startX + (size*counter) + (2*counter);
-
-    //   do Screen.drawRectangle(x, startY, x + size, startY + size);
-
-    //   let counter = counter + 1;
-    // }
-    // // // // //
-
-    // Test mesh
-    // // frame start +1 for padding, +1 for next line
-    // let gameFrame = Frame.new(frameStartX + 2, frameStartY + 2, size);
-    // let gameMesh = Mesh.new(10, 20);
-    // // do gameMesh.setState(0, 0, true);
-    // // do gameMesh.setState(1, 1, true);
-    // // do gameMesh.setState(2, 0, true);
-    // // do gameMesh.setState(3, 1, true);
-    // while (counter < 20){
-    //   do gameMesh.setState(0, counter, true);
-    //   do gameMesh.setState(1, counter, true);
-    //   let counter = counter + 1;
-    // }
-    // let counter = 0;
-    // while (counter < 10){
-    //   do gameMesh.setState(counter, 0, true);
-    //   do gameMesh.setState(counter, 1, true);
-    //   let counter = counter + 1;
-    // }
-    // do gameFrame.draw(gameMesh);
-    // // // // //
-
-    // // Test falling tetrominos
-    // let tetrominoMesh = Mesh.new(2, 2);
-    // do tetrominoMesh.setState(0, 0, true);
-    // do tetrominoMesh.setState(0, 1, true);
-    // do tetrominoMesh.setState(1, 0, true);
-    // do tetrominoMesh.setState(1, 1, true);
-    // // frame start +1 for padding, +1 for next line
-    // let curTetromino = Tetromino.new(tetrominoMesh, 4, 0, 10, frameStartX + 2, frameStartY + 2);
-    // let counter = 0;
-
-    // do curTetromino.spawn();
-    // while (counter < 18){
-    //   do Sys.wait(100);
-    //   do curTetromino.moveDown();
-    // let counter = counter+1;
-    // }
-    // // // // //
 
     let gameSpeed = 100;
 
@@ -124,8 +71,9 @@ class TetrisGame {
     let tetrominoSpawner = TetrominoSpawner.new(frameStartX, frameStartY);
     let counter = 0;
     while (counter < 5){
+
       let curTetromino = tetrominoSpawner.spawnO();
-      do tetrominoFall(curTetromino, gameSpeed);
+      do tetrominoFall(curTetromino);
 
 
       // FIXME: For cell in tetromino get gameMesh coordinates and set state to true
@@ -135,12 +83,8 @@ class TetrisGame {
     // FIXME: Real mesh must have some rows hidden for user
 
     // We can now free the memory as these are no longer needed
-    do gameMesh.dispose();
-    do gameFrame.dispose();
-    do tetrominoMesh.dispose();
     do curTetromino.dispose();
     do tetrominoSpawner.dispose();
-
 
     do Output.moveCursor(3, 30);
     do Output.printString("Done!");
@@ -171,35 +115,45 @@ class TetrisGame {
     return;
   }
 
-  method void tetrominoFall(Tetromino curTetromino, int gameSpeed){
+  method void tetrominoFall(Tetromino curTetromino){
     var bool falling;
     var int index;
+    var int meshLenght;
+    var int gameXInd;
+    var int gameYInd;
     var Array tetrominoIndexArray;
+    var Mesh tetrominoMesh;
 
+    let tetrominoMesh = curTetromino.getTetrominoMesh();
+    let meshLenght = tetrominoMesh.getMeshLenght();
     let falling = true;
     while(falling){
       do Sys.wait(gameSpeed);
 
-      // FIXME: YOU ARE HERE
       if(curTetromino.canMoveDown(gameMesh)){
         do curTetromino.moveDown();
       }
       else{
         let falling = false;
         // Add tetromino to the game mesh
-        while(index < curTetromino.getTetrominoMesh().getMeshLenght()){
-          let tetrominoIndexArray = curTetromino.getTetrominoMesh().getMeshIndices(index);
+        let index = 0;
+        while(index < meshLenght){
+          let tetrominoIndexArray = tetrominoMesh.getMeshIndices(index);
           let gameXInd = curTetromino.getRelativeMeshX() + tetrominoIndexArray[0];
           let gameYInd = curTetromino.getRelativeMeshY() + tetrominoIndexArray[1];
           do gameMesh.setState(gameXInd, gameYInd, true);
+          let index = index + 1;
         }
         do gameFrame.draw(gameMesh);
+
+        // FIXME: ???
         // The tetromino can now be destroyed
-        curTetromino.dispose()
+        do curTetromino.dispose();
       }
     }
 
     // FIXME: dispose array???
+    // FIXME: dispose meshes???
     return;
   }
 }
