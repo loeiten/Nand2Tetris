@@ -21,7 +21,7 @@ return
 function Frame.draw 7
 push argument 0
 pop pointer 0
-push constant 0
+push constant 200
 pop local 0
 label WHILE_EXP0
 push local 0

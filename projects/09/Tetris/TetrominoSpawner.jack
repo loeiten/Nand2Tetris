@@ -28,8 +28,14 @@ class TetrominoSpawner {
     do tetrominoMesh.setState(0, 1, true);
     do tetrominoMesh.setState(1, 0, true);
     do tetrominoMesh.setState(1, 1, true);
-    // frame start +1 for padding, +1 for next line
-    let tetromino = Tetromino.new(tetrominoMesh, 4, 0, 10, frameStartX + 2, frameStartY + 2);
+    let tetromino = Tetromino.new(tetrominoMesh,
+                                  4,  // FIXME: relativeX should be center
+                                  19, // First 20 rows are hidden, spawn at row 21 counted from bottom
+                                  10, // Element size
+                                  frameStartX + 2, // frame start +1 for padding, +1 for next line
+                                  frameStartY + 2 // frame start +1 for padding, +1 for next line
+                                 );
+    // FIXME: Should maybe try spawn?
     do tetromino.spawn();
 
     // FIXME: Dispose tetrominoMesh?

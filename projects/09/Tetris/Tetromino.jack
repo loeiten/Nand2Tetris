@@ -35,6 +35,8 @@
 
   method void spawn(){
       do draw();
+      // FIXME:
+      do Output.printString("SPAWNED!!!");
       return;
   }
 
@@ -46,7 +48,16 @@
     var int gameXInd;
     var int gameYInd;
 
+    let tetrominoMeshIndex = 0;
+      // FIXME: YOU ARE HERE: FIGURING OUT MYSTERY OF SUDDENLY TURNING TO 3
+      do Output.moveCursor(15, 30);
+      do Output.printInt(tetrominoMeshIndex);
+
     while(tetrominoMeshIndex < tetrominoMesh.getMeshLenght()){
+      // FIXME:
+      do Output.moveCursor(16, 30);
+      do Output.printInt(tetrominoMeshIndex);
+
       let tetrominoIndices = tetrominoMesh.getMeshIndices(tetrominoMeshIndex);
       let tetrominoXIndex = tetrominoIndices[0];
       let tetrominoYIndex = tetrominoIndices[1];
@@ -68,15 +79,33 @@
       if (gameYInd < 0){
         return false;
       }
+
+      // FIXME:
+      do Output.moveCursor(9, 30);
+      do Output.printInt(tetrominoMeshIndex);
+      do Output.printString("BAALLZ");
+      do Output.moveCursor(10, 30);
+      do Output.printInt(gameYInd);
+      do Output.moveCursor(11, 30);
+      do Output.printInt(newRelativeMeshY);
+      do Output.moveCursor(12, 30);
+      do Output.printInt(tetrominoYIndex);
       if (gameYInd > gameMesh.getRows()){
+        do Output.printString("NOT");
         return false;
       }
+      do Output.moveCursor(13, 30);
+      do Output.printString("Pass");
 
       // Check whether we would collide
       if (gameMesh.getState(gameXInd, gameYInd)){
         return false;
       }
       let tetrominoMeshIndex = tetrominoMeshIndex + 1;
+
+      // FIXME:
+      do Output.moveCursor(17, 30);
+      do Output.printInt(tetrominoMeshIndex);
     }
     return true;
   }
@@ -90,6 +119,9 @@
 
   method void moveDown(){
     do erase();
+      // FIXME:
+    do Output.moveCursor(0, 0);
+    do Output.printInt(relativeMeshY);
     let relativeMeshY = relativeMeshY + 1;
     do draw();
     return;
@@ -127,14 +159,28 @@
 
       // Reference system is relativeMesh
       let xInd = relativeMeshX + indices[0];
-      let yInd = relativeMeshY + indices[1];
+      // Subtract 20 from relativeMesh as the play field is 10x40 with only 10x20 showing
+      let yInd = relativeMeshY - 20 + indices[1];
 
-      let xStartPixel = frameStartX + (tetrominoElementSize*xInd) + (2*xInd);
-      let yStartPixel = frameStartY + (tetrominoElementSize*yInd) + (2*yInd);
+      // Only draw if termino is within the frame
+      if(yInd > -1){
+        let xStartPixel = frameStartX + (tetrominoElementSize*xInd) + (2*xInd);
+        let yStartPixel = frameStartY + (tetrominoElementSize*yInd) + (2*yInd);
 
-      do Screen.setColor(state);
-      do Screen.drawRectangle(xStartPixel, yStartPixel, xStartPixel+tetrominoElementSize, yStartPixel+tetrominoElementSize);
+        // FIXME:
+        do Output.moveCursor(3, 30);
+        do Output.printInt(yStartPixel);
+        do Output.moveCursor(4, 30);
+        do Output.printInt(relativeMeshY);
+        do Output.moveCursor(5, 30);
+        do Output.printInt(frameStartY);
+        do Output.moveCursor(6, 30);
+        do Output.printInt(yInd);
+        do Output.moveCursor(7, 30);
 
+        do Screen.setColor(state);
+        do Screen.drawRectangle(xStartPixel, yStartPixel, xStartPixel+tetrominoElementSize, yStartPixel+tetrominoElementSize);
+      }
       let index = index + 1;
     }
 
@@ -157,13 +203,17 @@
       // Reference system is relativeMesh
       let indices = tetrominoMesh.getMeshIndices(index);
       let xInd = relativeMeshX + indices[0];
-      let yInd = relativeMeshY + indices[1];
+      // Subtract 20 from relativeMesh as the play field is 10x40 with only 10x20 showing
+      let yInd = relativeMeshY - 20 + indices[1];
 
-      let xStartPixel = frameStartX + (tetrominoElementSize*xInd) + (2*xInd);
-      let yStartPixel = frameStartY + (tetrominoElementSize*yInd) + (2*yInd);
+      // Only erase if termino is within the frame
+      if(yInd > -1){
+        let xStartPixel = frameStartX + (tetrominoElementSize*xInd) + (2*xInd);
+        let yStartPixel = frameStartY + (tetrominoElementSize*yInd) + (2*yInd);
 
-      do Screen.setColor(false);
-      do Screen.drawRectangle(xStartPixel, yStartPixel, xStartPixel+tetrominoElementSize, yStartPixel+tetrominoElementSize);
+        do Screen.setColor(false);
+        do Screen.drawRectangle(xStartPixel, yStartPixel, xStartPixel+tetrominoElementSize, yStartPixel+tetrominoElementSize);
+      }
 
       let index = index + 1;
     }

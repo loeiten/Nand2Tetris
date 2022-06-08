@@ -30,7 +30,14 @@
     var int yStartPixel;
     var bool state;
 
-    let index = 0;
+
+    // NOTE: The mesh is 40x10 according to the guidelines, however, rows above
+    //       20 is hidden
+    //       Row 0 starts at index 0
+    //       Row 1 starts at index 10, thus
+    //       Row 20 starts at index 20*10=200
+    // https://tetris.fandom.com/wiki/Tetris_Guideline#List_of_rules_(as_of_2009)
+    let index = 200;
     while (index < frameMesh.getMeshLenght()){
       let indices = frameMesh.getMeshIndices(index);
       let xInd = indices[0];

@@ -53,7 +53,7 @@ call Mesh.setState 4
 pop temp 0
 push local 0
 push constant 4
-push constant 0
+push constant 19
 push constant 10
 push this 0
 push constant 2

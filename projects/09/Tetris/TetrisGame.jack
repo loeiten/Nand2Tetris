@@ -23,7 +23,7 @@ class TetrisGame {
 
     let elementSize = 10;
 
-    let gameSpeed = 50;
+    let gameSpeed = 500;
 
     // Draw background frame
     do Screen.setColor(true);
@@ -34,7 +34,9 @@ class TetrisGame {
 
     // Initialize the game frame and the game mesh
     let gameFrame = Frame.new(frameStartX + 2, frameStartY + 2, elementSize);
-    let gameMesh = Mesh.new(10, 20);
+    // NOTE: The mesh is 40 according to
+    // https://tetris.fandom.com/wiki/Tetris_Guideline#List_of_rules_(as_of_2009)
+    let gameMesh = Mesh.new(10, 40);
     return this;
   }
 
@@ -65,11 +67,10 @@ class TetrisGame {
 
     do Screen.setColor(true);
 
-    let gameSpeed = 100;
-
     // Test locking tetrominos
     let tetrominoSpawner = TetrominoSpawner.new(frameStartX, frameStartY);
     let counter = 0;
+    // FIXME: Let game end by Top out: https://tetris.fandom.com/wiki/Top_out
     while (counter < 5){
 
       let curTetromino = tetrominoSpawner.spawnO();
@@ -128,6 +129,7 @@ class TetrisGame {
     let meshLenght = tetrominoMesh.getMeshLenght();
     let falling = true;
     while(falling){
+      // FIXME: Have counter which is updated instead of gameSpeed
       do Sys.wait(gameSpeed);
 
       if(curTetromino.canMoveDown(gameMesh)){

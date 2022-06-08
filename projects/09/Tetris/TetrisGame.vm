@@ -12,7 +12,7 @@ push constant 242
 pop local 1
 push constant 10
 pop this 2
-push constant 50
+push constant 500
 pop this 3
 push constant 0
 not
@@ -68,7 +68,7 @@ push this 2
 call Frame.new 3
 pop this 4
 push constant 10
-push constant 20
+push constant 40
 call Mesh.new 2
 pop this 5
 push pointer 0
@@ -104,8 +104,6 @@ push constant 0
 not
 call Screen.setColor 1
 pop temp 0
-push constant 100
-pop this 3
 push this 0
 push this 1
 call TetrominoSpawner.new 2
