@@ -19,6 +19,10 @@
     let frameStartX = frameStartX_;
     let frameStartY = frameStartY_;
 
+      // FIXME:
+      //   do Output.moveCursor(6, 30);
+      //   do Output.printString("relativeMeshX at ctor: ");
+      //   do Output.printInt(relativeMeshX);
     return this;
   }
 
@@ -120,12 +124,60 @@
     return canBePlaced(gameMesh, relativeMeshX, newRelativeMeshY);
   }
 
+  method bool canMoveLeft(Mesh gameMesh){
+    var int newRelativeMeshX;
+
+    let newRelativeMeshX = relativeMeshX - 1;
+      // FIXME:
+      //   do Output.moveCursor(8, 30);
+      //   do Output.printString("relativeMeshX at input: ");
+      //   do Output.printInt(relativeMeshX);
+    return canBePlaced(gameMesh, newRelativeMeshX, relativeMeshY);
+  }
+
+  method bool canMoveRight(Mesh gameMesh){
+    var int newRelativeMeshX;
+
+    let newRelativeMeshX = relativeMeshX + 1;
+    return canBePlaced(gameMesh, newRelativeMeshX, relativeMeshY);
+  }
+
   method void moveDown(){
     do erase();
     let relativeMeshY = relativeMeshY + 1;
     do draw();
     return;
   }
+
+  method void moveLeft(){
+
+      // FIXME:
+      //   do Output.moveCursor(9, 30);
+      //   do Output.printString("relativeMeshX before erase: ");
+      //   do Output.printInt(relativeMeshX);
+    do erase();
+
+      // FIXME:
+      //   do Output.moveCursor(10, 30);
+      //   do Output.printString("relativeMeshX: ");
+      //   do Output.printInt(relativeMeshX);
+    let relativeMeshX = relativeMeshX - 1;
+
+      // FIXME:
+      //   do Output.moveCursor(11, 30);
+      //   do Output.printString("relativeMeshX after change: ");
+      //   do Output.printInt(relativeMeshX);
+    do draw();
+    return;
+  }
+
+  method void moveRight(){
+    do erase();
+    let relativeMeshX = relativeMeshX + 1;
+    do draw();
+    return;
+  }
+
 
   method int getTetrominoMesh(){
     return tetrominoMesh;
@@ -148,6 +200,14 @@
     var int xStartPixel;
     var int yStartPixel;
     var bool state;
+
+      // FIXME:
+      //   do Output.moveCursor(7, 30);
+      //   do Output.printString("relativeMeshX at draw: ");
+      //   do Output.printInt(relativeMeshX);
+
+
+
 
     let index = 0;
     while (index < tetrominoMesh.getMeshLenght()){

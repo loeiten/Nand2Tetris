@@ -23,7 +23,7 @@ class TetrisGame {
 
     let elementSize = 10;
 
-    let gameSpeed = 50;
+    let gameSpeed = 500;
 
     // Draw background frame
     do Screen.setColor(true);
@@ -94,87 +94,155 @@ class TetrisGame {
 
     do Sys.wait(2000);
 
-
-    // while (~exit) {
-    //    // waits for a key to be pressed
-    //    while (key = 0) {
-    //       let key = Keyboard.keyPressed();
-    //       do moveTetris();
-    //    }
-    //    if (key = 81)  { let exit = true; }     // q key
-    //    if (key = 90)  { do tetris.decSize(); } // z key
-    //    if (key = 88)  { do tetris.incSize(); } // x key
-    //    if (key = 131) { let direction = 1; }   // up arrow
-    //    if (key = 133) { let direction = 2; }   // down arrow
-    //    if (key = 130) { let direction = 3; }   // left arrow
-    //    if (key = 132) { let direction = 4; }   // right arrow
-
-    //    // waits for the key to be released
-    //    while (~(key = 0)) {
-    //       let key = Keyboard.keyPressed();
-    //       do moveTetris();
-    //    }
-    // } // while
     return;
   }
 
   method void tetrominoFall(Tetromino curTetromino){
-    var bool falling;
+    var int countDown;
     var int index;
     var int meshLenght;
     var int gameXInd;
     var int gameYInd;
+
+    var char key;
+    var bool falling;
+
     var Array tetrominoIndexArray;
     var Mesh tetrominoMesh;
 
     let tetrominoMesh = curTetromino.getTetrominoMesh();
     let meshLenght = tetrominoMesh.getMeshLenght();
+    let countDown = gameSpeed;
     let falling = true;
     while(falling){
       // FIXME: Have counter which is updated instead of gameSpeed
-      do Sys.wait(gameSpeed);
+      // FIXME: YOU ARE HERE: Game controls should maybe be here, with a count-down?
 
-      if(curTetromino.canMoveDown(gameMesh)){
-        do curTetromino.moveDown();
-      }
-      else{
-        let falling = false;
-        // Add tetromino to the game mesh
-        let index = 0;
-        while(index < meshLenght){
-          let tetrominoIndexArray = tetrominoMesh.getMeshIndices(index);
-          let gameXInd = curTetromino.getRelativeMeshX() + tetrominoIndexArray[0];
-          let gameYInd = curTetromino.getRelativeMeshY() + tetrominoIndexArray[1];
-          do gameMesh.setState(gameXInd, gameYInd, true);
-          let index = index + 1;
+
+
+
+      // Wait for a key to be pressed
+      while((key=0) & (countDown > 0)){
+        let key = Keyboard.keyPressed();
+
         // FIXME:
-        // do Output.moveCursor(7, 30);
-        // do Output.printString("index: ");
-        // do Output.printInt(index);
-        // do Output.moveCursor(8, 30);
-        // do Output.printString("tetrominoIndexArray[0]: ");
-        // do Output.printInt(tetrominoIndexArray[0]);
-        // do Output.moveCursor(9, 30);
-        // do Output.printString("tetrominoIndexArray[1]: ");
-        // do Output.printInt(tetrominoIndexArray[1]);
-        // do Output.moveCursor(10, 30);
-        // do Output.printString("gameXInd: ");
-        // do Output.printInt(gameXInd);
-        // do Output.moveCursor(11, 30);
-        // do Output.printString("gameYInd: ");
-        // do Output.printInt(gameYInd);
-        // do Sys.wait(1000);
-        }
-        do gameFrame.draw(gameMesh);
+        // do Output.moveCursor(0, 30);
+        // do Output.printString("Key: ");
+        // do Output.printInt(key);
 
-        // FIXME: ???
-        // The tetromino can now be destroyed
-        do curTetromino.dispose();
+        do Sys.wait(1);
+        let countDown = countDown - 1;
+
+
+        // FIXME: Hack
+        // do Output.moveCursor(7, 30);
+        // do Output.printString("Hey");
+        // if(curTetromino.canMoveDown(gameMesh)){
+        //   do curTetromino.moveDown();
+        //   let countDown = gameSpeed;
+        // }
+        // let key = 130;
+        // do Output.moveCursor(8, 30);
+        // do Output.printString("Ho");
+         // FIXME:
+         // do Output.moveCursor(7, 30);
+         // do Output.printString("countDown: ");
+         // do Output.printInt(countDown);
+         // do Output.moveCursor(8, 30);
+         // do Output.printString("key: ");
+         // do Output.printInt(key);
+      }
+      // do Output.moveCursor(9, 30);
+      // do Output.printString("Outside the while loop");
+      // do Output.moveCursor(10, 30);
+      // do Output.printString("countDown: ");
+      // do Output.printInt(countDown);
+      // do Sys.wait(100);
+
+
+
+      //    if (key = 81)  { let exit = true; }     // q key
+      //    if (key = 90)  { do tetris.decSize(); } // z key
+      //    if (key = 88)  { do tetris.incSize(); } // x key
+      if (key = 131) { let countDown = 0; }   // up arrow
+      if (key = 133) {    // down arrow
+        if(curTetromino.canMoveDown(gameMesh)){
+          do curTetromino.moveDown();
+        }
+      }
+
+      // do Output.moveCursor(9, 30);
+      // do Output.printString("Lo");
+      if (key = 130) { // left arrow
+        // do Output.moveCursor(10, 30);
+        // do Output.printString("Bo");
+        if(curTetromino.canMoveLeft(gameMesh)){
+          // do Output.moveCursor(11, 30);
+          // do Output.printString("Do");
+          do curTetromino.moveLeft();
+        }
+      }
+      // FIXME:
+      // do Sys.wait(500);
+      if (key = 132) {    // right arrow
+        if(curTetromino.canMoveRight(gameMesh)){
+          // do Output.moveCursor(11, 30);
+          // do Output.printString("Do");
+          do curTetromino.moveRight();
+        }
+      }
+
+      // Wait for the key to be release to continue
+      // If not the key will be registered several times as the
+      // content of the "falling" while loop is traversed quite fast
+      while(~(key=0) & (countDown > 0)){
+        let key = Keyboard.keyPressed();
+        do Sys.wait(1);
+        let countDown = countDown - 1;
+      }
+
+      if(countDown < 1){
+        if(curTetromino.canMoveDown(gameMesh)){
+          do curTetromino.moveDown();
+          let countDown = gameSpeed;
+        }
+        else{
+          let falling = false;
+          // Add tetromino to the game mesh
+          let index = 0;
+          while(index < meshLenght){
+            let tetrominoIndexArray = tetrominoMesh.getMeshIndices(index);
+            let gameXInd = curTetromino.getRelativeMeshX() + tetrominoIndexArray[0];
+            let gameYInd = curTetromino.getRelativeMeshY() + tetrominoIndexArray[1];
+            do gameMesh.setState(gameXInd, gameYInd, true);
+            let index = index + 1;
+          // FIXME:
+          // do Output.moveCursor(7, 30);
+          // do Output.printString("index: ");
+          // do Output.printInt(index);
+          // do Output.moveCursor(8, 30);
+          // do Output.printString("tetrominoIndexArray[0]: ");
+          // do Output.printInt(tetrominoIndexArray[0]);
+          // do Output.moveCursor(9, 30);
+          // do Output.printString("tetrominoIndexArray[1]: ");
+          // do Output.printInt(tetrominoIndexArray[1]);
+          // do Output.moveCursor(10, 30);
+          // do Output.printString("gameXInd: ");
+          // do Output.printInt(gameXInd);
+          // do Output.moveCursor(11, 30);
+          // do Output.printString("gameYInd: ");
+          // do Output.printInt(gameYInd);
+          // do Sys.wait(1000);
+          }
+          do gameFrame.draw(gameMesh);
+        }
       }
     }
-
+    // The tetromino can now be destroyed
+    do curTetromino.dispose();
     // FIXME: dispose array???
     // FIXME: dispose meshes???
     return;
   }
+
 }
