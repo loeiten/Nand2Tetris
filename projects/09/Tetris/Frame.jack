@@ -44,8 +44,32 @@
       let yInd = indices[1];
       let state = frameMesh.getState(xInd, yInd);
 
+      let yInd = yInd - 20;
       let xStartPixel = frameStartX + (meshElementSize*xInd) + (2*xInd);
       let yStartPixel = frameStartY + (meshElementSize*yInd) + (2*yInd);
+
+
+      // FIXME:
+      // do Output.moveCursor(1, 30);
+      // do Output.printString("index: ");
+      // do Output.printInt(index);
+      // do Output.moveCursor(2, 30);
+      // do Output.printString("xInd: ");
+      // do Output.printInt(xInd);
+      // do Output.moveCursor(3, 30);
+      // do Output.printString("yInd: ");
+      // do Output.printInt(yInd);
+      // do Output.moveCursor(4, 30);
+      // do Output.printString("meshElementSize: ");
+      // do Output.printInt(meshElementSize);
+      // do Output.moveCursor(5, 30);
+      // do Output.printString("frameStartX: ");
+      // do Output.printInt(frameStartX);
+      // do Output.moveCursor(6, 30);
+      // do Output.printString("frameStartY: ");
+      // do Output.printInt(frameStartY);
+      // do Output.moveCursor(7, 30);
+      // do Sys.wait(100);
 
       do Screen.setColor(state);
       do Screen.drawRectangle(xStartPixel, yStartPixel, xStartPixel+meshElementSize, yStartPixel+meshElementSize);

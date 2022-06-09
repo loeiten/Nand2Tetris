@@ -23,7 +23,7 @@ class TetrisGame {
 
     let elementSize = 10;
 
-    let gameSpeed = 500;
+    let gameSpeed = 50;
 
     // Draw background frame
     do Screen.setColor(true);
@@ -50,18 +50,21 @@ class TetrisGame {
 
   /** Runs the game: handles the user's inputs and moves the tetris accordingly */
   method void run() {
+    var bool gameOver;
+    var bool canSpawn;
+    var bool canSpawn;
     var int x;
     var int y;
     var int startX;
     var int startY;
 
-    var int counter;
 
     var Tetromino curTetromino;
 
+    var Mesh tetrominoMesh;
+
     var TetrominoSpawner tetrominoSpawner;
 
-    let counter = 0;
     let startX = frameStartX + 2;  // +1 for fram line and +1 for whitespace padding
     let startY = frameStartY + 2;  // +1 for fram line and +1 for whitespace padding
 
@@ -69,16 +72,15 @@ class TetrisGame {
 
     // Test locking tetrominos
     let tetrominoSpawner = TetrominoSpawner.new(frameStartX, frameStartY);
-    let counter = 0;
     // FIXME: Let game end by Top out: https://tetris.fandom.com/wiki/Top_out
-    while (counter < 5){
-
-      let curTetromino = tetrominoSpawner.spawnO();
-      do tetrominoFall(curTetromino);
-
-
-      // FIXME: For cell in tetromino get gameMesh coordinates and set state to true
-      let counter = counter+1;
+    while (~gameOver){
+      let curTetromino = tetrominoSpawner.getO();
+      let canSpawn = curTetromino.spawn(gameMesh);
+      if(canSpawn){
+        // FIXME: Can be game over by top out
+        do tetrominoFall(curTetromino);
+      }
+      let gameOver = ~canSpawn;
     }
 
     // FIXME: Real mesh must have some rows hidden for user
@@ -87,8 +89,8 @@ class TetrisGame {
     do curTetromino.dispose();
     do tetrominoSpawner.dispose();
 
-    do Output.moveCursor(3, 30);
-    do Output.printString("Done!");
+    do Output.moveCursor(11, 3);
+    do Output.printString("Game over!");
 
     do Sys.wait(2000);
 
@@ -145,6 +147,23 @@ class TetrisGame {
           let gameYInd = curTetromino.getRelativeMeshY() + tetrominoIndexArray[1];
           do gameMesh.setState(gameXInd, gameYInd, true);
           let index = index + 1;
+        // FIXME:
+        // do Output.moveCursor(7, 30);
+        // do Output.printString("index: ");
+        // do Output.printInt(index);
+        // do Output.moveCursor(8, 30);
+        // do Output.printString("tetrominoIndexArray[0]: ");
+        // do Output.printInt(tetrominoIndexArray[0]);
+        // do Output.moveCursor(9, 30);
+        // do Output.printString("tetrominoIndexArray[1]: ");
+        // do Output.printInt(tetrominoIndexArray[1]);
+        // do Output.moveCursor(10, 30);
+        // do Output.printString("gameXInd: ");
+        // do Output.printInt(gameXInd);
+        // do Output.moveCursor(11, 30);
+        // do Output.printString("gameYInd: ");
+        // do Output.printInt(gameYInd);
+        // do Sys.wait(1000);
         }
         do gameFrame.draw(gameMesh);
 

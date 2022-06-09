@@ -33,14 +33,21 @@
     return;
   }
 
-  method void spawn(){
+  // Returns true if it's possible to spawn the tetromino
+  method bool spawn(Mesh gameMesh){
+    var bool canSpawn;
+
+    let canSpawn = canBePlaced(gameMesh, relativeMeshX, relativeMeshY);
+
+    if(canSpawn){
       do draw();
-      // FIXME:
-      do Output.printString("SPAWNED!!!");
-      return;
+      return true;
+    } else{
+      return false;
+    }
   }
 
-  method bool canMove(Mesh gameMesh, int newRelativeMeshX, int newRelativeMeshY){
+  method bool canBePlaced(Mesh gameMesh, int newRelativeMeshX, int newRelativeMeshY){
     var int tetrominoMeshIndex;
     var Array tetrominoIndices;
     var int tetrominoXIndex;
@@ -48,16 +55,7 @@
     var int gameXInd;
     var int gameYInd;
 
-    let tetrominoMeshIndex = 0;
-      // FIXME: YOU ARE HERE: FIGURING OUT MYSTERY OF SUDDENLY TURNING TO 3
-      do Output.moveCursor(15, 30);
-      do Output.printInt(tetrominoMeshIndex);
-
     while(tetrominoMeshIndex < tetrominoMesh.getMeshLenght()){
-      // FIXME:
-      do Output.moveCursor(16, 30);
-      do Output.printInt(tetrominoMeshIndex);
-
       let tetrominoIndices = tetrominoMesh.getMeshIndices(tetrominoMeshIndex);
       let tetrominoXIndex = tetrominoIndices[0];
       let tetrominoYIndex = tetrominoIndices[1];
@@ -71,7 +69,8 @@
       if (gameXInd < 0){
         return false;
       }
-      if (gameXInd > gameMesh.getCols()){
+      // -1 as gameXInd counts from 0
+      if (gameXInd > (gameMesh.getCols() - 1)){
         return false;
       }
 
@@ -81,31 +80,35 @@
       }
 
       // FIXME:
-      do Output.moveCursor(9, 30);
-      do Output.printInt(tetrominoMeshIndex);
-      do Output.printString("BAALLZ");
-      do Output.moveCursor(10, 30);
-      do Output.printInt(gameYInd);
-      do Output.moveCursor(11, 30);
-      do Output.printInt(newRelativeMeshY);
-      do Output.moveCursor(12, 30);
-      do Output.printInt(tetrominoYIndex);
-      if (gameYInd > gameMesh.getRows()){
-        do Output.printString("NOT");
+      // do Output.moveCursor(9, 30);
+      // do Output.printString("tetrominoMeshIndex: ");
+      // do Output.printInt(tetrominoMeshIndex);
+      // do Output.moveCursor(10, 30);
+      // do Output.printString("gameYInd: ");
+      // do Output.printInt(gameYInd);
+      // do Output.moveCursor(11, 30);
+      // do Output.printString("newRelativeMeshY: ");
+      // do Output.printInt(newRelativeMeshY);
+      // do Output.moveCursor(12, 30);
+      // do Output.printString("tetrominoYIndex: ");
+      // do Output.printInt(tetrominoYIndex);
+      // do Output.moveCursor(13, 30);
+      // do Output.printString("gameMesh.getRows(): ");
+      // do Output.printInt(gameMesh.getRows());
+      // do Sys.wait(10);
+      // -1 as gameYInd counts from 0
+      if (gameYInd > (gameMesh.getRows() - 1)){
+        // do Output.printString("NOT");
         return false;
       }
-      do Output.moveCursor(13, 30);
-      do Output.printString("Pass");
+      // do Output.moveCursor(14, 30);
+      // do Output.printString("Pass");
 
       // Check whether we would collide
       if (gameMesh.getState(gameXInd, gameYInd)){
         return false;
       }
       let tetrominoMeshIndex = tetrominoMeshIndex + 1;
-
-      // FIXME:
-      do Output.moveCursor(17, 30);
-      do Output.printInt(tetrominoMeshIndex);
     }
     return true;
   }
@@ -114,14 +117,11 @@
     var int newRelativeMeshY;
 
     let newRelativeMeshY = relativeMeshY + 1;
-    return canMove(gameMesh, relativeMeshX, newRelativeMeshY);
+    return canBePlaced(gameMesh, relativeMeshX, newRelativeMeshY);
   }
 
   method void moveDown(){
     do erase();
-      // FIXME:
-    do Output.moveCursor(0, 0);
-    do Output.printInt(relativeMeshY);
     let relativeMeshY = relativeMeshY + 1;
     do draw();
     return;
@@ -168,15 +168,19 @@
         let yStartPixel = frameStartY + (tetrominoElementSize*yInd) + (2*yInd);
 
         // FIXME:
-        do Output.moveCursor(3, 30);
-        do Output.printInt(yStartPixel);
-        do Output.moveCursor(4, 30);
-        do Output.printInt(relativeMeshY);
-        do Output.moveCursor(5, 30);
-        do Output.printInt(frameStartY);
-        do Output.moveCursor(6, 30);
-        do Output.printInt(yInd);
-        do Output.moveCursor(7, 30);
+        // do Output.moveCursor(3, 30);
+        // do Output.printString("yStartPixel :");
+        // do Output.printInt(yStartPixel);
+        // do Output.moveCursor(4, 30);
+        // do Output.printString("relativeMeshY :");
+        // do Output.printInt(relativeMeshY);
+        // do Output.moveCursor(5, 30);
+        // do Output.printString("frameStartY: ");
+        // do Output.printInt(frameStartY);
+        // do Output.moveCursor(6, 30);
+        // do Output.printString("yInd :");
+        // do Output.printInt(yInd);
+        // do Output.moveCursor(7, 30);
 
         do Screen.setColor(state);
         do Screen.drawRectangle(xStartPixel, yStartPixel, xStartPixel+tetrominoElementSize, yStartPixel+tetrominoElementSize);
