@@ -2,15 +2,22 @@
  * Implements the general purpose algorithms
  */
 
- class Algorithm {
+class Algorithm {
 
-   function int mod(int dividend, int divisor){
-     var int modolus;
+  /**
+   * Return the modulus.
+   *
+   * \param dividend The dividend
+   * \param divisor The divisor
+   * \return The modoulus
+   */
+  function int mod(int dividend, int divisor){
+    var int modolus;
 
-     // Note dividend/divisor is the trucated division
-     let modolus = dividend - (divisor * (dividend/divisor));
+    // Note dividend/divisor is the trucated division
+    let modolus = dividend - (divisor * (dividend/divisor));
 
-     return modolus;
-   }
+    return modolus;
+  }
 
- }
+}

@@ -1,0 +1,102 @@
+/**
+ * Implements the Background class
+ */
+
+/**
+ * The background is the location where all inactive tetrominos are drawn
+ */
+class Background {
+  field int frameStartX;  // The pixel column for the start of the background
+  field int frameStartY;  // The pixel row for the start of the background
+  field int meshElementSize;  // The size of a tetromino element
+  field int skipRows;  // Number of invisible rows (counting from the top)
+  field int meshCols;  // Number of columns in the mesh
+
+  field Mesh backgroundMesh;  // Mesh holding the state of each element
+
+  /**
+   * Construct the Background
+   *
+   * \param frameStartX_ The pixel column for the start of the background
+   * \param frameStartY_ The pixel row for the start of the background
+   * \param meshElementSize_ The size of a tetromino element
+   * \param skipRows_ Number of invisible rows (counting from the top)
+   * \param meshCols_ Number of columns for the backgroundMesh
+   * \param meshRows Number of rows for the backgroundMesh
+   */
+  constructor Background new(int frameStartX_,
+                             int frameStartY_,
+                             int meshElementSize_,
+                             int skipRows_,
+                             int meshCols_,
+                             int meshRows) {
+    let frameStartX = frameStartX_;
+    let frameStartY = frameStartY_;
+    let meshElementSize = meshElementSize_;
+
+    let meshCols = meshCols_;
+
+    let backgroundMesh = Mesh.new(meshCols, meshRows);
+
+    return this;
+  }
+
+  /**
+   * Destroy the Background
+   *
+   * Disposes:
+   * - The backgroundMesh
+   * - This
+   */
+  method void dispose (){
+    do backgroundMesh.dispose();
+    do Memory.deAlloc(this);
+    return;
+  }
+
+  /**
+   * Draw the background
+   */
+  method void draw(){
+    var int index;  // Index representing the Mesh element
+    var int xInd;  // The x coordinate of the Mesh
+    var int yInd;  // The y coordinate of the Mesh
+    var int xStartPixel;  // The pixel column to start draw a rectangle from
+    var int yStartPixel;  // The pixel row to start draw a rectangle from
+
+    var bool state;  // State of the current Mesh element
+
+    var Array indices;  // Array holding the (x, y) coordinate of the Mesh
+
+    // NOTE: The mesh is 40x10 according to the guidelines, however, rows above
+    //       20 is hidden
+    //       Row 0 starts at index 0
+    //       Row 1 starts at index 10, thus
+    //       Row 20 starts at index 20*10=200
+    // https://tetris.fandom.com/wiki/Tetris_Guideline#List_of_rules_(as_of_2009)
+    let index = skipRows * meshCols;
+    while (index < backgroundMesh.getMeshLenght()){
+      let indices = backgroundMesh.getMeshIndices(index);
+      let xInd = indices[0];
+      let yInd = indices[1];
+      // NOTE: We need the actual y-coordinate to get the state
+      let state = backgroundMesh.getState(xInd, yInd);
+
+      // NOTE: Since both our abstract Mesh and our display start counting rows
+      //       from 0, we must subtract skipRows in order not to draw the
+      //       rectangle out of range
+      let yInd = yInd - skipRows;
+      let xStartPixel = frameStartX + (meshElementSize*xInd) + (2*xInd);
+      let yStartPixel = frameStartY + (meshElementSize*yInd) + (2*yInd);
+
+      do Screen.setColor(state);
+      do Screen.drawRectangle(xStartPixel, yStartPixel, xStartPixel+meshElementSize, yStartPixel+meshElementSize);
+
+      let index = index + 1;
+    }
+
+    do indices.dispose();
+    return;
+  }
+
+}

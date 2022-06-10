@@ -2,11 +2,19 @@
  * Implements the TetrominoSpawner class
  */
 
+/**
+ * Class for spawing tetrominos
+ */
 class TetrominoSpawner {
+  field int frameStartX;  // Pixel column to start drawing the tetromino from
+  field int frameStartY;  // Pixel row to start drawing the tetromino from
 
-  field int frameStartX;
-  field int frameStartY;
-
+  /**
+   * Construct the spawner
+   *
+   * \param frameStartX_ The pixel column for the start of the background
+   * \param frameStartY_ The pixel row for the start of the background
+   */
   constructor TetrominoSpawner new(int frameStartX_, int frameStartY_){
     let frameStartX = frameStartX_;
     let frameStartY = frameStartY_;
@@ -14,11 +22,13 @@ class TetrominoSpawner {
     return this;
   }
 
+  /** Dispose this */
   method void dispose(){
     do Memory.deAlloc(this);
     return;
   }
 
+  /** Return the O tetromino */
   method Tetromino getO(){
     var Mesh tetrominoMesh;
     var Tetromino tetromino;
@@ -28,13 +38,15 @@ class TetrominoSpawner {
     do  tetrominoMesh.setState(1, 0, true);
     do  tetrominoMesh.setState(1, 1, true);
     let tetromino = Tetromino.new(tetrominoMesh,
-                                  4,  // FIXME: relativeX should be center
-                                  19, // First 20 rows are hidden, spawn at row 21 counted from bottom
+                                  4,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
+                                  19, // y-coodrinate in the gameMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
                                   10, // Element size
                                   frameStartX + 2, // frame start +1 for padding, +1 for next line
                                   frameStartY + 2 // frame start +1 for padding, +1 for next line
                                  );
-    // FIXME: Dispose tetrominoMesh?
+
+    // Dispose the tetrominoMesh at it has been copied to the tetromino
+    do tetrominoMesh.dispose();
 
     return tetromino;
   }

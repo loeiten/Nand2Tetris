@@ -2,12 +2,22 @@
  * Implements the Mesh class
  */
 
- class Mesh {
-  field int cols;
-  field int rows;
-  field Array meshArray;
-  field int meshLenght;
+/**
+ * Class representing a mesh or a grid where elements have either state 0 or 1
+ */
+class Mesh {
+  field int cols;  // Number of cols in the Mesh
+  field int rows;  // Number of rows in the Mesh
+  field int meshLenght;  // Total number of elements in the Mesh
 
+  field Array meshArray;  // Array holding the state of each element
+
+  /**
+   * Construct the mesh
+   *
+   * \param cols_ Number of columns in the Mesh
+   * \param rows_ Number of rows in the Mesh
+   */
   constructor Mesh new(int cols_, int rows_) {
     let cols = cols_;
     let rows = rows_;
@@ -17,12 +27,26 @@
     return this;
   }
 
+  /**
+   * Destroy the Mesh
+   *
+   * Disposes:
+   * - The meshArray
+   * - This
+   */
   method void dispose (){
     do meshArray.dispose();
     do Memory.deAlloc(this);
     return;
   }
 
+  /**
+   * Return the state at given x and y coordinates
+   *
+   * \param xInd The x coordinate of the Mesh
+   * \param yInd The y coordinate of the Mesh
+   * \return The state at the given x and y coordinates
+   */
   method bool getState(int xInd, int yInd){
     var int index;
     var bool state;
@@ -33,6 +57,13 @@
     return state;
   }
 
+  /**
+   * Set the state at given x and y coordinates
+   *
+   * \param xInd The x coordinate of the Mesh
+   * \param yInd The y coordinate of the Mesh
+   * \param state The state to set
+   */
   method void setState(int xInd, int yInd, bool state){
     var int index;
 
@@ -41,10 +72,25 @@
     return;
   }
 
+  /**
+   * Translates a set of x and y coordinates into an index
+   *
+   * \param xInd The x coordinate of the Mesh
+   * \param yInd The y coordinate of the Mesh
+   * \return The corresponding index
+   */
   method int getMeshArrayIndex(int xInd, int yInd){
     return xInd + (yInd*cols);
   }
 
+  /**
+   * Translates an index to a set of x and y coordinates
+   *
+   * \param index The index to translate to x and y coordinates
+   * \return An array where:
+   *  - The first index is the x coordinate of the Mesh
+   *  - The second index is the y coordinate of the Mesh
+   */
   method Array getMeshIndices(int index){
     var Array indices;
     let indices = Array.new(2);
@@ -58,16 +104,19 @@
     return indices;
   }
 
+  /** Return the total number of elements in the Mesh */
   method int getMeshLenght(){
     return meshLenght;
   }
 
+  /** Return the number columns in the mesh */
   method int getCols(){
     return cols;
   }
 
+  /** Return the number rows in the mesh */
   method int getRows(){
     return rows;
   }
 
- }
+}

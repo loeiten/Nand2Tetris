@@ -2,28 +2,38 @@
  * Implements the Tetris game.
  */
 
+/** Class responsible for updating the model of the game */
 class TetrisGame {
-  field int frameStartX;
-  field int frameStartY;
-  field int elementSize;
-  field int gameSpeed;
+  field int frameStartX;  // The pixel column for the start of the background
+  field int frameStartY;  // The pixel row for the start of the background
+  field int meshElementSize;  // The size of a tetromino element
+  field int gameSpeed;  // Speed of the game
 
-  field Frame gameFrame;
-  field Mesh gameMesh;
+  field Background gameBackground;  // The game background
+  field Mesh gameMesh;  // The game mesh
 
-  /** Constructs a new Tetris Game. */
+  /**
+   * Construct a new Tetris Game.
+   *
+   * The constructor will:
+   * - Draw the background frame
+   * - Initialize the background
+   */
   constructor TetrisGame new() {
     var int xLen;
     var int yLen;
 
+    // Set initial game speed
+    let gameSpeed = 500;
+
+    // Size of tetrominos
+    let meshElementSize = 10;
+
+    // Set background frame coordinates
     let frameStartX = 1;
     let frameStartY = 6;
     let xLen = 122;
     let yLen = 242;  // 240 + 1 for next line + 1 for frame line
-
-    let elementSize = 10;
-
-    let gameSpeed = 500;
 
     // Draw background frame
     do Screen.setColor(true);
@@ -32,86 +42,93 @@ class TetrisGame {
     do Screen.drawLine(frameStartX + xLen, frameStartY, frameStartX + xLen, frameStartY + yLen);
     do Screen.drawLine(frameStartX, frameStartY + yLen, frameStartX + xLen, frameStartY + yLen);
 
-    // Initialize the game frame and the game mesh
-    let gameFrame = Frame.new(frameStartX + 2, frameStartY + 2, elementSize);
+    // Initialize the background
     // NOTE: The mesh is 40 according to
     // https://tetris.fandom.com/wiki/Tetris_Guideline#List_of_rules_(as_of_2009)
-    let gameMesh = Mesh.new(10, 40);
+    let gameBackground = Background.new(frameStartX + 2,  // frameStartX_
+                                   frameStartY + 2,  // frameStartY_
+                                   meshElementSize,      // meshElementSize_
+                                   20,               // skipRows_
+                                   10,               // meshCols
+                                   40                // meshRows
+                                   );
     return this;
   }
 
-  /** Disposes this game. */
+  /** Dispose this game. */
   method void dispose() {
-    do gameFrame.dispose();
+    do gameBackground.dispose();
     do gameMesh.dispose();
     do Memory.deAlloc(this);
     return;
   }
 
-  /** Runs the game: handles the user's inputs and moves the tetris accordingly */
+  /**
+   * Run the game by:
+   *
+   * 1. Prepare the tetromino sequence (7-bag draw)
+   * 2. Spawning a tetromino
+   * 3. Let it fall (capturing of keystrokes happens during fall)
+   * 4. Check if a row is covered and remove the row
+   * 5. Update the score
+   * 6. Check if the game is over
+   */
   method void run() {
-    var bool gameOver;
-    var bool canSpawn;
-    var bool canSpawn;
-    var int x;
-    var int y;
-    var int startX;
-    var int startY;
+    var bool doSpawn;  // Whether we will spawn or not
+    var bool gameOver;  // Whether the game is over or not
 
+    var Tetromino curTetromino;  // The current tetromino
+    var TetrominoSpawner tetrominoSpawner;  // The tetromino spawner
 
-    var Tetromino curTetromino;
-
-    var Mesh tetrominoMesh;
-
-    var TetrominoSpawner tetrominoSpawner;
-
-    let startX = frameStartX + 2;  // +1 for fram line and +1 for whitespace padding
-    let startY = frameStartY + 2;  // +1 for fram line and +1 for whitespace padding
-
-    do Screen.setColor(true);
-
-    // Test locking tetrominos
+    // Create the spawner
     let tetrominoSpawner = TetrominoSpawner.new(frameStartX, frameStartY);
-    // FIXME: Let game end by Top out: https://tetris.fandom.com/wiki/Top_out
+
+    // Run until game over
     while (~gameOver){
       let curTetromino = tetrominoSpawner.getO();
-      let canSpawn = curTetromino.spawn(gameMesh);
-      if(canSpawn){
-        // FIXME: Can be game over by top out
+      let doSpawn = curTetromino.canSpawn(gameMesh);
+      if(doSpawn){
+        // Enter the fall sequence
         do tetrominoFall(curTetromino);
       }
-      let gameOver = ~canSpawn;
+      // The game can end by "Top out" if a tetromino cannot spawn:
+      // https://tetris.fandom.com/wiki/Top_out
+      let gameOver = ~doSpawn;
+
+      // Dispose the current tetromino
+      do curTetromino.dispose();
     }
 
-    // We can now free the memory as these are no longer needed
-    do curTetromino.dispose();
+    // Dispose the spawner
     do tetrominoSpawner.dispose();
 
+    // Display game over
     do Output.moveCursor(11, 3);
     do Output.printString("Game over!");
-
-    do Sys.wait(2000);
 
     return;
   }
 
+  /** Let the tetromino fall and move it around while falling */
   method void tetrominoFall(Tetromino curTetromino){
-    var int countDown;
-    var int index;
-    var int meshLenght;
-    var int gameXInd;
-    var int gameYInd;
+    var int gameXInd;  // x-coordinate in the gameMesh
+    var int gameYInd;  // y-coordinate in the gameMesh
+    var int countDown;  // Count down until next move down
+    var int tetrominoIndex;  // Index in the tetromino mesh
+    var int tetrominoMeshLenght;  // Lenght of the tetromino mesh
 
-    var char key;
-    var bool falling;
+    var char key;  // Variable for capturing key stroke
+    var bool falling;  // Whether or not the tetromino is still falling
 
-    var Array tetrominoIndexArray;
-    var Mesh tetrominoMesh;
+    var Array tetrominoIndexArray;  // The array for the tetromino coordinates
+    var Mesh tetrominoMesh;  // The tetromino mesh
 
+    // Initialize the variables
     let tetrominoMesh = curTetromino.getTetrominoMesh();
-    let meshLenght = tetrominoMesh.getMeshLenght();
+    let tetrominoMeshLenght = tetrominoMesh.getMeshLenght();
     let countDown = gameSpeed;
     let falling = true;
+
     while(falling){
 
       // Wait for a key to be pressed
@@ -122,18 +139,22 @@ class TetrisGame {
         let countDown = countDown - 1;
       }
 
-      if (key = 131) { let countDown = 0; }   // up arrow
-      if (key = 133) {    // down arrow
+      // Capture up arrow
+      if (key = 131) { let countDown = 0; }
+      // Capture down arrow
+      if (key = 133) {
         if(curTetromino.canMoveDown(gameMesh)){
           do curTetromino.moveDown();
         }
       }
-      if (key = 130) { // left arrow
+      // Capture left arrow
+      if (key = 130) {
         if(curTetromino.canMoveLeft(gameMesh)){
           do curTetromino.moveLeft();
         }
       }
-      if (key = 132) {    // right arrow
+      // Capture right arrow
+      if (key = 132) {
         if(curTetromino.canMoveRight(gameMesh)){
           do curTetromino.moveRight();
         }
@@ -148,6 +169,8 @@ class TetrisGame {
         let countDown = countDown - 1;
       }
 
+      // If the time counts out we will add the tetromino with the mesh and destroy it
+      // NOTE: We cannot set countDown < 0 to check if countDown is 0
       if(countDown < 1){
         if(curTetromino.canMoveDown(gameMesh)){
           do curTetromino.moveDown();
@@ -156,22 +179,21 @@ class TetrisGame {
         else{
           let falling = false;
           // Add tetromino to the game mesh
-          let index = 0;
-          while(index < meshLenght){
-            let tetrominoIndexArray = tetrominoMesh.getMeshIndices(index);
+          let tetrominoIndex = 0;
+          while(tetrominoIndex < tetrominoMeshLenght){
+            let tetrominoIndexArray = tetrominoMesh.getMeshIndices(tetrominoIndex);
             let gameXInd = curTetromino.getRelativeMeshX() + tetrominoIndexArray[0];
             let gameYInd = curTetromino.getRelativeMeshY() + tetrominoIndexArray[1];
             do gameMesh.setState(gameXInd, gameYInd, true);
-            let index = index + 1;
+            let tetrominoIndex = tetrominoIndex + 1;
           }
-          do gameFrame.draw(gameMesh);
+          do gameBackground.draw();
         }
       }
     }
+
     // The tetromino can now be destroyed
     do curTetromino.dispose();
-    // FIXME: dispose array???
-    // FIXME: dispose meshes???
     return;
   }
 
