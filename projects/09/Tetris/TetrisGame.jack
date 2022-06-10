@@ -10,6 +10,7 @@ class TetrisGame {
   field int gameSpeed;  // Speed of the game
 
   field Background gameBackground;  // The game background
+  // Destroyed by the gameBackground
   field Mesh gameMesh;  // The game mesh
 
   /**
@@ -46,12 +47,14 @@ class TetrisGame {
     // NOTE: The mesh is 40 according to
     // https://tetris.fandom.com/wiki/Tetris_Guideline#List_of_rules_(as_of_2009)
     let gameBackground = Background.new(frameStartX + 2,  // frameStartX_
-                                   frameStartY + 2,  // frameStartY_
-                                   meshElementSize,      // meshElementSize_
-                                   20,               // skipRows_
-                                   10,               // meshCols
-                                   40                // meshRows
-                                   );
+                                        frameStartY + 2,  // frameStartY_
+                                        meshElementSize,      // meshElementSize_
+                                        20,               // skipRows_
+                                        10,               // meshCols
+                                        40                // meshRows
+                                        );
+    let gameMesh = gameBackground.getBackgroundMesh();
+
     return this;
   }
 
@@ -120,7 +123,9 @@ class TetrisGame {
     var char key;  // Variable for capturing key stroke
     var bool falling;  // Whether or not the tetromino is still falling
 
+    // The array will be destroyed when Mesh is destroyed in Tetromino
     var Array tetrominoIndexArray;  // The array for the tetromino coordinates
+    // Will be destroyed by the Tetromino
     var Mesh tetrominoMesh;  // The tetromino mesh
 
     // Initialize the variables
@@ -191,9 +196,6 @@ class TetrisGame {
         }
       }
     }
-
-    // The tetromino can now be destroyed
-    do curTetromino.dispose();
     return;
   }
 

@@ -30,6 +30,7 @@ class TetrominoSpawner {
 
   /** Return the O tetromino */
   method Tetromino getO(){
+    // NOTE: The tetromino mesh is destroyed by the tetromino itself, so we will not destroy it here
     var Mesh tetrominoMesh;
     var Tetromino tetromino;
     let tetrominoMesh = Mesh.new(2, 2);
@@ -44,9 +45,6 @@ class TetrominoSpawner {
                                   frameStartX + 2, // frame start +1 for padding, +1 for next line
                                   frameStartY + 2 // frame start +1 for padding, +1 for next line
                                  );
-
-    // Dispose the tetrominoMesh at it has been copied to the tetromino
-    do tetrominoMesh.dispose();
 
     return tetromino;
   }

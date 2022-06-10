@@ -35,6 +35,7 @@ class Background {
     let meshElementSize = meshElementSize_;
 
     let meshCols = meshCols_;
+    let skipRows = skipRows_;
 
     let backgroundMesh = Mesh.new(meshCols, meshRows);
 
@@ -52,6 +53,11 @@ class Background {
     do backgroundMesh.dispose();
     do Memory.deAlloc(this);
     return;
+  }
+
+  /** Return the background Mesh */
+  method Mesh getBackgroundMesh(){
+    return backgroundMesh;
   }
 
   /**
@@ -75,6 +81,7 @@ class Background {
     //       Row 20 starts at index 20*10=200
     // https://tetris.fandom.com/wiki/Tetris_Guideline#List_of_rules_(as_of_2009)
     let index = skipRows * meshCols;
+
     while (index < backgroundMesh.getMeshLenght()){
       let indices = backgroundMesh.getMeshIndices(index);
       let xInd = indices[0];
@@ -95,7 +102,6 @@ class Background {
       let index = index + 1;
     }
 
-    do indices.dispose();
     return;
   }
 

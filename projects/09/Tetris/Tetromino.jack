@@ -10,7 +10,6 @@
  * - Draw and erase the tetromino within another mesh
  */
 class Tetromino {
-  // FIXME: Consider to store a gameMesh
   field int relativeMeshX;  // x-coordinate in a different mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
   field int relativeMeshY;  // y-coordinate in a different mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
   field int tetrominoElementSize;  // Size of a tetromino element
@@ -77,9 +76,6 @@ class Tetromino {
 
     let canBeSpawn = canBePlaced(gameMesh, relativeMeshX, relativeMeshY);
 
-    // Dispose the gameMesh at is has been copied to canBePlaced
-    do gameMesh.dispose();
-
     if(canBeSpawn){
       do draw();
       return true;
@@ -103,7 +99,7 @@ class Tetromino {
     var int gameXInd;
     var int gameYInd;
 
-    var Array tetrominoIndices;
+    var Array tetrominoIndices;  // Will be destroyed by the tetromino
 
     while(tetrominoMeshIndex < tetrominoMesh.getMeshLenght()){
       let tetrominoIndices = tetrominoMesh.getMeshIndices(tetrominoMeshIndex);
@@ -114,42 +110,17 @@ class Tetromino {
       let gameYInd = newRelativeMeshY + tetrominoYIndex;
 
       // Check that x is within limits
-      if (gameXInd < 0){
-        // Dispose the Array and the Mesh as it's no longer used
-        do tetrominoIndices.dispose();
-        do gameMesh.dispose();
-        return false;
-      }
+      if (gameXInd < 0){ return false; }
       // -1 as gameXInd counts from 0
-      if (gameXInd > (gameMesh.getCols() - 1)){
-        // Dispose the Array and the Mesh as it's no longer used
-        do tetrominoIndices.dispose();
-        do gameMesh.dispose();
-        return false;
-      }
+      if (gameXInd > (gameMesh.getCols() - 1)){ return false; }
 
       // Check that y is within limits
-      if (gameYInd < 0){
-        // Dispose the Array and the Mesh as it's no longer used
-        do tetrominoIndices.dispose();
-        do gameMesh.dispose();
-        return false;
-      }
+      if (gameYInd < 0){ return false; }
       // -1 as gameYInd counts from 0
-      if (gameYInd > (gameMesh.getRows() - 1)){
-        // Dispose the Array and the Mesh as it's no longer used
-        do tetrominoIndices.dispose();
-        do gameMesh.dispose();
-        return false;
-      }
+      if (gameYInd > (gameMesh.getRows() - 1)){ return false; }
 
       // Check whether we would collide
-      if (gameMesh.getState(gameXInd, gameYInd)){
-        // Dispose the Array and the Mesh as it's no longer used
-        do tetrominoIndices.dispose();
-        do gameMesh.dispose();
-        return false;
-      }
+      if (gameMesh.getState(gameXInd, gameYInd)){ return false; }
       let tetrominoMeshIndex = tetrominoMeshIndex + 1;
     }
 
@@ -169,8 +140,6 @@ class Tetromino {
     let newRelativeMeshY = relativeMeshY + 1;
     let canPlace = canBePlaced(gameMesh, relativeMeshX, newRelativeMeshY);
 
-    // Dispose the gameMesh as it's no longer used
-    do gameMesh.dispose();
     return canPlace;
   }
 
@@ -186,9 +155,6 @@ class Tetromino {
 
     let newRelativeMeshX = relativeMeshX - 1;
     let canPlace = canBePlaced(gameMesh, newRelativeMeshX, relativeMeshY);
-
-    // Dispose the gameMesh as it's no longer used
-    do gameMesh.dispose();
     return canPlace;
   }
 
@@ -204,9 +170,6 @@ class Tetromino {
 
     let newRelativeMeshX = relativeMeshX + 1;
     let canPlace = canBePlaced(gameMesh, newRelativeMeshX, relativeMeshY);
-
-    // Dispose the gameMesh as it's no longer used
-    do gameMesh.dispose();
     return canPlace;
   }
 
@@ -259,6 +222,7 @@ class Tetromino {
 
     var bool state;  // State of the current tetromino element
 
+    // Will be destroyed by the tetromino
     var Array indices;  // Array holding the (x, y) coordinate of the Mesh
 
     let index = 0;
@@ -284,8 +248,6 @@ class Tetromino {
       }
       let index = index + 1;
     }
-
-    do indices.dispose();
     return;
   }
 
@@ -299,6 +261,7 @@ class Tetromino {
 
     var bool state;  // State of the current tetromino element
 
+    // Will be destroyed by the tetromino
     var Array indices;  // Array holding the (x, y) coordinate of the Mesh
 
     let index = 0;
@@ -320,8 +283,6 @@ class Tetromino {
 
       let index = index + 1;
     }
-
-    do indices.dispose();
     return;
   }
 
