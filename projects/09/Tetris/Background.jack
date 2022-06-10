@@ -60,9 +60,12 @@ class Background {
     return backgroundMesh;
   }
 
-  /**
-   * Draw the background
-   */
+  /** Return the skip rows */
+  method int getSkipRows(){
+    return skipRows;
+  }
+
+  /** Draw the background */
   method void draw(){
     var int index;  // Index representing the Mesh element
     var int xInd;  // The x coordinate of the Mesh
@@ -72,20 +75,15 @@ class Background {
 
     var bool state;  // State of the current Mesh element
 
-    var Array indices;  // Array holding the (x, y) coordinate of the Mesh
+    // Will be destroyed by the Mesh
+    var Array coordinates;  // Array holding the (x, y) coordinate of the Mesh
 
-    // NOTE: The mesh is 40x10 according to the guidelines, however, rows above
-    //       20 is hidden
-    //       Row 0 starts at index 0
-    //       Row 1 starts at index 10, thus
-    //       Row 20 starts at index 20*10=200
-    // https://tetris.fandom.com/wiki/Tetris_Guideline#List_of_rules_(as_of_2009)
     let index = skipRows * meshCols;
 
-    while (index < backgroundMesh.getMeshLenght()){
-      let indices = backgroundMesh.getMeshIndices(index);
-      let xInd = indices[0];
-      let yInd = indices[1];
+    while (index < backgroundMesh.getMeshLength()){
+      let coordinates = backgroundMesh.getMeshIndices(index);
+      let xInd = coordinates[0];
+      let yInd = coordinates[1];
       // NOTE: We need the actual y-coordinate to get the state
       let state = backgroundMesh.getState(xInd, yInd);
 

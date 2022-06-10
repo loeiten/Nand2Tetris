@@ -13,6 +13,7 @@ class Tetromino {
   field int relativeMeshX;  // x-coordinate in a different mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
   field int relativeMeshY;  // y-coordinate in a different mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
   field int tetrominoElementSize;  // Size of a tetromino element
+  field int skipRows; // The number of rows not showing
   field int frameStartX;  // The pixel column for the start of the background
   field int frameStartY;  // The pixel row for the start of the background
 
@@ -25,6 +26,7 @@ class Tetromino {
    * \param relativeMeshX_ x-coordinate in a different mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
    * \param relativeMeshY_ y-coordinate in a different mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
    * \param tetrominoElementSize_ Size of a tetromino element
+   * \param skipRows_ The number of rows not showing
    * \param frameStartX_ The pixel column for the start of the background
    * \param frameStartY_ The pixel row for the start of the background
    */
@@ -32,6 +34,7 @@ class Tetromino {
                             int relativeMeshX_,
                             int relativeMeshY_,
                             int tetrominoElementSize_,
+                            int skipRows_,
                             int frameStartX_,
                             int frameStartY_) {
     let tetrominoMesh = tetrominoMesh_;
@@ -39,6 +42,8 @@ class Tetromino {
     let relativeMeshX = relativeMeshX_;
     let relativeMeshY = relativeMeshY_;
     let tetrominoElementSize = tetrominoElementSize_;
+    let skipRows = skipRows_;
+
     let frameStartX = frameStartX_;
     let frameStartY = frameStartY_;
 
@@ -99,9 +104,9 @@ class Tetromino {
     var int gameXInd;
     var int gameYInd;
 
-    var Array tetrominoIndices;  // Will be destroyed by the tetromino
+    var Array tetrominoIndices;  // Will be destroyed by the Mesh
 
-    while(tetrominoMeshIndex < tetrominoMesh.getMeshLenght()){
+    while(tetrominoMeshIndex < tetrominoMesh.getMeshLength()){
       let tetrominoIndices = tetrominoMesh.getMeshIndices(tetrominoMeshIndex);
       let tetrominoXIndex = tetrominoIndices[0];
       let tetrominoYIndex = tetrominoIndices[1];
@@ -222,21 +227,21 @@ class Tetromino {
 
     var bool state;  // State of the current tetromino element
 
-    // Will be destroyed by the tetromino
-    var Array indices;  // Array holding the (x, y) coordinate of the Mesh
+    // Will be destroyed by the Mesh
+    var Array coordinates;  // Array holding the (x, y) coordinate of the Mesh
 
     let index = 0;
-    while (index < tetrominoMesh.getMeshLenght()){
+    while (index < tetrominoMesh.getMeshLength()){
       // Reference system is tetromino
-      let indices = tetrominoMesh.getMeshIndices(index);
-      let xInd = indices[0];
-      let yInd = indices[1];
+      let coordinates = tetrominoMesh.getMeshIndices(index);
+      let xInd = coordinates[0];
+      let yInd = coordinates[1];
       let state = tetrominoMesh.getState(xInd, yInd);
 
       // Reference system is relativeMesh
-      let xInd = relativeMeshX + indices[0];
-      // Subtract 20 from relativeMesh as the play field is 10x40 with only 10x20 showing
-      let yInd = relativeMeshY - 20 + indices[1];
+      let xInd = relativeMeshX + coordinates[0];
+      // Subtract skip rows
+      let yInd = relativeMeshY - skipRows + coordinates[1];
 
       // Only draw if termino is within the frame
       if(yInd > -1){
@@ -262,15 +267,15 @@ class Tetromino {
     var bool state;  // State of the current tetromino element
 
     // Will be destroyed by the tetromino
-    var Array indices;  // Array holding the (x, y) coordinate of the Mesh
+    var Array coordinates;  // Array holding the (x, y) coordinate of the Mesh
 
     let index = 0;
-    while (index < tetrominoMesh.getMeshLenght()){
+    while (index < tetrominoMesh.getMeshLength()){
       // Reference system is relativeMesh
-      let indices = tetrominoMesh.getMeshIndices(index);
-      let xInd = relativeMeshX + indices[0];
-      // Subtract 20 from relativeMesh as the play field is 10x40 with only 10x20 showing
-      let yInd = relativeMeshY - 20 + indices[1];
+      let coordinates = tetrominoMesh.getMeshIndices(index);
+      let xInd = relativeMeshX + coordinates[0];
+      // Subtract skip rows
+      let yInd = relativeMeshY - skipRows + coordinates[1];
 
       // Only erase if termino is within the frame
       if(yInd > -1){

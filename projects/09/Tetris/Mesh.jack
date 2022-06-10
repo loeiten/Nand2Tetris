@@ -8,9 +8,10 @@
 class Mesh {
   field int cols;  // Number of cols in the Mesh
   field int rows;  // Number of rows in the Mesh
-  field int meshLenght;  // Total number of elements in the Mesh
+  field int meshLength;  // Total number of elements in the Mesh
 
   field Array meshArray;  // Array holding the state of each element
+  field Array coordinates;  // Array holding the coordinates
 
   /**
    * Construct the mesh
@@ -21,8 +22,10 @@ class Mesh {
   constructor Mesh new(int cols_, int rows_) {
     let cols = cols_;
     let rows = rows_;
-    let meshLenght = cols * rows;
-    let meshArray = Array.new(meshLenght);
+    let meshLength = cols * rows;
+
+    let meshArray = Array.new(meshLength);
+    let coordinates = Array.new(2);
 
     return this;
   }
@@ -32,10 +35,12 @@ class Mesh {
    *
    * Disposes:
    * - The meshArray
+   * - The coordinates
    * - This
    */
   method void dispose (){
     do meshArray.dispose();
+    do coordinates.dispose();
     do Memory.deAlloc(this);
     return;
   }
@@ -92,21 +97,18 @@ class Mesh {
    *  - The second index is the y coordinate of the Mesh
    */
   method Array getMeshIndices(int index){
-    var Array indices;
-    let indices = Array.new(2);
-
     // x-index (integer division)
-    let indices[0] = Algorithm.mod(index, cols);
+    let coordinates[0] = Algorithm.mod(index, cols);
 
     // y-index (modolus operator)
-    let indices[1] = index/cols;
+    let coordinates[1] = index/cols;
 
-    return indices;
+    return coordinates;
   }
 
   /** Return the total number of elements in the Mesh */
-  method int getMeshLenght(){
-    return meshLenght;
+  method int getMeshLength(){
+    return meshLength;
   }
 
   /** Return the number columns in the mesh */

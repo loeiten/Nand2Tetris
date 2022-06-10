@@ -106,73 +106,22 @@ class TetrisGame {
     do tetrominoSpawner.dispose();
 
     // Display game over
-    do Output.moveCursor(11, 3);
-    do Output.printString("Game over!");
+    do Output.moveCursor(11, 2);
+    do Output.printString(" Game over! ");
 
     return;
   }
 
   /** Let the tetromino fall and move it around while falling */
   method void tetrominoFall(Tetromino curTetromino){
-    var int gameXInd;  // x-coordinate in the gameMesh
-    var int gameYInd;  // y-coordinate in the gameMesh
     var int countDown;  // Count down until next move down
-    var int tetrominoIndex;  // Index in the tetromino mesh
-    var int tetrominoMeshLenght;  // Lenght of the tetromino mesh
-
-    var char key;  // Variable for capturing key stroke
     var bool falling;  // Whether or not the tetromino is still falling
 
-    // The array will be destroyed when Mesh is destroyed in Tetromino
-    var Array tetrominoIndexArray;  // The array for the tetromino coordinates
-    // Will be destroyed by the Tetromino
-    var Mesh tetrominoMesh;  // The tetromino mesh
-
-    // Initialize the variables
-    let tetrominoMesh = curTetromino.getTetrominoMesh();
-    let tetrominoMeshLenght = tetrominoMesh.getMeshLenght();
     let countDown = gameSpeed;
     let falling = true;
 
     while(falling){
-
-      // Wait for a key to be pressed
-      while((key=0) & (countDown > 0)){
-        let key = Keyboard.keyPressed();
-
-        do Sys.wait(1);
-        let countDown = countDown - 1;
-      }
-
-      // Capture up arrow
-      if (key = 131) { let countDown = 0; }
-      // Capture down arrow
-      if (key = 133) {
-        if(curTetromino.canMoveDown(gameMesh)){
-          do curTetromino.moveDown();
-        }
-      }
-      // Capture left arrow
-      if (key = 130) {
-        if(curTetromino.canMoveLeft(gameMesh)){
-          do curTetromino.moveLeft();
-        }
-      }
-      // Capture right arrow
-      if (key = 132) {
-        if(curTetromino.canMoveRight(gameMesh)){
-          do curTetromino.moveRight();
-        }
-      }
-
-      // Wait for the key to be release to continue
-      // If not the key will be registered several times as the
-      // content of the "falling" while loop is traversed quite fast
-      while(~(key=0) & (countDown > 0)){
-        let key = Keyboard.keyPressed();
-        do Sys.wait(1);
-        let countDown = countDown - 1;
-      }
+      let countDown = moveWithKeyboard(curTetromino, countDown);
 
       // If the time counts out we will add the tetromino with the mesh and destroy it
       // NOTE: We cannot set countDown < 0 to check if countDown is 0
@@ -183,19 +132,93 @@ class TetrisGame {
         }
         else{
           let falling = false;
-          // Add tetromino to the game mesh
-          let tetrominoIndex = 0;
-          while(tetrominoIndex < tetrominoMeshLenght){
-            let tetrominoIndexArray = tetrominoMesh.getMeshIndices(tetrominoIndex);
-            let gameXInd = curTetromino.getRelativeMeshX() + tetrominoIndexArray[0];
-            let gameYInd = curTetromino.getRelativeMeshY() + tetrominoIndexArray[1];
-            do gameMesh.setState(gameXInd, gameYInd, true);
-            let tetrominoIndex = tetrominoIndex + 1;
-          }
-          do gameBackground.draw();
+          do addTetrominoToMesh(curTetromino);
         }
       }
     }
+    return;
+  }
+
+  /**
+   * Move the tetromino with the keyboard
+   *
+   * \param curTetromino The current tetromino
+   * \param countDown Remaining time until lock
+   */
+  method int moveWithKeyboard(Tetromino curTetromino, int countDown){
+    var char key;  // Variable for capturing key stroke
+
+    // Wait for a key to be pressed
+    while((key=0) & (countDown > 0)){
+      let key = Keyboard.keyPressed();
+
+      do Sys.wait(1);
+      let countDown = countDown - 1;
+    }
+
+    // Capture up arrow
+    if (key = 131) { let countDown = 0; }
+    // Capture down arrow
+    if (key = 133) {
+      if(curTetromino.canMoveDown(gameMesh)){
+        do curTetromino.moveDown();
+      }
+    }
+    // Capture left arrow
+    if (key = 130) {
+      if(curTetromino.canMoveLeft(gameMesh)){
+        do curTetromino.moveLeft();
+      }
+    }
+    // Capture right arrow
+    if (key = 132) {
+      if(curTetromino.canMoveRight(gameMesh)){
+        do curTetromino.moveRight();
+      }
+    }
+
+    // Wait for the key to be release to continue
+    // If not the key will be registered several times as the
+    // content of the "falling" while loop is traversed quite fast
+    while(~(key=0) & (countDown > 0)){
+      let key = Keyboard.keyPressed();
+      do Sys.wait(1);
+      let countDown = countDown - 1;
+    }
+
+    return countDown;
+  }
+
+  /**
+   * Add the tetromino to the mesh
+   *
+   * \param curTetromino The current tetromino
+   */
+  method void addTetrominoToMesh(Tetromino curTetromino){
+    var int gameXInd;  // x-coordinate in the gameMesh
+    var int gameYInd;  // y-coordinate in the gameMesh
+    var int tetrominoIndex;  // Index in the tetromino mesh
+
+    var int tetrominoMeshLength;  // Length of the tetromino mesh
+    // Will be destroyed when Mesh is destroyed in Tetromino
+    var Array tetrominoIndexArray;  // The array for the tetromino coordinates
+    // Will be destroyed by the Tetromino
+    var Mesh tetrominoMesh;  // The tetromino mesh
+
+    let tetrominoMesh = curTetromino.getTetrominoMesh();
+    let tetrominoMeshLength = tetrominoMesh.getMeshLength();
+
+    // Add tetromino to the game mesh
+    let tetrominoIndex = 0;
+    while(tetrominoIndex < tetrominoMeshLength){
+      let tetrominoIndexArray = tetrominoMesh.getMeshIndices(tetrominoIndex);
+      let gameXInd = curTetromino.getRelativeMeshX() + tetrominoIndexArray[0];
+      let gameYInd = curTetromino.getRelativeMeshY() + tetrominoIndexArray[1];
+      do gameMesh.setState(gameXInd, gameYInd, true);
+      let tetrominoIndex = tetrominoIndex + 1;
+    }
+    do gameBackground.draw();
+
     return;
   }
 

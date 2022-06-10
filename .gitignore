@@ -3,6 +3,7 @@ tools/
 *.txt
 *.out
 *.zip
+*.vscode
 demo/
 __pycache__/
 .pytest_cache/

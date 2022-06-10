@@ -130,3 +130,7 @@ Making the sprite for Tetris
  magick ttcl_resize_invert.png -monochrome -threshold 10% ttcl_res_inv_mon.png
  # Manual fixes with paint
 ```
+
+## Helpful resources
+
+- Notes about memory management: [Ray tracer](https://blog.alexqua.ch/posts/from-nand-to-raytracer/) with [source code](https://github.com/aquach/from-nand-to-raytracer)

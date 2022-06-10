@@ -28,7 +28,11 @@ class TetrominoSpawner {
     return;
   }
 
-  /** Return the O tetromino */
+  /**
+   * Return the O tetromino
+   *
+   * \warning The tetromino must be manually destroyed
+   */
   method Tetromino getO(){
     // NOTE: The tetromino mesh is destroyed by the tetromino itself, so we will not destroy it here
     var Mesh tetrominoMesh;
@@ -42,6 +46,7 @@ class TetrominoSpawner {
                                   4,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
                                   19, // y-coodrinate in the gameMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
                                   10, // Element size
+                                  20, // Skip rows
                                   frameStartX + 2, // frame start +1 for padding, +1 for next line
                                   frameStartY + 2 // frame start +1 for padding, +1 for next line
                                  );
