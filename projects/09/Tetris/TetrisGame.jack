@@ -121,12 +121,36 @@ class TetrisGame {
   method void tetrominoFall(Tetromino curTetromino){
     var int countDown;  // Count down until next move down
     var bool falling;  // Whether or not the tetromino is still falling
+    var char key;  // Variable for capturing key stroke
+    var char prevKey;  // Variable for the previous key stroke
 
     let countDown = gameSpeed;
     let falling = true;
 
     while(falling){
-      let countDown = moveWithKeyboard(curTetromino, countDown);
+
+      // Wait for a key to be pressed
+      while(((key=0) & (countDown > 0))){
+        let key = Keyboard.keyPressed();
+
+        do Sys.wait(1);
+        let countDown = countDown - 1;
+      }
+      // If the current key is the same as the previous key it's due to the key
+      // not being released before the countDown ended
+      // We therefore add a guard to make sure that the key get's properly released
+      if (~(key = prevKey)){ do moveWithKeyboard(curTetromino, gameMesh, countDown, key); }
+      let prevKey = key;
+
+      // Wait for the key to be release to continue
+      // If not the key will be registered several times as the
+      // content of the "falling" while loop is traversed quite fast
+      while((~(key=0)) & (countDown > 0)){
+        let prevKey = 0;
+        let key = Keyboard.keyPressed();
+        do Sys.wait(1);
+        let countDown = countDown - 1;
+      }
 
       // If the time counts out we will add the tetromino with the mesh and destroy it
       // NOTE: We cannot set countDown < 0 to check if countDown is 0
@@ -149,21 +173,18 @@ class TetrisGame {
    * Move the tetromino with the keyboard
    *
    * \param curTetromino The current tetromino
+   * \param gameMesh The game mesh
    * \param countDown Remaining time until lock
+   * \param key Current key stroke
    */
-  method int moveWithKeyboard(Tetromino curTetromino, int countDown){
-    var char key;  // Variable for capturing key stroke
-
-    // Wait for a key to be pressed
-    while((key=0) & (countDown > 0)){
-      let key = Keyboard.keyPressed();
-
-      do Sys.wait(1);
-      let countDown = countDown - 1;
-    }
-
+  method void moveWithKeyboard(Tetromino curTetromino, Mesh gameMesh, int countDown, char key){
     // Capture up arrow
-    if (key = 131) { let countDown = 0; }
+    if (key = 131) {
+      let countDown = 0;
+      while(curTetromino.canMoveDown(gameMesh)){
+          do curTetromino.moveDown();
+      }
+    }
     // Capture down arrow
     if (key = 133) {
       if(curTetromino.canMoveDown(gameMesh)){
@@ -183,16 +204,7 @@ class TetrisGame {
       }
     }
 
-    // Wait for the key to be release to continue
-    // If not the key will be registered several times as the
-    // content of the "falling" while loop is traversed quite fast
-    while(~(key=0) & (countDown > 0)){
-      let key = Keyboard.keyPressed();
-      do Sys.wait(1);
-      let countDown = countDown - 1;
-    }
-
-    return countDown;
+    return;
   }
 
   /**
