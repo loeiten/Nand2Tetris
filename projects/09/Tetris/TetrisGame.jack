@@ -86,6 +86,11 @@ class TetrisGame {
     // Create the spawner
     let tetrominoSpawner = TetrominoSpawner.new(frameStartX, frameStartY);
 
+    // FIXME: You are here: Do tests
+    // FIXME: Draw a mesh above spawing and test
+    //        1. Blinking
+    //        2. Collapse
+
     // Run until game over
     while (~gameOver){
       let curTetromino = tetrominoSpawner.getO();
@@ -133,6 +138,7 @@ class TetrisGame {
         else{
           let falling = false;
           do addTetrominoToMesh(curTetromino);
+          do removeFullLines();
         }
       }
     }
@@ -220,6 +226,78 @@ class TetrisGame {
     do gameBackground.draw();
 
     return;
+  }
+
+  /** Remove full lines */
+  method void removeFullLines(){
+    var Array rowsToRemove;
+    var bool removeAnyRow;
+    var int rowNumber;
+
+    let rowsToRemove = getRowsToRemove();
+    let removeAnyRow = false;
+    while((rowNumber < gameBackground.getVisibleRows()) & (~removeAnyRow)){
+      if( rowsToRemove[rowNumber] ){ let removeAnyRow = true; }
+      let rowNumber = rowNumber + 1;
+    }
+
+    if(removeAnyRow){
+      // Let the rows blink
+      do gameBackground.drawRows(rowsToRemove, false);
+      do Sys.wait(50);
+      do gameBackground.drawRows(rowsToRemove, true);
+      do Sys.wait(50);
+      do gameBackground.drawRows(rowsToRemove, false);
+
+      // Collapse full rows
+      do gameBackground.collapse(rowsToRemove);
+    }
+
+    do rowsToRemove.dispose();
+    return;
+  }
+
+  /**
+   * Get rows to remove
+   *
+   * \warning The returned array must be manually destroyed
+   */
+  method Array getRowsToRemove(){
+    var int xInd;  // The x coordinate of the Mesh
+    var int curRow;  // The y coordinate of the Mesh
+
+    var bool foundWhiteSpace;
+    var bool state;
+
+    var Array rowsToRemove;
+    var Mesh backgroundMesh;
+
+
+    let rowsToRemove = Array.new(gameBackground.getVisibleRows());
+    let backgroundMesh = gameBackground.getBackgroundMesh();
+
+    let curRow = gameBackground.getSkipRows();
+
+    // Loop over all visible rows
+    while(curRow < gameBackground.getVisibleRows()){
+      let xInd = 0;
+
+      // Loop over all rows in a column
+      // Reset foundWhiteSpace
+      let foundWhiteSpace = false;
+      while ((xInd < backgroundMesh.getRows()) & (~foundWhiteSpace)){
+        let state = backgroundMesh.getState(xInd, curRow);
+        if(state = 0){ let foundWhiteSpace = true; }
+        let xInd = xInd + 1;
+      }
+
+      // If we didn't find a whitespace, mark the row for removal
+      if(~foundWhiteSpace){ let rowsToRemove[curRow - gameBackground.getSkipRows()] = true; }
+
+      let curRow = curRow + 1;
+    }
+
+    return rowsToRemove;
   }
 
 }

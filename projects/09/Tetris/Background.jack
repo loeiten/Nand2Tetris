@@ -11,6 +11,8 @@ class Background {
   field int meshElementSize;  // The size of a tetromino element
   field int skipRows;  // Number of invisible rows (counting from the top)
   field int meshCols;  // Number of columns in the mesh
+  field int meshRows;  // Number of rows in the mesh
+  field int visibleRows;  // Number of visible rows
 
   field Mesh backgroundMesh;  // Mesh holding the state of each element
 
@@ -22,20 +24,22 @@ class Background {
    * \param meshElementSize_ The size of a tetromino element
    * \param skipRows_ Number of invisible rows (counting from the top)
    * \param meshCols_ Number of columns for the backgroundMesh
-   * \param meshRows Number of rows for the backgroundMesh
+   * \param meshRows_ Number of rows for the backgroundMesh
    */
   constructor Background new(int frameStartX_,
                              int frameStartY_,
                              int meshElementSize_,
                              int skipRows_,
                              int meshCols_,
-                             int meshRows) {
+                             int meshRows_) {
     let frameStartX = frameStartX_;
     let frameStartY = frameStartY_;
     let meshElementSize = meshElementSize_;
 
     let meshCols = meshCols_;
+    let meshRows = meshRows_;
     let skipRows = skipRows_;
+    let visibleRows = meshRows - skipRows;
 
     let backgroundMesh = Mesh.new(meshCols, meshRows);
 
@@ -63,6 +67,11 @@ class Background {
   /** Return the skip rows */
   method int getSkipRows(){
     return skipRows;
+  }
+
+  /** Return the visible rows */
+  method int getVisibleRows(){
+    return visibleRows;
   }
 
   /** Draw the background */
@@ -100,6 +109,94 @@ class Background {
       let index = index + 1;
     }
 
+    return;
+  }
+
+  /**
+   * Draw specific rows with a certain color
+   *
+   * \param rowsToDraw Rows to draw with the color
+   * \param color The color to draw
+   */
+  method void drawRows(Array rowsToDraw, bool color){
+    var int xInd;  // The x coordinate of the Mesh
+    var int curRow;  // The y coordinate of the Mesh
+    var int visibleRow;  // The y coordinate of visible row
+    var bool drawRow;  // Whether or not to draw the row
+    var int xStartPixel;  // The pixel column to start draw a rectangle from
+    var int yStartPixel;  // The pixel row to start draw a rectangle from
+
+    let curRow = skipRows;
+
+    do Screen.setColor(color);
+
+    // Loop over all visible rows
+    while(curRow < visibleRows){
+      let visibleRow = curRow - skipRows;
+      let drawRow = rowsToDraw[visibleRow];
+      if(drawRow){
+        let xInd = 0;
+
+        // Loop over all rows in a column
+        while (xInd < meshRows){
+          let xStartPixel = frameStartX + (meshElementSize*visibleRow) + (2*xInd);
+          let yStartPixel = frameStartY + (meshElementSize*visibleRow) + (2*visibleRow);
+          do Screen.drawRectangle(xStartPixel, yStartPixel, xStartPixel+meshElementSize, yStartPixel+meshElementSize);
+          let xInd = xInd + 1;
+        }
+        let curRow = curRow + 1;
+      }
+    }
+
+    return;
+  }
+
+  /**
+   * Collapse full rows
+   *
+   * \param rowsToCollapse Rows to collapse
+   */
+  method void collapse(Array rowsToCollapse){
+    // We will use the following strategy:
+    // 1. Iterate from the bottom row
+    // 2. When a rowToRemove is encountered:
+    //    a. Iterate from the bottom to the top:
+    //       - If a element has state = true: Set the state of the element below to 0
+
+    var int xInd;  // The x coordinate of the Mesh
+    var int potentialCollapseRow;  // The y coordinate of the row to potentially collapse
+    var int meshRow;  // The y coordinate of the mesh
+
+    let potentialCollapseRow = meshRows;
+    while(potentialCollapseRow > skipRows){
+
+      if(rowsToCollapse[potentialCollapseRow - skipRows]){
+        // Start at the row immediately above the collapsed row
+        let meshRow = potentialCollapseRow + 1;
+        while(meshRow > skipRows){
+          let xInd = 0;
+
+          // Loop over all rows
+          while(xInd < meshRows){
+            if(backgroundMesh.getState(xInd, meshRow)){
+              // Set the element below to true
+              do backgroundMesh.setState(xInd, meshRow - 1, true);
+              // Set the current element to false
+              do backgroundMesh.setState(xInd, meshRow, false);
+            }
+            let xInd = xInd+1;
+          }
+
+          let meshRow = meshRow - 1;
+        }
+
+      }
+
+      let potentialCollapseRow = potentialCollapseRow - 1;
+    }
+
+    // Draw the updated background
+    do draw();
     return;
   }
 
