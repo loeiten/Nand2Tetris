@@ -83,8 +83,6 @@ class TetrisGame {
       let gameOver = ~canSpawn;
     }
 
-    // FIXME: Real mesh must have some rows hidden for user
-
     // We can now free the memory as these are no longer needed
     do curTetromino.dispose();
     do tetrominoSpawner.dispose();
@@ -115,79 +113,28 @@ class TetrisGame {
     let countDown = gameSpeed;
     let falling = true;
     while(falling){
-      // FIXME: Have counter which is updated instead of gameSpeed
-      // FIXME: YOU ARE HERE: Game controls should maybe be here, with a count-down?
-
-
-
 
       // Wait for a key to be pressed
       while((key=0) & (countDown > 0)){
         let key = Keyboard.keyPressed();
 
-        // FIXME:
-        // do Output.moveCursor(0, 30);
-        // do Output.printString("Key: ");
-        // do Output.printInt(key);
-
         do Sys.wait(1);
         let countDown = countDown - 1;
-
-
-        // FIXME: Hack
-        // do Output.moveCursor(7, 30);
-        // do Output.printString("Hey");
-        // if(curTetromino.canMoveDown(gameMesh)){
-        //   do curTetromino.moveDown();
-        //   let countDown = gameSpeed;
-        // }
-        // let key = 130;
-        // do Output.moveCursor(8, 30);
-        // do Output.printString("Ho");
-         // FIXME:
-         // do Output.moveCursor(7, 30);
-         // do Output.printString("countDown: ");
-         // do Output.printInt(countDown);
-         // do Output.moveCursor(8, 30);
-         // do Output.printString("key: ");
-         // do Output.printInt(key);
       }
-      // do Output.moveCursor(9, 30);
-      // do Output.printString("Outside the while loop");
-      // do Output.moveCursor(10, 30);
-      // do Output.printString("countDown: ");
-      // do Output.printInt(countDown);
-      // do Sys.wait(100);
 
-
-
-      //    if (key = 81)  { let exit = true; }     // q key
-      //    if (key = 90)  { do tetris.decSize(); } // z key
-      //    if (key = 88)  { do tetris.incSize(); } // x key
       if (key = 131) { let countDown = 0; }   // up arrow
       if (key = 133) {    // down arrow
         if(curTetromino.canMoveDown(gameMesh)){
           do curTetromino.moveDown();
         }
       }
-
-      // do Output.moveCursor(9, 30);
-      // do Output.printString("Lo");
       if (key = 130) { // left arrow
-        // do Output.moveCursor(10, 30);
-        // do Output.printString("Bo");
         if(curTetromino.canMoveLeft(gameMesh)){
-          // do Output.moveCursor(11, 30);
-          // do Output.printString("Do");
           do curTetromino.moveLeft();
         }
       }
-      // FIXME:
-      // do Sys.wait(500);
       if (key = 132) {    // right arrow
         if(curTetromino.canMoveRight(gameMesh)){
-          // do Output.moveCursor(11, 30);
-          // do Output.printString("Do");
           do curTetromino.moveRight();
         }
       }
@@ -216,23 +163,6 @@ class TetrisGame {
             let gameYInd = curTetromino.getRelativeMeshY() + tetrominoIndexArray[1];
             do gameMesh.setState(gameXInd, gameYInd, true);
             let index = index + 1;
-          // FIXME:
-          // do Output.moveCursor(7, 30);
-          // do Output.printString("index: ");
-          // do Output.printInt(index);
-          // do Output.moveCursor(8, 30);
-          // do Output.printString("tetrominoIndexArray[0]: ");
-          // do Output.printInt(tetrominoIndexArray[0]);
-          // do Output.moveCursor(9, 30);
-          // do Output.printString("tetrominoIndexArray[1]: ");
-          // do Output.printInt(tetrominoIndexArray[1]);
-          // do Output.moveCursor(10, 30);
-          // do Output.printString("gameXInd: ");
-          // do Output.printInt(gameXInd);
-          // do Output.moveCursor(11, 30);
-          // do Output.printString("gameYInd: ");
-          // do Output.printInt(gameYInd);
-          // do Sys.wait(1000);
           }
           do gameFrame.draw(gameMesh);
         }

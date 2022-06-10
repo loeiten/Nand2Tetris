@@ -2,7 +2,7 @@
  * Implements the Frame class
  */
 
- class Frame {
+class Frame {
   field int frameStartX;
   field int frameStartY;
   field int meshElementSize;
@@ -21,7 +21,6 @@
   }
 
   method void draw(Mesh frameMesh){
-    // FIXME: Some rows should not be drawn (e.g. spawn area)
     var int index;
     var Array indices;
     var int xInd;
@@ -29,7 +28,6 @@
     var int xStartPixel;
     var int yStartPixel;
     var bool state;
-
 
     // NOTE: The mesh is 40x10 according to the guidelines, however, rows above
     //       20 is hidden
@@ -48,29 +46,6 @@
       let xStartPixel = frameStartX + (meshElementSize*xInd) + (2*xInd);
       let yStartPixel = frameStartY + (meshElementSize*yInd) + (2*yInd);
 
-
-      // FIXME:
-      // do Output.moveCursor(1, 30);
-      // do Output.printString("index: ");
-      // do Output.printInt(index);
-      // do Output.moveCursor(2, 30);
-      // do Output.printString("xInd: ");
-      // do Output.printInt(xInd);
-      // do Output.moveCursor(3, 30);
-      // do Output.printString("yInd: ");
-      // do Output.printInt(yInd);
-      // do Output.moveCursor(4, 30);
-      // do Output.printString("meshElementSize: ");
-      // do Output.printInt(meshElementSize);
-      // do Output.moveCursor(5, 30);
-      // do Output.printString("frameStartX: ");
-      // do Output.printInt(frameStartX);
-      // do Output.moveCursor(6, 30);
-      // do Output.printString("frameStartY: ");
-      // do Output.printInt(frameStartY);
-      // do Output.moveCursor(7, 30);
-      // do Sys.wait(100);
-
       do Screen.setColor(state);
       do Screen.drawRectangle(xStartPixel, yStartPixel, xStartPixel+meshElementSize, yStartPixel+meshElementSize);
 
@@ -82,4 +57,4 @@
     return;
   }
 
- }
+}

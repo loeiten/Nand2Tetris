@@ -19,10 +19,6 @@
     let frameStartX = frameStartX_;
     let frameStartY = frameStartY_;
 
-      // FIXME:
-      //   do Output.moveCursor(6, 30);
-      //   do Output.printString("relativeMeshX at ctor: ");
-      //   do Output.printInt(relativeMeshX);
     return this;
   }
 
@@ -32,7 +28,6 @@
     return;
   }
 
-// FIXME:
   method void rotate(){
     return;
   }
@@ -83,30 +78,11 @@
         return false;
       }
 
-      // FIXME:
-      // do Output.moveCursor(9, 30);
-      // do Output.printString("tetrominoMeshIndex: ");
-      // do Output.printInt(tetrominoMeshIndex);
-      // do Output.moveCursor(10, 30);
-      // do Output.printString("gameYInd: ");
-      // do Output.printInt(gameYInd);
-      // do Output.moveCursor(11, 30);
-      // do Output.printString("newRelativeMeshY: ");
-      // do Output.printInt(newRelativeMeshY);
-      // do Output.moveCursor(12, 30);
-      // do Output.printString("tetrominoYIndex: ");
-      // do Output.printInt(tetrominoYIndex);
-      // do Output.moveCursor(13, 30);
-      // do Output.printString("gameMesh.getRows(): ");
-      // do Output.printInt(gameMesh.getRows());
-      // do Sys.wait(10);
       // -1 as gameYInd counts from 0
       if (gameYInd > (gameMesh.getRows() - 1)){
         // do Output.printString("NOT");
         return false;
       }
-      // do Output.moveCursor(14, 30);
-      // do Output.printString("Pass");
 
       // Check whether we would collide
       if (gameMesh.getState(gameXInd, gameYInd)){
@@ -128,10 +104,6 @@
     var int newRelativeMeshX;
 
     let newRelativeMeshX = relativeMeshX - 1;
-      // FIXME:
-      //   do Output.moveCursor(8, 30);
-      //   do Output.printString("relativeMeshX at input: ");
-      //   do Output.printInt(relativeMeshX);
     return canBePlaced(gameMesh, newRelativeMeshX, relativeMeshY);
   }
 
@@ -150,23 +122,8 @@
   }
 
   method void moveLeft(){
-
-      // FIXME:
-      //   do Output.moveCursor(9, 30);
-      //   do Output.printString("relativeMeshX before erase: ");
-      //   do Output.printInt(relativeMeshX);
     do erase();
-
-      // FIXME:
-      //   do Output.moveCursor(10, 30);
-      //   do Output.printString("relativeMeshX: ");
-      //   do Output.printInt(relativeMeshX);
     let relativeMeshX = relativeMeshX - 1;
-
-      // FIXME:
-      //   do Output.moveCursor(11, 30);
-      //   do Output.printString("relativeMeshX after change: ");
-      //   do Output.printInt(relativeMeshX);
     do draw();
     return;
   }
@@ -192,7 +149,6 @@
   }
 
   method void draw(){
-    // FIXME: Some rows should not be drawn (e.g. spawn area)
     var int index;
     var Array indices;
     var int xInd;
@@ -200,14 +156,6 @@
     var int xStartPixel;
     var int yStartPixel;
     var bool state;
-
-      // FIXME:
-      //   do Output.moveCursor(7, 30);
-      //   do Output.printString("relativeMeshX at draw: ");
-      //   do Output.printInt(relativeMeshX);
-
-
-
 
     let index = 0;
     while (index < tetrominoMesh.getMeshLenght()){
@@ -227,21 +175,6 @@
         let xStartPixel = frameStartX + (tetrominoElementSize*xInd) + (2*xInd);
         let yStartPixel = frameStartY + (tetrominoElementSize*yInd) + (2*yInd);
 
-        // FIXME:
-        // do Output.moveCursor(3, 30);
-        // do Output.printString("yStartPixel :");
-        // do Output.printInt(yStartPixel);
-        // do Output.moveCursor(4, 30);
-        // do Output.printString("relativeMeshY :");
-        // do Output.printInt(relativeMeshY);
-        // do Output.moveCursor(5, 30);
-        // do Output.printString("frameStartY: ");
-        // do Output.printInt(frameStartY);
-        // do Output.moveCursor(6, 30);
-        // do Output.printString("yInd :");
-        // do Output.printInt(yInd);
-        // do Output.moveCursor(7, 30);
-
         do Screen.setColor(state);
         do Screen.drawRectangle(xStartPixel, yStartPixel, xStartPixel+tetrominoElementSize, yStartPixel+tetrominoElementSize);
       }
@@ -253,7 +186,6 @@
   }
 
   method void erase(){
-    // FIXME: Some rows should not be drawn (e.g. spawn area)
     var int index;
     var Array indices;
     var int xInd;
