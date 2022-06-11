@@ -91,6 +91,72 @@ class TetrisGame {
     //        1. Blinking
     //        2. Collapse
 
+    // Remove
+    do gameMesh.setState(0, 38, true);
+    do gameMesh.setState(1, 38, true);
+    do gameMesh.setState(2, 38, true);
+    do gameMesh.setState(3, 38, true);
+    do gameMesh.setState(4, 38, true);
+    do gameMesh.setState(5, 38, true);
+    do gameMesh.setState(6, 38, true);
+    do gameMesh.setState(7, 38, true);
+    do gameMesh.setState(8, 38, true);
+    do gameMesh.setState(9, 38, true);
+
+    do gameMesh.setState(1, 37, true);
+    do gameMesh.setState(2, 37, true);
+    do gameMesh.setState(4, 37, true);
+    do gameMesh.setState(5, 37, true);
+    do gameMesh.setState(6, 37, true);
+    do gameMesh.setState(8, 37, true);
+    do gameMesh.setState(9, 37, true);
+
+    do gameMesh.setState(0, 36, true);
+    do gameMesh.setState(1, 36, true);
+    do gameMesh.setState(2, 36, true);
+    do gameMesh.setState(4, 36, true);
+    do gameMesh.setState(7, 36, true);
+    do gameMesh.setState(8, 36, true);
+    do gameMesh.setState(9, 36, true);
+
+    // Remove
+    do gameMesh.setState(0, 35, true);
+    do gameMesh.setState(1, 35, true);
+    do gameMesh.setState(2, 35, true);
+    do gameMesh.setState(3, 35, true);
+    do gameMesh.setState(4, 35, true);
+    do gameMesh.setState(5, 35, true);
+    do gameMesh.setState(6, 35, true);
+    do gameMesh.setState(7, 35, true);
+    do gameMesh.setState(8, 35, true);
+    do gameMesh.setState(9, 35, true);
+
+    // Remove
+    do gameMesh.setState(0, 34, true);
+    do gameMesh.setState(1, 34, true);
+    do gameMesh.setState(2, 34, true);
+    do gameMesh.setState(3, 34, true);
+    do gameMesh.setState(4, 34, true);
+    do gameMesh.setState(5, 34, true);
+    do gameMesh.setState(6, 34, true);
+    do gameMesh.setState(7, 34, true);
+    do gameMesh.setState(8, 34, true);
+    do gameMesh.setState(9, 34, true);
+
+    do gameMesh.setState(0, 33, true);
+    do gameMesh.setState(2, 33, true);
+    do gameMesh.setState(3, 33, true);
+    do gameMesh.setState(4, 33, true);
+    do gameMesh.setState(5, 33, true);
+    do gameMesh.setState(6, 33, true);
+    do gameMesh.setState(8, 33, true);
+    do gameMesh.setState(9, 33, true);
+    do gameBackground.draw();
+
+
+
+
+
     // Run until game over
     while (~gameOver){
       let curTetromino = tetrominoSpawner.getO();
@@ -243,28 +309,43 @@ class TetrisGame {
   /** Remove full lines */
   method void removeFullLines(){
     var Array rowsToRemove;
-    var bool removeAnyRow;
+    var int nRowsToRemove;
     var int rowNumber;
+    var int blinkSpeed;
+
+    let blinkSpeed = 150;
 
     let rowsToRemove = getRowsToRemove();
-    let removeAnyRow = false;
-    while((rowNumber < gameBackground.getVisibleRows()) & (~removeAnyRow)){
-      if( rowsToRemove[rowNumber] ){ let removeAnyRow = true; }
+    while(rowNumber < gameBackground.getVisibleRows()){
+      if(rowsToRemove[rowNumber]){
+        let nRowsToRemove = nRowsToRemove + 1;
+      }
       let rowNumber = rowNumber + 1;
     }
 
-    if(removeAnyRow){
+    // FIXME:
+    do Output.moveCursor(3, 30);
+    do Output.printString("nRowsToRemove: ");
+    do Output.printInt(nRowsToRemove);
+
+    // FIXME: YOU ARE HERE: ONLY TIME TO BLINK IS TETRIS
+    // FIXME: YOU ARE HERE: Animate removal: From center and out
+    if(nRowsToRemove > 0){
       // Let the rows blink
       do gameBackground.drawRows(rowsToRemove, false);
-      do Sys.wait(50);
+      do Sys.wait(blinkSpeed);
       do gameBackground.drawRows(rowsToRemove, true);
-      do Sys.wait(50);
+      do Sys.wait(blinkSpeed);
       do gameBackground.drawRows(rowsToRemove, false);
+      do Sys.wait(blinkSpeed);
+      do gameBackground.drawRows(rowsToRemove, true);
 
+      // FIXME: YOU ARE HERE: Row collapse is bad, check rows and cols are correct
       // Collapse full rows
       do gameBackground.collapse(rowsToRemove);
     }
 
+    // Created in getRowsToRemove
     do rowsToRemove.dispose();
     return;
   }
@@ -284,27 +365,30 @@ class TetrisGame {
     var Array rowsToRemove;
     var Mesh backgroundMesh;
 
-
     let rowsToRemove = Array.new(gameBackground.getVisibleRows());
     let backgroundMesh = gameBackground.getBackgroundMesh();
 
     let curRow = gameBackground.getSkipRows();
 
     // Loop over all visible rows
-    while(curRow < gameBackground.getVisibleRows()){
+    while(curRow < gameBackground.getMeshRows()){
       let xInd = 0;
 
       // Loop over all rows in a column
       // Reset foundWhiteSpace
       let foundWhiteSpace = false;
-      while ((xInd < backgroundMesh.getRows()) & (~foundWhiteSpace)){
+      while ((xInd < backgroundMesh.getCols()) & (~foundWhiteSpace)){
         let state = backgroundMesh.getState(xInd, curRow);
-        if(state = 0){ let foundWhiteSpace = true; }
+        if(state = 0){
+          let foundWhiteSpace = true;
+        }
         let xInd = xInd + 1;
       }
 
       // If we didn't find a whitespace, mark the row for removal
-      if(~foundWhiteSpace){ let rowsToRemove[curRow - gameBackground.getSkipRows()] = true; }
+      if(~foundWhiteSpace){
+        let rowsToRemove[curRow - gameBackground.getSkipRows()] = true;
+      }
 
       let curRow = curRow + 1;
     }

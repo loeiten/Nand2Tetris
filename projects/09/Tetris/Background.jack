@@ -64,6 +64,11 @@ class Background {
     return backgroundMesh;
   }
 
+  /** Return the number of rows in the Mesh*/
+  method int getMeshRows(){
+    return meshRows;
+  }
+
   /** Return the skip rows */
   method int getSkipRows(){
     return skipRows;
@@ -131,21 +136,22 @@ class Background {
     do Screen.setColor(color);
 
     // Loop over all visible rows
-    while(curRow < visibleRows){
+    while(curRow < meshRows){
       let visibleRow = curRow - skipRows;
       let drawRow = rowsToDraw[visibleRow];
+
       if(drawRow){
         let xInd = 0;
 
         // Loop over all rows in a column
-        while (xInd < meshRows){
-          let xStartPixel = frameStartX + (meshElementSize*visibleRow) + (2*xInd);
+        while (xInd < meshCols){
+          let xStartPixel = frameStartX + (meshElementSize*xInd) + (2*xInd);
           let yStartPixel = frameStartY + (meshElementSize*visibleRow) + (2*visibleRow);
           do Screen.drawRectangle(xStartPixel, yStartPixel, xStartPixel+meshElementSize, yStartPixel+meshElementSize);
           let xInd = xInd + 1;
         }
-        let curRow = curRow + 1;
       }
+      let curRow = curRow + 1;
     }
 
     return;
