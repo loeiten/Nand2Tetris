@@ -10,12 +10,8 @@
  * - Draw and erase the tetromino within another mesh
  */
 class Tetromino {
-  field int relativeMeshX;  // x-coordinate in a different mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
-  field int relativeMeshY;  // y-coordinate in a different mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
-  field int tetrominoElementSize;  // Size of a tetromino element
-  field int skipRows; // The number of rows not showing
-  field int frameStartX;  // The pixel column for the start of the background
-  field int frameStartY;  // The pixel row for the start of the background
+  field int relativeXInd;  // x-coordinate in the background mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
+  field int relativeYInd;  // y-coordinate in the background mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
 
   field Mesh tetrominoMesh;  // The mesh of the tetromino itself
 
@@ -23,29 +19,19 @@ class Tetromino {
    * Construct the tetromino
    *
    * \param tetrominoMesh_ The mesh of the tetromino itself
-   * \param relativeMeshX_ x-coordinate in a different mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
-   * \param relativeMeshY_ y-coordinate in a different mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
+   * \param relativeXInd_ x-coordinate in the background mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
+   * \param relativeYInd_ y-coordinate in the background mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
    * \param tetrominoElementSize_ Size of a tetromino element
-   * \param skipRows_ The number of rows not showing
-   * \param frameStartX_ The pixel column for the start of the background
-   * \param frameStartY_ The pixel row for the start of the background
    */
+   // FIXME: skipRows not needed when have relative mesh
   constructor Tetromino new(Mesh tetrominoMesh_,
-                            int relativeMeshX_,
-                            int relativeMeshY_,
-                            int tetrominoElementSize_,
-                            int skipRows_,
-                            int frameStartX_,
-                            int frameStartY_) {
+                            int relativeXInd_,
+                            int relativeYInd_,
+                            int tetrominoElementSize_) {
     let tetrominoMesh = tetrominoMesh_;
 
-    let relativeMeshX = relativeMeshX_;
-    let relativeMeshY = relativeMeshY_;
-    let tetrominoElementSize = tetrominoElementSize_;
-    let skipRows = skipRows_;
-
-    let frameStartX = frameStartX_;
-    let frameStartY = frameStartY_;
+    let relativeXInd = relativeXInd_;
+    let relativeYInd = relativeYInd_;
 
     return this;
   }
@@ -73,13 +59,14 @@ class Tetromino {
   /**
    * Return true if it's possible to spawn the tetromino in the gameMesh
    *
-   * \param gameMesh The gameMesh
+   * \param gameBackground The game background
    * \return true if it's possible to spawn the tetromino
    */
-  method bool canSpawn(Mesh gameMesh){
+   // FIXME: Must change to background, from there can get the mesh
+  method bool canSpawn(Background gameBackground){
     var bool canBeSpawn;
 
-    let canBeSpawn = canBePlaced(gameMesh, relativeMeshX, relativeMeshY);
+    let canBeSpawn = canBePlaced(gameBackground.getBackgroundMesh(), relativeXInd, relativeYInd);
 
     if(canBeSpawn){
       do draw();
@@ -93,11 +80,11 @@ class Tetromino {
    * Return true if it's possible to place the tetromino with the new coordinates in the gameMesh
    *
    * \param gameMesh The gameMesh
-   * \param newRelativeMeshX The new x-coordinate in the gameMesh
-   * \param newRelativeMeshY The new y-coordinate in the gameMesh
+   * \param newrelativeXInd The new x-coordinate in the gameMesh
+   * \param newrelativeYInd The new y-coordinate in the gameMesh
    * \return true if it's possible to place the tetromino
    */
-  method bool canBePlaced(Mesh gameMesh, int newRelativeMeshX, int newRelativeMeshY){
+  method bool canBePlaced(Mesh gameMesh, int newrelativeXInd, int newrelativeYInd){
     var int tetrominoMeshIndex;
     var int tetrominoXIndex;
     var int tetrominoYIndex;
@@ -111,8 +98,8 @@ class Tetromino {
       let tetrominoXIndex = tetrominoIndices[0];
       let tetrominoYIndex = tetrominoIndices[1];
 
-      let gameXInd = newRelativeMeshX + tetrominoXIndex;
-      let gameYInd = newRelativeMeshY + tetrominoYIndex;
+      let gameXInd = newrelativeXInd + tetrominoXIndex;
+      let gameYInd = newrelativeYInd + tetrominoYIndex;
 
       // Check that x is within limits
       if (gameXInd < 0){ return false; }
@@ -135,15 +122,15 @@ class Tetromino {
   /**
    * Return true if it's possible to move the tetromino down in the gameMesh
    *
-   * \param gameMesh The gameMesh
+   * \param gameMesh The game mesh
    * \return true if it's possible to move the tetromino down
    */
   method bool canMoveDown(Mesh gameMesh){
-    var int newRelativeMeshY;
+    var int newrelativeYInd;
     var bool canPlace;
 
-    let newRelativeMeshY = relativeMeshY + 1;
-    let canPlace = canBePlaced(gameMesh, relativeMeshX, newRelativeMeshY);
+    let newrelativeYInd = relativeYInd + 1;
+    let canPlace = canBePlaced(gameMesh, relativeXInd, newrelativeYInd);
 
     return canPlace;
   }
@@ -151,53 +138,53 @@ class Tetromino {
   /**
    * Return true if it's possible to move the tetromino to the left in the gameMesh
    *
-   * \param gameMesh The gameMesh
+   * \param gameMesh The game mesh
    * \return true if it's possible to move the tetromino to the left
    */
   method bool canMoveLeft(Mesh gameMesh){
-    var int newRelativeMeshX;
+    var int newrelativeXInd;
     var bool canPlace;
 
-    let newRelativeMeshX = relativeMeshX - 1;
-    let canPlace = canBePlaced(gameMesh, newRelativeMeshX, relativeMeshY);
+    let newrelativeXInd = relativeXInd - 1;
+    let canPlace = canBePlaced(gameMesh, newrelativeXInd, relativeYInd);
     return canPlace;
   }
 
   /**
    * Return true if it's possible to move the tetromino to the right in the gameMesh
    *
-   * \param gameMesh The gameMesh
+   * \param gameMesh The game mesh
    * \return true if it's possible to move the tetromino to the right
    */
   method bool canMoveRight(Mesh gameMesh){
-    var int newRelativeMeshX;
+    var int newrelativeXInd;
     var bool canPlace;
 
-    let newRelativeMeshX = relativeMeshX + 1;
-    let canPlace = canBePlaced(gameMesh, newRelativeMeshX, relativeMeshY);
+    let newrelativeXInd = relativeXInd + 1;
+    let canPlace = canBePlaced(gameMesh, newrelativeXInd, relativeYInd);
     return canPlace;
   }
 
-  /** Move the tetromino down in the gameMesh */
+  /** Move the tetromino down in the game mesh */
   method void moveDown(){
     do erase();
-    let relativeMeshY = relativeMeshY + 1;
+    let relativeYInd = relativeYInd + 1;
     do draw();
     return;
   }
 
-  /** Move the tetromino to the left in the gameMesh */
+  /** Move the tetromino to the left in the game mesh */
   method void moveLeft(){
     do erase();
-    let relativeMeshX = relativeMeshX - 1;
+    let relativeXInd = relativeXInd - 1;
     do draw();
     return;
   }
 
-  /** Move the tetromino to the right in the gameMesh */
+  /** Move the tetromino to the right in the game mesh */
   method void moveRight(){
     do erase();
-    let relativeMeshX = relativeMeshX + 1;
+    let relativeXInd = relativeXInd + 1;
     do draw();
     return;
   }
@@ -207,88 +194,14 @@ class Tetromino {
     return tetrominoMesh;
   }
 
-  /** Return relativeMeshX */
-  method int getRelativeMeshX(){
-    return relativeMeshX;
+  /** Return relativeXInd */
+  method int getRelativeXInd(){
+    return relativeXInd;
   }
 
-  /** Return relativeMeshY */
-  method int getRelativeMeshY(){
-    return relativeMeshY;
-  }
-
-  /** Draw the tetromino in the gameMesh */
-  method void draw(){
-    var int index;  // Index representing the tetromino element
-    var int xInd;  // The x coordinate of either the tetrominoMesh or the gameMesh
-    var int yInd;  // The y coordinate of either the tetrominoMesh or the gameMesh
-    var int xStartPixel;  // The pixel column to start draw a rectangle from
-    var int yStartPixel;  // The pixel row to start draw a rectangle from
-
-    var bool state;  // State of the current tetromino element
-
-    // Will be destroyed by the Mesh
-    var Array coordinates;  // Array holding the (x, y) coordinate of the Mesh
-
-    let index = 0;
-    while (index < tetrominoMesh.getMeshLength()){
-      // Reference system is tetromino
-      let coordinates = tetrominoMesh.getMeshIndices(index);
-      let xInd = coordinates[0];
-      let yInd = coordinates[1];
-      let state = tetrominoMesh.getState(xInd, yInd);
-
-      // Reference system is relativeMesh
-      let xInd = relativeMeshX + coordinates[0];
-      // Subtract skip rows
-      let yInd = relativeMeshY - skipRows + coordinates[1];
-
-      // Only draw if termino is within the frame
-      if(yInd > -1){
-        let xStartPixel = frameStartX + (tetrominoElementSize*xInd) + (2*xInd);
-        let yStartPixel = frameStartY + (tetrominoElementSize*yInd) + (2*yInd);
-
-        do Screen.setColor(state);
-        do Screen.drawRectangle(xStartPixel, yStartPixel, xStartPixel+tetrominoElementSize, yStartPixel+tetrominoElementSize);
-      }
-      let index = index + 1;
-    }
-    return;
-  }
-
-  /** Erase the tetromino in the gameMesh */
-  method void erase(){
-    var int index;  // Index representing the tetromino element
-    var int xInd;  // The x coordinate of either the tetrominoMesh or the gameMesh
-    var int yInd;  // The y coordinate of either the tetrominoMesh or the gameMesh
-    var int xStartPixel;  // The pixel column to start draw a rectangle from
-    var int yStartPixel;  // The pixel row to start draw a rectangle from
-
-    var bool state;  // State of the current tetromino element
-
-    // Will be destroyed by the tetromino
-    var Array coordinates;  // Array holding the (x, y) coordinate of the Mesh
-
-    let index = 0;
-    while (index < tetrominoMesh.getMeshLength()){
-      // Reference system is relativeMesh
-      let coordinates = tetrominoMesh.getMeshIndices(index);
-      let xInd = relativeMeshX + coordinates[0];
-      // Subtract skip rows
-      let yInd = relativeMeshY - skipRows + coordinates[1];
-
-      // Only erase if termino is within the frame
-      if(yInd > -1){
-        let xStartPixel = frameStartX + (tetrominoElementSize*xInd) + (2*xInd);
-        let yStartPixel = frameStartY + (tetrominoElementSize*yInd) + (2*yInd);
-
-        do Screen.setColor(false);
-        do Screen.drawRectangle(xStartPixel, yStartPixel, xStartPixel+tetrominoElementSize, yStartPixel+tetrominoElementSize);
-      }
-
-      let index = index + 1;
-    }
-    return;
+  /** Return relativeYInd */
+  method int getRelativeYInd(){
+    return relativeYInd;
   }
 
 }

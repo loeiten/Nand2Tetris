@@ -6,34 +6,12 @@
  * Class for spawing tetrominos
  */
 class TetrominoSpawner {
-  field int frameStartX;  // Pixel column to start drawing the tetromino from
-  field int frameStartY;  // Pixel row to start drawing the tetromino from
-
-  /**
-   * Construct the spawner
-   *
-   * \param frameStartX_ The pixel column for the start of the background
-   * \param frameStartY_ The pixel row for the start of the background
-   */
-  constructor TetrominoSpawner new(int frameStartX_, int frameStartY_){
-    let frameStartX = frameStartX_;
-    let frameStartY = frameStartY_;
-
-    return this;
-  }
-
-  /** Dispose this */
-  method void dispose(){
-    do Memory.deAlloc(this);
-    return;
-  }
-
   /**
    * Return the O tetromino
    *
    * \warning The tetromino must be manually destroyed
    */
-  method Tetromino getO(){
+  function Tetromino getO(){
     // NOTE: The tetromino mesh is destroyed by the tetromino itself, so we will not destroy it here
     var Mesh tetrominoMesh;
     var Tetromino tetromino;
@@ -46,9 +24,7 @@ class TetrominoSpawner {
                                   4,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
                                   19, // y-coodrinate in the gameMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
                                   10, // Element size
-                                  20, // Skip rows
-                                  frameStartX + 2, // frame start +1 for padding, +1 for next line
-                                  frameStartY + 2 // frame start +1 for padding, +1 for next line
+                                  20 // Skip rows
                                  );
 
     return tetromino;

@@ -4,9 +4,6 @@
 
 /** Class responsible for updating the model of the game */
 class TetrisGame {
-  field int frameStartX;  // The pixel column for the start of the background
-  field int frameStartY;  // The pixel row for the start of the background
-  field int meshElementSize;  // The size of a tetromino element
   field int gameSpeed;  // Speed of the game
 
   field Background gameBackground;  // The game background
@@ -21,39 +18,25 @@ class TetrisGame {
    * - Initialize the background
    */
   constructor TetrisGame new() {
-    var int xLen;
-    var int yLen;
-
     // Set initial game speed
+    // FIXME: Make game speed work with level
     let gameSpeed = 500;
 
-    // Size of tetrominos
-    let meshElementSize = 10;
-
-    // Set background frame coordinates
-    let frameStartX = 1;
-    let frameStartY = 6;
-    let xLen = 122;
-    let yLen = 242;  // 240 + 1 for next line + 1 for frame line
-
-    // Draw background frame
-    do Screen.setColor(true);
-    do Screen.drawLine(frameStartX, frameStartY, frameStartX + xLen, frameStartY);
-    do Screen.drawLine(frameStartX, frameStartY, frameStartX, frameStartY + yLen);
-    do Screen.drawLine(frameStartX + xLen, frameStartY, frameStartX + xLen, frameStartY + yLen);
-    do Screen.drawLine(frameStartX, frameStartY + yLen, frameStartX + xLen, frameStartY + yLen);
-
-    // Initialize the background
+    // FIXME: YOU ARE HERE: Refactor drawing on mesh to be relative to background
+    // Initialize the background (see README.md for calculation)
     // NOTE: The mesh is 40 according to
     // https://tetris.fandom.com/wiki/Tetris_Guideline#List_of_rules_(as_of_2009)
-    let gameBackground = Background.new(frameStartX + 2,  // frameStartX_
-                                        frameStartY + 2,  // frameStartY_
-                                        meshElementSize,      // meshElementSize_
-                                        20,               // skipRows_
-                                        10,               // meshCols
-                                        40                // meshRows
+    let gameBackground = Background.new(1,   // frameStartX_
+                                        6,   // frameStartY_
+                                        122, // frameLenX_
+                                        242, // frameLenY_ (240 + 1 for next line + 1 for frame line)
+                                        10,  // tetrominoElementSize_
+                                        20,  // skipRows_
+                                        10,  // meshCols_
+                                        40   // meshRows_
                                         );
     let gameMesh = gameBackground.getBackgroundMesh();
+    do gameBackground.drawFrame();
 
     return this;
   }
@@ -87,9 +70,6 @@ class TetrisGame {
     var int testRow;
     var int testCol;
     let testRow = 39;
-
-    // Create the spawner
-    let tetrominoSpawner = TetrominoSpawner.new(frameStartX, frameStartY);
 
     // FIXME: TestMesh
     while(testRow > 28){
@@ -143,9 +123,6 @@ class TetrisGame {
       // Dispose the current tetromino
       do curTetromino.dispose();
     }
-
-    // Dispose the spawner
-    do tetrominoSpawner.dispose();
 
     // Display game over
     do Output.moveCursor(11, 2);
@@ -294,7 +271,6 @@ class TetrisGame {
       let rowNumber = rowNumber + 1;
     }
 
-    // FIXME: YOU ARE HERE: Refactor all draws to be relative to background
     if(nRowsToRemove > 0){
       if (nRowsToRemove > 3){
         // Let the rows blink on Tetris

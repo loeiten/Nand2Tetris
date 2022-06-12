@@ -6,9 +6,13 @@
  * The background is the location where all inactive tetrominos are drawn
  */
 class Background {
-  field int frameStartX;  // The pixel column for the start of the background
-  field int frameStartY;  // The pixel row for the start of the background
-  field int meshElementSize;  // The size of a tetromino element
+  field int frameStartX;  // The pixel column for the start of the frame
+  field int frameStartY;  // The pixel row for the start of the frame
+  field int tetrominoStartX;  // The pixel column for the start of the tetromino
+  field int tetrominoStartY;  // The pixel row for the start of the tetromino
+  field int frameLenX;  // The length of the frame in the x direction
+  field int frameLenY;  // The length of the frame in the y direction
+  field int tetrominoElementSize;  // The size of a tetromino element
   field int skipRows;  // Number of invisible rows (counting from the top)
   field int meshCols;  // Number of columns in the mesh
   field int meshRows;  // Number of rows in the mesh
@@ -21,20 +25,32 @@ class Background {
    *
    * \param frameStartX_ The pixel column for the start of the background
    * \param frameStartY_ The pixel row for the start of the background
-   * \param meshElementSize_ The size of a tetromino element
+   * \param frameLenX_ The length of the frame in the x direction
+   * \param frameLenY_ The length of the frame in the y direction
+   * \param tetrominoElementSize_ The size of a tetromino element
    * \param skipRows_ Number of invisible rows (counting from the top)
    * \param meshCols_ Number of columns for the backgroundMesh
    * \param meshRows_ Number of rows for the backgroundMesh
    */
   constructor Background new(int frameStartX_,
                              int frameStartY_,
-                             int meshElementSize_,
+                             int frameLenX_,
+                             int frameLenY_,
+                             int tetrominoElementSize_,
                              int skipRows_,
                              int meshCols_,
                              int meshRows_) {
     let frameStartX = frameStartX_;
     let frameStartY = frameStartY_;
-    let meshElementSize = meshElementSize_;
+
+    // The start of the tetromino is +1 padding and +1 for the line
+    let tetrominoStartX = frameStartX + 2;
+    let tetrominoStartY = frameStartY + 2;
+
+    let frameLenX = frameLenX_;
+    let frameLenY = frameLenY_;
+
+    let tetrominoElementSize = tetrominoElementSize_;
 
     let meshCols = meshCols_;
     let meshRows = meshRows_;
@@ -79,13 +95,33 @@ class Background {
     return visibleRows;
   }
 
-  /** Draw the background */
-  method void draw(){
+  /** Draw the frame */
+  method void drawFrame(){
+    // Draw background frame
+    do Screen.setColor(true);
+    do Screen.drawLine(frameStartX, frameStartY, frameStartX + frameLenX, frameStartY);
+    do Screen.drawLine(frameStartX, frameStartY, frameStartX, frameStartY + frameLenY);
+    do Screen.drawLine(frameStartX + frameLenX, frameStartY, frameStartX + frameLenX, frameStartY + frameLenY);
+    do Screen.drawLine(frameStartX, frameStartY + frameLenY, frameStartX + frameLenX, frameStartY + frameLenY);
+
+    return;
+  }
+
+  /**
+   * Draw a mesh on the background
+   *
+   * \param erase Draw with color false even if state is true
+   * \param mesh The Mesh to draw on the background
+   * \param relativeXInd The x index of the input mesh relative to the background (counted from the top left)
+   * \param relativeYInd The y index of the input mesh relative to the background (counted from the top left)
+   */
+  // FIXME: Input introduced as part of refactor
+  method void drawMesh(bool erase, Mesh mesh, int relativeXInd, int relativeYInd){
     var int index;  // Index representing the Mesh element
     var int xInd;  // The x coordinate of the Mesh
     var int yInd;  // The y coordinate of the Mesh
-    var int xStartPixel;  // The pixel column to start draw a rectangle from
-    var int yStartPixel;  // The pixel row to start draw a rectangle from
+    var int startPixelX;  // The pixel column to start draw a rectangle from
+    var int startPixelY;  // The pixel row to start draw a rectangle from
 
     var bool state;  // State of the current Mesh element
 
@@ -101,15 +137,29 @@ class Background {
       // NOTE: We need the actual y-coordinate to get the state
       let state = backgroundMesh.getState(xInd, yInd);
 
-      // NOTE: Since both our abstract Mesh and our display start counting rows
-      //       from 0, we must subtract skipRows in order not to draw the
-      //       rectangle out of range
-      let yInd = yInd - skipRows;
-      let xStartPixel = frameStartX + (meshElementSize*xInd) + (2*xInd);
-      let yStartPixel = frameStartY + (meshElementSize*yInd) + (2*yInd);
+      // NOTE: We only draw the active part of the mesh as the inactive part
+      //       may overlap with the background
+      if(state){
+        // Add the relative indices
+        let xInd = relativeXInd + xInd;
+        // NOTE: Since both our abstract Mesh and our display start counting rows
+        //       from 0, we must subtract skipRows in order not to draw the
+        //       rectangle out of range
+        let yInd = relativeYInd + yInd - skipRows;
 
-      do Screen.setColor(state);
-      do Screen.drawRectangle(xStartPixel, yStartPixel, xStartPixel+meshElementSize, yStartPixel+meshElementSize);
+        let startPixelX = tetrominoStartX + (tetrominoElementSize*xInd) + (2*xInd);
+        let startPixelY = tetrominoStartY + (tetrominoElementSize*yInd) + (2*yInd);
+
+        if(erase){
+          do Screen.setColor(false);
+        } else {
+          do Screen.setColor(state);
+        }
+        do Screen.drawRectangle(startPixelX,
+                                startPixelY,
+                                startPixelX+tetrominoElementSize,
+                                startPixelY+tetrominoElementSize);
+      }
 
       let index = index + 1;
     }
@@ -128,8 +178,8 @@ class Background {
     var int curRow;  // The y coordinate of the Mesh
     var int visibleRow;  // The y coordinate of visible row
     var bool drawRow;  // Whether or not to draw the row
-    var int xStartPixel;  // The pixel column to start draw a rectangle from
-    var int yStartPixel;  // The pixel row to start draw a rectangle from
+    var int startPixelX;  // The pixel column to start draw a rectangle from
+    var int startPixelY;  // The pixel row to start draw a rectangle from
 
     let curRow = skipRows;
 
@@ -145,9 +195,9 @@ class Background {
 
         // Loop over all rows in a column
         while (xInd < meshCols){
-          let xStartPixel = frameStartX + (meshElementSize*xInd) + (2*xInd);
-          let yStartPixel = frameStartY + (meshElementSize*visibleRow) + (2*visibleRow);
-          do Screen.drawRectangle(xStartPixel, yStartPixel, xStartPixel+meshElementSize, yStartPixel+meshElementSize);
+          let startPixelX = tetrominoStartX + (tetrominoElementSize*xInd) + (2*xInd);
+          let startPixelY = tetrominoStartY + (tetrominoElementSize*visibleRow) + (2*visibleRow);
+          do Screen.drawRectangle(startPixelX, startPixelY, startPixelX+tetrominoElementSize, startPixelY+tetrominoElementSize);
           let xInd = xInd + 1;
         }
       }
@@ -166,8 +216,8 @@ class Background {
     var int curRow;  // The y coordinate of the Mesh
     var int visibleRow;  // The y coordinate of visible row
     var bool clearRow;  // Whether or not to draw the row
-    var int xStartPixel;  // The pixel column to start draw a rectangle from
-    var int yStartPixel;  // The pixel row to start draw a rectangle from
+    var int startPixelX;  // The pixel column to start draw a rectangle from
+    var int startPixelY;  // The pixel row to start draw a rectangle from
 
     var int xIndHalf;
     var int xIndRight;
@@ -193,13 +243,13 @@ class Background {
 
         if(clearRow){
           // Remove the right element
-          let xStartPixel = frameStartX + (meshElementSize*xIndRight) + (2*xIndRight);
-          let yStartPixel = frameStartY + (meshElementSize*visibleRow) + (2*visibleRow);
-          do Screen.drawRectangle(xStartPixel, yStartPixel, xStartPixel+meshElementSize, yStartPixel+meshElementSize);
+          let startPixelX = tetrominoStartX + (tetrominoElementSize*xIndRight) + (2*xIndRight);
+          let startPixelY = tetrominoStartY + (tetrominoElementSize*visibleRow) + (2*visibleRow);
+          do Screen.drawRectangle(startPixelX, startPixelY, startPixelX+tetrominoElementSize, startPixelY+tetrominoElementSize);
           // Remove the left element
-          let xStartPixel = frameStartX + (meshElementSize*xIndLeft) + (2*xIndLeft);
-          let yStartPixel = frameStartY + (meshElementSize*visibleRow) + (2*visibleRow);
-          do Screen.drawRectangle(xStartPixel, yStartPixel, xStartPixel+meshElementSize, yStartPixel+meshElementSize);
+          let startPixelX = tetrominoStartX + (tetrominoElementSize*xIndLeft) + (2*xIndLeft);
+          let startPixelY = tetrominoStartY + (tetrominoElementSize*visibleRow) + (2*visibleRow);
+          do Screen.drawRectangle(startPixelX, startPixelY, startPixelX+tetrominoElementSize, startPixelY+tetrominoElementSize);
         }
 
         let curRow = curRow + 1;
@@ -262,7 +312,7 @@ class Background {
     }
 
     // Draw the updated background
-    do draw();
+    do drawMesh(false, backgroundMesh, 0, 0);
     return;
   }
 
