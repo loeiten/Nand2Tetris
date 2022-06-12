@@ -91,13 +91,7 @@ class TetrisGame {
     // Create the spawner
     let tetrominoSpawner = TetrominoSpawner.new(frameStartX, frameStartY);
 
-    // FIXME: You are here: Do tests
-    // FIXME: Draw a mesh above spawing and test
-    //        1. Blinking
-    //        2. Collapse
-
-    do Output.moveCursor(3, 30);
-    do Output.printString("Hello");
+    // FIXME: TestMesh
     while(testRow > 28){
       let testCol = 0;
       while (testCol < 10){

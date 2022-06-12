@@ -234,27 +234,58 @@ class Background {
     var int meshRow;  // The y coordinate of the mesh
 
     let potentialCollapseRow = meshRows;
+
+    // FIXME:
+    do Output.moveCursor(4, 30);
+    do Output.printString("potentialCollapseRow: ");
+    do Output.printInt(potentialCollapseRow);
+    do Output.moveCursor(5, 30);
+    do Output.printString("potentialCollapseRow in loop: ");
+    do Output.moveCursor(7, 30);
+    do Output.printString("meshRow in if statement: ");
+    do Output.moveCursor(9, 30);
+    do Output.printString("hit in (vis mesh) row: ");
+
+
     while(potentialCollapseRow > skipRows){
 
+
+    // FIXME:
+    do Output.moveCursor(6, 30);
+    do Output.printInt(potentialCollapseRow);
+
+      // FIXME: The hits are correct when commented out
+      //        Expect hit at 18, 16, 15, 13, 12, 11, 10
       if(rowsToCollapse[potentialCollapseRow - skipRows]){
         // Start at the row immediately above the collapsed row
-        let meshRow = potentialCollapseRow + 1;
-        while(meshRow > skipRows){
-          let xInd = 0;
+        let meshRow = potentialCollapseRow - 1;
 
-          // Loop over all rows
-          while(xInd < meshRows){
-            if(backgroundMesh.getState(xInd, meshRow)){
-              // Set the element below to true
-              do backgroundMesh.setState(xInd, meshRow - 1, true);
-              // Set the current element to false
-              do backgroundMesh.setState(xInd, meshRow, false);
-            }
-            let xInd = xInd+1;
-          }
+    // FIXME:
+    do Output.moveCursor(8, 30);
+    do Output.printInt(meshRow);
+    do Output.moveCursor(10, 30);
+    do Output.printInt(potentialCollapseRow - skipRows);
+    do Sys.wait(1000);
 
-          let meshRow = meshRow - 1;
-        }
+        // FIXME: YOU ARE HERE: WHEN COLLAPSE THE INDEX OF ROW TO COLLAPSE MUST BE -1
+        //        Actual hit: 18 (drop of all), 17 (drop of all), 17?
+        // FIXME: Uncomment
+        // while(meshRow > skipRows){
+        //   let xInd = 0;
+
+        //   // Loop over all rows
+        //   while(xInd < meshCols){
+        //     if(backgroundMesh.getState(xInd, meshRow)){
+        //       // Set the element which is to be cleared to true
+        //       do backgroundMesh.setState(xInd, meshRow + 1, true);
+        //       // // Set the current element to false
+        //       // do backgroundMesh.setState(xInd, meshRow, false);
+        //     }
+        //     let xInd = xInd+1;
+        //   }
+
+        //   let meshRow = meshRow - 1;
+        // }
 
       }
 
