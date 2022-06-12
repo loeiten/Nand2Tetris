@@ -310,7 +310,6 @@ class TetrisGame {
 
       do gameBackground.clearLinesAnimation(rowsToRemove);
 
-      // FIXME: YOU ARE HERE: Row collapse is bad, check rows and cols are correct
       // Collapse full rows
       do gameBackground.collapse(rowsToRemove);
     }
@@ -356,8 +355,12 @@ class TetrisGame {
       }
 
       // If we didn't find a whitespace, mark the row for removal
+      // NOTE: Although we dispose the rowsToRemove, the array is not initialized to zero
+      //       Hence we must  specify both rows to remove and rows to keep
       if(~foundWhiteSpace){
         let rowsToRemove[curRow - gameBackground.getSkipRows()] = true;
+      } else {
+        let rowsToRemove[curRow - gameBackground.getSkipRows()] = false;
       }
 
       let curRow = curRow + 1;
