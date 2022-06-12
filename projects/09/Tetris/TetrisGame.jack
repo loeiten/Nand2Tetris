@@ -83,6 +83,11 @@ class TetrisGame {
     var Tetromino curTetromino;  // The current tetromino
     var TetrominoSpawner tetrominoSpawner;  // The tetromino spawner
 
+    // FIXME: Remove
+    var int testRow;
+    var int testCol;
+    let testRow = 39;
+
     // Create the spawner
     let tetrominoSpawner = TetrominoSpawner.new(frameStartX, frameStartY);
 
@@ -91,66 +96,38 @@ class TetrisGame {
     //        1. Blinking
     //        2. Collapse
 
-    // Remove
-    do gameMesh.setState(0, 38, true);
-    do gameMesh.setState(1, 38, true);
-    do gameMesh.setState(2, 38, true);
-    do gameMesh.setState(3, 38, true);
-    do gameMesh.setState(4, 38, true);
-    do gameMesh.setState(5, 38, true);
-    do gameMesh.setState(6, 38, true);
-    do gameMesh.setState(7, 38, true);
-    do gameMesh.setState(8, 38, true);
-    do gameMesh.setState(9, 38, true);
+    do Output.moveCursor(3, 30);
+    do Output.printString("Hello");
+    while(testRow > 28){
+      let testCol = 0;
+      while (testCol < 10){
+        do gameMesh.setState(testCol, testRow, true);
+        let testCol = testCol + 1;
+      }
+      let testRow = testRow - 1;
+    }
 
-    do gameMesh.setState(1, 37, true);
-    do gameMesh.setState(2, 37, true);
-    do gameMesh.setState(4, 37, true);
-    do gameMesh.setState(5, 37, true);
-    do gameMesh.setState(6, 37, true);
-    do gameMesh.setState(8, 37, true);
-    do gameMesh.setState(9, 37, true);
+    // Make holes
+    do gameMesh.setState(0, 39, false);
+    do gameMesh.setState(2, 39, false);
+    do gameMesh.setState(4, 39, false);
+    do gameMesh.setState(6, 39, false);
+    do gameMesh.setState(8, 39, false);
+    // 38 is due to clearing
+    do gameMesh.setState(1, 37, false);
+    do gameMesh.setState(3, 37, false);
+    do gameMesh.setState(5, 37, false);
+    do gameMesh.setState(7, 37, false);
+    do gameMesh.setState(9, 37, false);
+    // 36 - 35 is due to clearing
+    do gameMesh.setState(0, 34, false);
+    do gameMesh.setState(4, 34, false);
+    do gameMesh.setState(5, 34, false);
+    do gameMesh.setState(9, 34, false);
+    // 33 - 30 is due to clearing
+    do gameMesh.setState(1, 29, false);
+    do gameMesh.setState(8, 29, false);
 
-    do gameMesh.setState(0, 36, true);
-    do gameMesh.setState(1, 36, true);
-    do gameMesh.setState(2, 36, true);
-    do gameMesh.setState(4, 36, true);
-    do gameMesh.setState(7, 36, true);
-    do gameMesh.setState(8, 36, true);
-    do gameMesh.setState(9, 36, true);
-
-    // Remove
-    do gameMesh.setState(0, 35, true);
-    do gameMesh.setState(1, 35, true);
-    do gameMesh.setState(2, 35, true);
-    do gameMesh.setState(3, 35, true);
-    do gameMesh.setState(4, 35, true);
-    do gameMesh.setState(5, 35, true);
-    do gameMesh.setState(6, 35, true);
-    do gameMesh.setState(7, 35, true);
-    do gameMesh.setState(8, 35, true);
-    do gameMesh.setState(9, 35, true);
-
-    // Remove
-    do gameMesh.setState(0, 34, true);
-    do gameMesh.setState(1, 34, true);
-    do gameMesh.setState(2, 34, true);
-    do gameMesh.setState(3, 34, true);
-    do gameMesh.setState(4, 34, true);
-    do gameMesh.setState(5, 34, true);
-    do gameMesh.setState(6, 34, true);
-    do gameMesh.setState(7, 34, true);
-    do gameMesh.setState(8, 34, true);
-    do gameMesh.setState(9, 34, true);
-
-    do gameMesh.setState(0, 33, true);
-    do gameMesh.setState(2, 33, true);
-    do gameMesh.setState(3, 33, true);
-    do gameMesh.setState(4, 33, true);
-    do gameMesh.setState(5, 33, true);
-    do gameMesh.setState(6, 33, true);
-    do gameMesh.setState(8, 33, true);
-    do gameMesh.setState(9, 33, true);
     do gameBackground.draw();
 
 
@@ -323,22 +300,21 @@ class TetrisGame {
       let rowNumber = rowNumber + 1;
     }
 
-    // FIXME:
-    do Output.moveCursor(3, 30);
-    do Output.printString("nRowsToRemove: ");
-    do Output.printInt(nRowsToRemove);
-
-    // FIXME: YOU ARE HERE: ONLY TIME TO BLINK IS TETRIS
-    // FIXME: YOU ARE HERE: Animate removal: From center and out
+    // FIXME: YOU ARE HERE: Refactor all draws to be relative to background
     if(nRowsToRemove > 0){
-      // Let the rows blink
-      do gameBackground.drawRows(rowsToRemove, false);
-      do Sys.wait(blinkSpeed);
-      do gameBackground.drawRows(rowsToRemove, true);
-      do Sys.wait(blinkSpeed);
-      do gameBackground.drawRows(rowsToRemove, false);
-      do Sys.wait(blinkSpeed);
-      do gameBackground.drawRows(rowsToRemove, true);
+      if (nRowsToRemove > 3){
+        // Let the rows blink on Tetris
+        do gameBackground.drawRows(rowsToRemove, false);
+        do Sys.wait(blinkSpeed);
+        do gameBackground.drawRows(rowsToRemove, true);
+        do Sys.wait(blinkSpeed);
+        do gameBackground.drawRows(rowsToRemove, false);
+        do Sys.wait(blinkSpeed);
+        do gameBackground.drawRows(rowsToRemove, true);
+        do Sys.wait(blinkSpeed);
+      }
+
+      do gameBackground.clearLinesAnimation(rowsToRemove);
 
       // FIXME: YOU ARE HERE: Row collapse is bad, check rows and cols are correct
       // Collapse full rows

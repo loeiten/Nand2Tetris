@@ -158,6 +158,66 @@ class Background {
   }
 
   /**
+   * Animate clear lines
+   *
+   * \param rowsToClear Rows to draw with the color
+   */
+  method void clearLinesAnimation(Array rowsToClear){
+    var int curRow;  // The y coordinate of the Mesh
+    var int visibleRow;  // The y coordinate of visible row
+    var bool clearRow;  // Whether or not to draw the row
+    var int xStartPixel;  // The pixel column to start draw a rectangle from
+    var int yStartPixel;  // The pixel row to start draw a rectangle from
+
+    var int xIndHalf;
+    var int xIndRight;
+    var int xIndLeft;
+    var int xIndRightCounter;
+    var int xIndLeftCounter;
+
+    let xIndHalf = (meshCols/2);
+    let xIndLeftCounter = 1;
+    let xIndRight = xIndHalf + xIndRightCounter;
+    let xIndLeft = xIndRight - xIndLeftCounter;
+
+    do Screen.setColor(false);
+
+    // Loop over half the xInds
+    while(xIndRight < meshCols){
+
+      // Loop over all visible rows
+      let curRow = skipRows;
+      while(curRow < meshRows){
+        let visibleRow = curRow - skipRows;
+        let clearRow = rowsToClear[visibleRow];
+
+        if(clearRow){
+          // Remove the right element
+          let xStartPixel = frameStartX + (meshElementSize*xIndRight) + (2*xIndRight);
+          let yStartPixel = frameStartY + (meshElementSize*visibleRow) + (2*visibleRow);
+          do Screen.drawRectangle(xStartPixel, yStartPixel, xStartPixel+meshElementSize, yStartPixel+meshElementSize);
+          // Remove the left element
+          let xStartPixel = frameStartX + (meshElementSize*xIndLeft) + (2*xIndLeft);
+          let yStartPixel = frameStartY + (meshElementSize*visibleRow) + (2*visibleRow);
+          do Screen.drawRectangle(xStartPixel, yStartPixel, xStartPixel+meshElementSize, yStartPixel+meshElementSize);
+        }
+
+        let curRow = curRow + 1;
+      }
+
+      let xIndLeftCounter = xIndLeftCounter + 2;
+      let xIndRightCounter = xIndRightCounter + 1;
+
+      let xIndRight = xIndHalf + xIndRightCounter;
+      let xIndLeft = xIndRight - xIndLeftCounter;
+
+      do Sys.wait(100);
+    }
+
+    return;
+  }
+
+  /**
    * Collapse full rows
    *
    * \param rowsToCollapse Rows to collapse
