@@ -115,7 +115,6 @@ class Background {
    * \param relativeXInd The x index of the input mesh relative to the background (counted from the top left)
    * \param relativeYInd The y index of the input mesh relative to the background (counted from the top left)
    */
-  // FIXME: Input introduced as part of refactor
   method void drawMesh(bool erase, Mesh mesh, int relativeXInd, int relativeYInd){
     var int index;  // Index representing the Mesh element
     var int xInd;  // The x coordinate of the Mesh

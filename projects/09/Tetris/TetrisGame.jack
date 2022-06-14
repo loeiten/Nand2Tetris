@@ -64,7 +64,6 @@ class TetrisGame {
     var bool gameOver;  // Whether the game is over or not
 
     var Tetromino curTetromino;  // The current tetromino
-    var TetrominoSpawner tetrominoSpawner;  // The tetromino spawner
 
     // FIXME: Remove
     var int testRow;
@@ -102,7 +101,7 @@ class TetrisGame {
     do gameMesh.setState(1, 29, false);
     do gameMesh.setState(8, 29, false);
 
-    do gameBackground.draw();
+    do gameBackground.drawMesh(false, gameMesh, 0, 0);
 
 
 
@@ -110,8 +109,8 @@ class TetrisGame {
 
     // Run until game over
     while (~gameOver){
-      let curTetromino = tetrominoSpawner.getO();
-      let doSpawn = curTetromino.canSpawn(gameMesh);
+      let curTetromino = TetrominoSpawner.getO();
+      let doSpawn = curTetromino.canSpawn();
       if(doSpawn){
         // Enter the fall sequence
         do tetrominoFall(curTetromino);
@@ -153,7 +152,7 @@ class TetrisGame {
       // If the current key is the same as the previous key it's due to the key
       // not being released before the countDown ended
       // We therefore add a guard to make sure that the key get's properly released
-      if (~(key = prevKey)){ do moveWithKeyboard(curTetromino, gameMesh, countDown, key); }
+      if (~(key = prevKey)){ do moveWithKeyboard(curTetromino, countDown, key); }
       let prevKey = key;
 
       // Wait for the key to be release to continue
@@ -169,7 +168,7 @@ class TetrisGame {
       // If the time counts out we will add the tetromino with the mesh and destroy it
       // NOTE: We cannot set countDown < 0 to check if countDown is 0
       if(countDown < 1){
-        if(curTetromino.canMoveDown(gameMesh)){
+        if(curTetromino.canMoveDown()){
           do curTetromino.moveDown();
           let countDown = gameSpeed;
         }
@@ -187,33 +186,32 @@ class TetrisGame {
    * Move the tetromino with the keyboard
    *
    * \param curTetromino The current tetromino
-   * \param gameMesh The game mesh
    * \param countDown Remaining time until lock
    * \param key Current key stroke
    */
-  method void moveWithKeyboard(Tetromino curTetromino, Mesh gameMesh, int countDown, char key){
+  method void moveWithKeyboard(Tetromino curTetromino, int countDown, char key){
     // Capture up arrow
     if (key = 131) {
       let countDown = 0;
-      while(curTetromino.canMoveDown(gameMesh)){
+      while(curTetromino.canMoveDown()){
           do curTetromino.moveDown();
       }
     }
     // Capture down arrow
     if (key = 133) {
-      if(curTetromino.canMoveDown(gameMesh)){
+      if(curTetromino.canMoveDown()){
         do curTetromino.moveDown();
       }
     }
     // Capture left arrow
     if (key = 130) {
-      if(curTetromino.canMoveLeft(gameMesh)){
+      if(curTetromino.canMoveLeft()){
         do curTetromino.moveLeft();
       }
     }
     // Capture right arrow
     if (key = 132) {
-      if(curTetromino.canMoveRight(gameMesh)){
+      if(curTetromino.canMoveRight()){
         do curTetromino.moveRight();
       }
     }
@@ -244,12 +242,12 @@ class TetrisGame {
     let tetrominoIndex = 0;
     while(tetrominoIndex < tetrominoMeshLength){
       let tetrominoIndexArray = tetrominoMesh.getMeshIndices(tetrominoIndex);
-      let gameXInd = curTetromino.getRelativeMeshX() + tetrominoIndexArray[0];
-      let gameYInd = curTetromino.getRelativeMeshY() + tetrominoIndexArray[1];
+      let gameXInd = curTetromino.getRelativeIndX() + tetrominoIndexArray[0];
+      let gameYInd = curTetromino.getRelativeIndY() + tetrominoIndexArray[1];
       do gameMesh.setState(gameXInd, gameYInd, true);
       let tetrominoIndex = tetrominoIndex + 1;
     }
-    do gameBackground.draw();
+    do gameBackground.drawMesh(false, gameMesh, 0, 0);
 
     return;
   }

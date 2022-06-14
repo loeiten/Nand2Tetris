@@ -14,6 +14,7 @@ class Tetromino {
   field int relativeYInd;  // y-coordinate in the background mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
 
   field Mesh tetrominoMesh;  // The mesh of the tetromino itself
+  field Background background;  // The background to interact with
 
   /**
    * Construct the tetromino
@@ -22,16 +23,20 @@ class Tetromino {
    * \param relativeXInd_ x-coordinate in the background mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
    * \param relativeYInd_ y-coordinate in the background mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
    * \param tetrominoElementSize_ Size of a tetromino element
+   * \param background_ The background to interact with
    */
    // FIXME: skipRows not needed when have relative mesh
   constructor Tetromino new(Mesh tetrominoMesh_,
                             int relativeXInd_,
                             int relativeYInd_,
-                            int tetrominoElementSize_) {
+                            int tetrominoElementSize_,
+                            Background background_) {
     let tetrominoMesh = tetrominoMesh_;
 
     let relativeXInd = relativeXInd_;
     let relativeYInd = relativeYInd_;
+
+    let background = background_;
 
     return this;
   }
@@ -59,17 +64,15 @@ class Tetromino {
   /**
    * Return true if it's possible to spawn the tetromino in the gameMesh
    *
-   * \param gameBackground The game background
    * \return true if it's possible to spawn the tetromino
    */
-   // FIXME: Must change to background, from there can get the mesh
-  method bool canSpawn(Background gameBackground){
+  method bool canSpawn(){
     var bool canBeSpawn;
 
-    let canBeSpawn = canBePlaced(gameBackground.getBackgroundMesh(), relativeXInd, relativeYInd);
+    let canBeSpawn = canBePlaced(background.getBackgroundMesh(), relativeXInd, relativeYInd);
 
     if(canBeSpawn){
-      do draw();
+      do background.drawMesh(false, background.getBackgroundMesh(), relativeXInd, relativeYInd);
       return true;
     } else{
       return false;
@@ -79,7 +82,6 @@ class Tetromino {
   /**
    * Return true if it's possible to place the tetromino with the new coordinates in the gameMesh
    *
-   * \param gameMesh The gameMesh
    * \param newrelativeXInd The new x-coordinate in the gameMesh
    * \param newrelativeYInd The new y-coordinate in the gameMesh
    * \return true if it's possible to place the tetromino
@@ -92,6 +94,9 @@ class Tetromino {
     var int gameYInd;
 
     var Array tetrominoIndices;  // Will be destroyed by the Mesh
+    var Mesh gameMesh;
+
+    let gameMesh = backgroundMesh.getBackgroundMesh();
 
     while(tetrominoMeshIndex < tetrominoMesh.getMeshLength()){
       let tetrominoIndices = tetrominoMesh.getMeshIndices(tetrominoMeshIndex);
@@ -122,15 +127,14 @@ class Tetromino {
   /**
    * Return true if it's possible to move the tetromino down in the gameMesh
    *
-   * \param gameMesh The game mesh
    * \return true if it's possible to move the tetromino down
    */
-  method bool canMoveDown(Mesh gameMesh){
+  method bool canMoveDown(){
     var int newrelativeYInd;
     var bool canPlace;
 
     let newrelativeYInd = relativeYInd + 1;
-    let canPlace = canBePlaced(gameMesh, relativeXInd, newrelativeYInd);
+    let canPlace = canBePlaced(background.getBackgroundMesh(), relativeXInd, newrelativeYInd);
 
     return canPlace;
   }
@@ -138,54 +142,58 @@ class Tetromino {
   /**
    * Return true if it's possible to move the tetromino to the left in the gameMesh
    *
-   * \param gameMesh The game mesh
    * \return true if it's possible to move the tetromino to the left
    */
-  method bool canMoveLeft(Mesh gameMesh){
+  method bool canMoveLeft(){
     var int newrelativeXInd;
     var bool canPlace;
 
     let newrelativeXInd = relativeXInd - 1;
-    let canPlace = canBePlaced(gameMesh, newrelativeXInd, relativeYInd);
+    let canPlace = canBePlaced(background.getBackgroundMesh(), newrelativeXInd, relativeYInd);
     return canPlace;
   }
 
   /**
    * Return true if it's possible to move the tetromino to the right in the gameMesh
    *
-   * \param gameMesh The game mesh
    * \return true if it's possible to move the tetromino to the right
    */
-  method bool canMoveRight(Mesh gameMesh){
+  method bool canMoveRight(){
     var int newrelativeXInd;
     var bool canPlace;
 
     let newrelativeXInd = relativeXInd + 1;
-    let canPlace = canBePlaced(gameMesh, newrelativeXInd, relativeYInd);
+    let canPlace = canBePlaced(background.getBackgroundMesh(), newrelativeXInd, relativeYInd);
     return canPlace;
   }
 
   /** Move the tetromino down in the game mesh */
   method void moveDown(){
-    do erase();
+    // Erase
+    do background.drawMesh(true, tetrominoMesh, relativeXInd, relativeYInd);
     let relativeYInd = relativeYInd + 1;
-    do draw();
+    // Draw
+    do background.drawMesh(false, tetrominoMesh, relativeXInd, relativeYInd);
     return;
   }
 
   /** Move the tetromino to the left in the game mesh */
   method void moveLeft(){
-    do erase();
+    // Erase
+    do background.drawMesh(true, tetrominoMesh, relativeXInd, relativeYInd);
     let relativeXInd = relativeXInd - 1;
-    do draw();
+    // Draw
+    do background.drawMesh(false, tetrominoMesh, relativeXInd, relativeYInd);
     return;
   }
 
   /** Move the tetromino to the right in the game mesh */
   method void moveRight(){
-    do erase();
+    // Erase
+    do background.drawMesh(true, tetrominoMesh, relativeXInd, relativeYInd);
     let relativeXInd = relativeXInd + 1;
-    do draw();
+    // Draw
+    do background.drawMesh(false, tetrominoMesh, relativeXInd, relativeYInd);
     return;
   }
 
@@ -195,12 +203,12 @@ class Tetromino {
   }
 
   /** Return relativeXInd */
-  method int getRelativeXInd(){
+  method int getRelativeIndX(){
     return relativeXInd;
   }
 
   /** Return relativeYInd */
-  method int getRelativeYInd(){
+  method int getRelativeIndY(){
     return relativeYInd;
   }
 
