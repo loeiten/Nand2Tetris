@@ -10,8 +10,10 @@ class TetrominoSpawner {
    * Return the O tetromino
    *
    * \warning The tetromino must be manually destroyed
+   *
+   * \param The background to spawn the tetromino on
    */
-  function Tetromino getO(){
+  function Tetromino getO(Background background){
     // NOTE: The tetromino mesh is destroyed by the tetromino itself, so we will not destroy it here
     var Mesh tetrominoMesh;
     var Tetromino tetromino;
@@ -24,7 +26,7 @@ class TetrominoSpawner {
                                   4,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
                                   19, // y-coodrinate in the gameMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
                                   10, // Element size
-                                  20 // Skip rows
+                                  background // Background
                                  );
 
     return tetromino;

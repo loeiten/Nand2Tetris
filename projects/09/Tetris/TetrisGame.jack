@@ -44,7 +44,6 @@ class TetrisGame {
   /** Dispose this game. */
   method void dispose() {
     do gameBackground.dispose();
-    do gameMesh.dispose();
     do Memory.deAlloc(this);
     return;
   }
@@ -109,7 +108,7 @@ class TetrisGame {
 
     // Run until game over
     while (~gameOver){
-      let curTetromino = TetrominoSpawner.getO();
+      let curTetromino = TetrominoSpawner.getO(gameBackground);
       let doSpawn = curTetromino.canSpawn();
       if(doSpawn){
         // Enter the fall sequence
@@ -308,7 +307,9 @@ class TetrisGame {
     var Array rowsToRemove;
     var Mesh backgroundMesh;
 
+    // Disposed in removeFullLines
     let rowsToRemove = Array.new(gameBackground.getVisibleRows());
+
     let backgroundMesh = gameBackground.getBackgroundMesh();
 
     let curRow = gameBackground.getSkipRows();

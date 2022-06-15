@@ -25,7 +25,6 @@ class Tetromino {
    * \param tetrominoElementSize_ Size of a tetromino element
    * \param background_ The background to interact with
    */
-   // FIXME: skipRows not needed when have relative mesh
   constructor Tetromino new(Mesh tetrominoMesh_,
                             int relativeXInd_,
                             int relativeYInd_,
@@ -54,6 +53,21 @@ class Tetromino {
     return;
   }
 
+  /** Return the tetrominoMesh */
+  method int getTetrominoMesh(){
+    return tetrominoMesh;
+  }
+
+  /** Return relativeXInd */
+  method int getRelativeIndX(){
+    return relativeXInd;
+  }
+
+  /** Return relativeYInd */
+  method int getRelativeIndY(){
+    return relativeYInd;
+  }
+
   /**
    * Rotate the tetromino clockwise
    */
@@ -69,10 +83,10 @@ class Tetromino {
   method bool canSpawn(){
     var bool canBeSpawn;
 
-    let canBeSpawn = canBePlaced(background.getBackgroundMesh(), relativeXInd, relativeYInd);
+    let canBeSpawn = canBePlaced(relativeXInd, relativeYInd);
 
     if(canBeSpawn){
-      do background.drawMesh(false, background.getBackgroundMesh(), relativeXInd, relativeYInd);
+      do background.drawMesh(false, tetrominoMesh, relativeXInd, relativeYInd);
       return true;
     } else{
       return false;
@@ -86,7 +100,7 @@ class Tetromino {
    * \param newrelativeYInd The new y-coordinate in the gameMesh
    * \return true if it's possible to place the tetromino
    */
-  method bool canBePlaced(Mesh gameMesh, int newrelativeXInd, int newrelativeYInd){
+  method bool canBePlaced(int newrelativeXInd, int newrelativeYInd){
     var int tetrominoMeshIndex;
     var int tetrominoXIndex;
     var int tetrominoYIndex;
@@ -96,7 +110,7 @@ class Tetromino {
     var Array tetrominoIndices;  // Will be destroyed by the Mesh
     var Mesh gameMesh;
 
-    let gameMesh = backgroundMesh.getBackgroundMesh();
+    let gameMesh = background.getBackgroundMesh();
 
     while(tetrominoMeshIndex < tetrominoMesh.getMeshLength()){
       let tetrominoIndices = tetrominoMesh.getMeshIndices(tetrominoMeshIndex);
@@ -134,7 +148,7 @@ class Tetromino {
     var bool canPlace;
 
     let newrelativeYInd = relativeYInd + 1;
-    let canPlace = canBePlaced(background.getBackgroundMesh(), relativeXInd, newrelativeYInd);
+    let canPlace = canBePlaced(relativeXInd, newrelativeYInd);
 
     return canPlace;
   }
@@ -149,7 +163,7 @@ class Tetromino {
     var bool canPlace;
 
     let newrelativeXInd = relativeXInd - 1;
-    let canPlace = canBePlaced(background.getBackgroundMesh(), newrelativeXInd, relativeYInd);
+    let canPlace = canBePlaced(newrelativeXInd, relativeYInd);
     return canPlace;
   }
 
@@ -163,7 +177,7 @@ class Tetromino {
     var bool canPlace;
 
     let newrelativeXInd = relativeXInd + 1;
-    let canPlace = canBePlaced(background.getBackgroundMesh(), newrelativeXInd, relativeYInd);
+    let canPlace = canBePlaced(newrelativeXInd, relativeYInd);
     return canPlace;
   }
 
@@ -195,21 +209,6 @@ class Tetromino {
     // Draw
     do background.drawMesh(false, tetrominoMesh, relativeXInd, relativeYInd);
     return;
-  }
-
-  /** Return the tetrominoMesh */
-  method int getTetrominoMesh(){
-    return tetrominoMesh;
-  }
-
-  /** Return relativeXInd */
-  method int getRelativeIndX(){
-    return relativeXInd;
-  }
-
-  /** Return relativeYInd */
-  method int getRelativeIndY(){
-    return relativeYInd;
   }
 
 }
