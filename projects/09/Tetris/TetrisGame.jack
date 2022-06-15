@@ -108,8 +108,18 @@ class TetrisGame {
 
     // Run until game over
     while (~gameOver){
+
+      // FIXME:
+      do Output.moveCursor(11, 30);
+      do gameMesh.printAlloc();
+
+
       let curTetromino = TetrominoSpawner.getO(gameBackground);
       let doSpawn = curTetromino.canSpawn();
+
+      // FIXME:
+      do Output.moveCursor(12, 30);
+      do gameMesh.printAlloc();
       if(doSpawn){
         // Enter the fall sequence
         do tetrominoFall(curTetromino);
@@ -174,6 +184,10 @@ class TetrisGame {
         else{
           let falling = false;
           do addTetrominoToMesh(curTetromino);
+
+      // FIXME:
+      do Output.moveCursor(13, 30);
+      do gameMesh.printAlloc();
           do removeFullLines();
         }
       }
@@ -261,6 +275,11 @@ class TetrisGame {
     let blinkSpeed = 150;
 
     let rowsToRemove = getRowsToRemove();
+
+
+      // FIXME:
+      do Output.moveCursor(14, 30);
+      do gameMesh.printAlloc();
     while(rowNumber < gameBackground.getVisibleRows()){
       if(rowsToRemove[rowNumber]){
         let nRowsToRemove = nRowsToRemove + 1;
@@ -282,6 +301,10 @@ class TetrisGame {
       }
 
       do gameBackground.clearLinesAnimation(rowsToRemove);
+
+      // FIXME:
+      do Output.moveCursor(15, 35);
+      do gameMesh.printAlloc();
 
       // Collapse full rows
       do gameBackground.collapse(rowsToRemove);
@@ -307,16 +330,40 @@ class TetrisGame {
     var Array rowsToRemove;
     var Mesh backgroundMesh;
 
+
+    // // FIXME: Moving this below the ctor of Array and no problem
+    //   // FIXME:
+    //   do Output.printString(" Game over! :");
+
+    // // FIXME:
+    // do Output.printInt(gameBackground.getVisibleRows());
+
     // Disposed in removeFullLines
     let rowsToRemove = Array.new(gameBackground.getVisibleRows());
+    // FIXME:
+    // do Sys.wait(2000);
 
     let backgroundMesh = gameBackground.getBackgroundMesh();
-
     let curRow = gameBackground.getSkipRows();
+
+      // // FIXME:
+      // do Output.moveCursor(10, 30);
+      // do Output.printString("curRow (initial):");
+      // do Output.printInt(curRow);
 
     // Loop over all visible rows
     while(curRow < gameBackground.getMeshRows()){
       let xInd = 0;
+
+      // // FIXME:
+      // do Output.moveCursor(11, 30);
+      // do Output.printString("curRow :");
+      // do Output.printInt(curRow);
+
+      // do Output.moveCursor(12, 10);
+      // do Output.printString("curRow - gameBackground.getSkipRows() :");
+      // do Output.printInt(curRow - gameBackground.getSkipRows());
+      // do Sys.wait(250);
 
       // Loop over all rows in a column
       // Reset foundWhiteSpace

@@ -16,6 +16,8 @@ class Tetromino {
   field Mesh tetrominoMesh;  // The mesh of the tetromino itself
   field Background background;  // The background to interact with
 
+  static int allocs;  // Number of times this has been allocated
+
   /**
    * Construct the tetromino
    *
@@ -37,6 +39,8 @@ class Tetromino {
 
     let background = background_;
 
+    let allocs = allocs + 1;
+
     return this;
   }
 
@@ -48,8 +52,20 @@ class Tetromino {
    * - This
    */
   method void dispose (){
+    let allocs = allocs - 1;
+
     do tetrominoMesh.dispose();
     do Memory.deAlloc(this);
+    return;
+  }
+
+  /** Print the number of allocs */
+  method void printAlloc (){
+    var String str;
+    let str = "Tetromino allocs: ";
+    do Output.printString(str);
+    do Output.printInt(allocs);
+    do str.dispose();
     return;
   }
 

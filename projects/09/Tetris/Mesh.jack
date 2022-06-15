@@ -13,6 +13,8 @@ class Mesh {
   field Array meshArray;  // Array holding the state of each element
   field Array coordinates;  // Array holding the coordinates
 
+  static int allocs;  // Number of times this has been allocated
+
   /**
    * Construct the mesh
    *
@@ -27,6 +29,8 @@ class Mesh {
     let meshArray = Array.new(meshLength);
     let coordinates = Array.new(2);
 
+    let allocs = allocs + 1;
+
     return this;
   }
 
@@ -39,9 +43,20 @@ class Mesh {
    * - This
    */
   method void dispose (){
+    let allocs = allocs - 1;
     do meshArray.dispose();
     do coordinates.dispose();
     do Memory.deAlloc(this);
+    return;
+  }
+
+  /** Print the number of allocs */
+  method void printAlloc (){
+    var String str;
+    let str = "Mesh allocs: ";
+    do Output.printString(str);
+    do Output.printInt(allocs);
+    do str.dispose();
     return;
   }
 
