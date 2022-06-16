@@ -135,97 +135,26 @@ class Background {
     //       Hence we need to subtract by one
     let potentialCollapseRow = meshRows - 1;
 
-        // FIXME: Keeping this and everything works...removing this and get into a dealloc error
-        //        Search for "ADD AFTER" to find debug stuff added after
-        // do Output.moveCursor(0, 30);
-        // do Output.printString("potentialCollapseRow: ");
-//        do Output.moveCursor(4, 30);
-//        do Output.printString("potentialCollapseRow: ");
-//        do Output.printInt(potentialCollapseRow);
-
-
-
-        // do Output.moveCursor(2, 30);
-        // do Output.printString("clearedRows: ");
-        // do Output.moveCursor(4, 30);
-        // do Output.printString("meshRow: ");
-
     while(potentialCollapseRow > skipRows){
       if(rowsToCollapse[potentialCollapseRow - skipRows]){
         // Start at the row immediately above the collapsed row
         // Also take into account previously cleared rows
         let meshRow = potentialCollapseRow - 1 + clearedRows;
-
-// FIXME:
-//            do Output.moveCursor(0, 30);
-//            do Output.printString("xInd: ");
-//            do Output.moveCursor(2, 30);
-//            do Output.printString("yInd: ");
-        // FIXME:
-        // Add explanation
-        // while((meshRow > skipRows) & (meshRow + 1 < backgroundMesh.getRows())){
-        do Output.moveCursor(0, 0);
-        do Output.printInt(meshRow);
-        do Sys.wait(500);
         while(meshRow > skipRows){
-
-
-
-
-        // FIXME:
-        // Expect potential collapse row:
-        // 38, 36, 35, 33, 32, 31, 30
-        // do Output.moveCursor(1, 30);
-//        do Output.moveCursor(5, 30);
-//        do Output.printInt(potentialCollapseRow);
-//        // do Output.moveCursor(3, 30);
-//        // do Output.printInt(clearedRows);
-//        // do Output.moveCursor(5, 30);
-//        do Output.printInt(meshRow);
-//        // do Sys.wait(500);
-
-
-
-
-
           let xInd = 0;
 
           // Loop over all rows
-
-
-      // FIXME:
-      do Output.moveCursor(16, 30);
-      do backgroundMesh.printAlloc();
           while(xInd < meshCols){
-
-//            // FIXME:
-//            do Output.moveCursor(1, 30);
-//            do Output.printInt(xInd);
-
-
-
             // Set the element of the row to be cleared to the row above
             let state = backgroundMesh.getState(xInd, meshRow);
             do backgroundMesh.setState(xInd, meshRow + 1, state);
             let xInd = xInd+1;
           }
-
-
-      // FIXME:
-      do Output.moveCursor(17, 30);
-      do backgroundMesh.printAlloc();
           let meshRow = meshRow - 1;
         }
         let clearedRows = clearedRows + 1;
-// FIXME:
-//    do drawMesh(false, backgroundMesh, 0, 0);
-//    do Sys.wait(250);
       }
       let potentialCollapseRow = potentialCollapseRow - 1;
-
-// FIXME:
-//    do drawMesh(false, backgroundMesh, 0, 0);
-//    do Sys.wait(500);
     }
 
     // Draw the updated background
@@ -269,26 +198,6 @@ class Background {
 
     let backgroundIndex = skipRows * meshCols;
 
-    // FIXME:
-    //     do Output.moveCursor(3, 30);
-    //     do Output.printString("backgroundIndex:");
-    //     do Output.moveCursor(5, 30);
-    //     do Output.printString("backgroundXInd (before): ");
-    //     do Output.moveCursor(7, 30);
-    //     do Output.printString("backgroundYInd (before): ");
-    //     do Output.moveCursor(9, 30);
-    //     do Output.printString("relativeXInd: ");
-    //     do Output.moveCursor(11, 30);
-    //     do Output.printString("relativeYInd: ");
-    //     do Output.moveCursor(13, 30);
-    //     do Output.printString("skipRows: ");
-    // do Output.moveCursor(15, 30);
-    // do Output.printString("tetrominoStartX: ");
-    // do Output.moveCursor(17, 30);
-    // do Output.printString("tetrominoStartY: ");
-    // do Output.moveCursor(19, 30);
-    // do Output.printString("backgroundYInd (after): ");
-
     while (backgroundIndex < backgroundMesh.getMeshLength()){
       // Get the background coordinates
       let backgroundCoordinates = backgroundMesh.getMeshIndices(backgroundIndex);
@@ -299,12 +208,6 @@ class Background {
       let meshXInd = backgroundXInd - relativeXInd;
       let meshYInd = backgroundYInd - relativeYInd;
 
-      // FIXME:
-      // let backgroundCoordinates[0] = mesh.getCols();
-      // let backgroundCoordinates[1] = mesh.getRows();
-      // do Output.moveCursor(0, 30);
-      // do Output.printInt(backgroundIndex);
-
       // Only proceed if meshXInd and meshYInd is within the range
       if (
         // Check the x coordinate
@@ -314,39 +217,12 @@ class Background {
       ){
         // NOTE: We need the actual y-coordinate to get the state
         let state = mesh.getState(meshXInd, meshYInd);
-
-
-          // FIXME:
-          // do Output.moveCursor(4, 30);
-          // do Output.printInt(backgroundIndex);
-          // do Output.moveCursor(6, 30);
-          // do Output.printInt(backgroundXInd);
-          // do Output.moveCursor(8, 30);
-          // do Output.printInt(backgroundYInd);
-          // do Output.moveCursor(10, 30);
-          // do Output.printInt(relativeXInd);
-          // do Output.moveCursor(12, 30);
-          // do Output.printInt(relativeYInd);
-          // do Output.moveCursor(14, 30);
-          // do Output.printInt(skipRows);
-          // do Sys.wait(250);
-
         // NOTE: We only draw the active part of the mesh as the inactive part
         //       may overlap with the background
         // FIXME: Need another way of not drawing active state...if not can get probs with collapse
         // if(state){
           // Subtract rows to skip, so that we only draw the visible part of the mesh
           let backgroundYInd = backgroundYInd - skipRows;
-
-          // FIXME:
-          // do Output.moveCursor(16, 30);
-          // do Output.printInt(tetrominoStartX);
-          // do Output.moveCursor(18, 30);
-          // do Output.printInt(tetrominoStartY);
-          // do Output.moveCursor(20, 30);
-          // do Output.printInt(backgroundYInd);
-          // do Output.moveCursor(21, 30);
-
           let startPixelX = tetrominoStartX + (tetrominoElementSize*backgroundXInd) + (2*backgroundXInd);
           let startPixelY = tetrominoStartY + (tetrominoElementSize*backgroundYInd) + (2*backgroundYInd);
 

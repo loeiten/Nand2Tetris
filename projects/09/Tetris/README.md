@@ -20,12 +20,15 @@ Total = 5
 Each block will occupy: Blocksize + 1 (assume that +1 is for bottom)
 
 The max is obtained when the left-over pixels are less than the size of a block
+
+```text
 256 - 5 - 20*(size + 1) > size
 251 - 20*size - 20 *1 > size
 231 > size + 20*size
 231 > 21*size
 231/21 > size
 11 > size
+```
 
 So max size is 10
 
@@ -46,6 +49,60 @@ If we pad equally top and bottom, we get
 ```
 
 Thus, we get `frameStartY = 6`
+
+#### X in the middle
+
+Don't think the below is too useful
+
+Center of background is
+512/2 = 256
+Half width of background
+122/2 = 61
+StartX will therefore be
+256 - 61 = 195
+
+---
+
+Have 23 lines, now used 2 => 21 lines
+
+...one line per tetromino
+
+Can draw and find that statistics need
+
+Assume 22 pixels gone to text, what is max tetromino size?
+
+The number 21 comes from stacking tetrominos in a mesh with one width spacing
+
+```text
+256 - 22 - 5 - 21*(size + 1) > size
+229 - 21*size - 21 *1 > size
+208 > size + 21*size
+208 > 22*size
+208/22 > size
+9.45... > size
+```
+
+So tetrominos of size 9 should be ok
+
+All 21 blocks will therefore occupy
+
+```text
+[Num blocks] * (size + spacing + [1 for the start position of next block])
+21*(9 + 1 + 1) = 231
+```
+
+If we pad equally top and bottom, we get
+
+```text
+256-22-231 = 3
+3 - bottom line - top line =
+3 - 2 = 1
+1/2 = 0
+```
+
+No padding
+
+Side: 6*(9+1+1)=66
 
 ### Next frame
 

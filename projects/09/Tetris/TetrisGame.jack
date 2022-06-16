@@ -22,11 +22,10 @@ class TetrisGame {
     // FIXME: Make game speed work with level
     let gameSpeed = 500;
 
-    // FIXME: YOU ARE HERE: Refactor drawing on mesh to be relative to background
     // Initialize the background (see README.md for calculation)
     // NOTE: The mesh is 40 according to
     // https://tetris.fandom.com/wiki/Tetris_Guideline#List_of_rules_(as_of_2009)
-    let gameBackground = Background.new(1,   // frameStartX_
+    let gameBackground = Background.new(195, // frameStartX_
                                         6,   // frameStartY_
                                         122, // frameLenX_
                                         242, // frameLenY_ (240 + 1 for next line + 1 for frame line)
@@ -64,10 +63,123 @@ class TetrisGame {
 
     var Tetromino curTetromino;  // The current tetromino
 
+    // FIXME: Must also dispose
+    var Background statistics;
+    var Mesh statMesh;
+
     // FIXME: Remove
     var int testRow;
     var int testCol;
     let testRow = 39;
+
+    // FIXME:
+    let statistics = Background.new(
+      1, // frameStartX_
+      23,   // frameStartY_
+      67, // frameLenX_
+      231, // frameLenY_ (240 + 1 for next line + 1 for frame line)
+      9,  // tetrominoElementSize_
+      0,  // skipRows_
+      6,  // meshCols_
+      21   // meshRows_
+    );
+    do statistics.drawFrame();
+    let statMesh = statistics.getBackgroundMesh();
+    do statMesh.setState(0, 0, true);
+    // Draw I
+    do statMesh.setState(1, 1, true);
+    do statMesh.setState(2, 1, true);
+    do statMesh.setState(3, 1, true);
+    do statMesh.setState(4, 1, true);
+    // Draw J
+    do statMesh.setState(1, 3, true);
+    do statMesh.setState(1, 4, true);
+    do statMesh.setState(2, 4, true);
+    do statMesh.setState(3, 4, true);
+    // Draw L
+    do statMesh.setState(3, 6, true);
+    do statMesh.setState(1, 7, true);
+    do statMesh.setState(2, 7, true);
+    do statMesh.setState(3, 7, true);
+    // Draw O
+    do statMesh.setState(1, 9,  true);
+    do statMesh.setState(2, 9,  true);
+    do statMesh.setState(1, 10, true);
+    do statMesh.setState(2, 10, true);
+    // Draw S
+    do statMesh.setState(2, 12, true);
+    do statMesh.setState(3, 12, true);
+    do statMesh.setState(1, 13, true);
+    do statMesh.setState(2, 13, true);
+    // Draw T
+    do statMesh.setState(2, 15, true);
+    do statMesh.setState(1, 16, true);
+    do statMesh.setState(2, 16, true);
+    do statMesh.setState(3, 16, true);
+    // Draw Z
+    do statMesh.setState(1, 18, true);
+    do statMesh.setState(2, 18, true);
+    do statMesh.setState(2, 19, true);
+    do statMesh.setState(3, 19, true);
+
+    do statMesh.setState(5, 20, true);
+    do statistics.drawMesh(false, statMesh, 0, 0);
+    // do Output.moveCursor(2, 12);
+    // do Output.printInt(100);
+    do Output.moveCursor(3, 12);
+    do Output.printInt(200);
+    // do Output.moveCursor(4, 12);
+    // do Output.printInt(300);
+    // do Output.moveCursor(5, 12);
+    // do Output.printInt(400);
+    do Output.moveCursor(6, 12);
+    do Output.printInt(500);
+    // do Output.moveCursor(7, 12);
+    // do Output.printInt(600);
+    // do Output.moveCursor(8, 12);
+    // do Output.printInt(700);
+    do Output.moveCursor(9, 12);
+    do Output.printInt(800);
+    // do Output.moveCursor(10, 12);
+    // do Output.printInt(900);
+    // do Output.moveCursor(11, 12);
+    // do Output.printInt(1000);
+    do Output.moveCursor(12, 12);
+    do Output.printInt(1100);
+    // do Output.moveCursor(13, 12);
+    // do Output.printInt(1200);
+    // do Output.moveCursor(14, 12);
+    // do Output.printInt(1300);
+    do Output.moveCursor(15, 12);
+    do Output.printInt(1400);
+    // do Output.moveCursor(16, 12);
+    // do Output.printInt(1500);
+    // do Output.moveCursor(17, 12);
+    // do Output.printInt(1600);
+    do Output.moveCursor(18, 12);
+    do Output.printInt(1700);
+    // do Output.moveCursor(19, 12);
+    // do Output.printInt(1800);
+    // do Output.moveCursor(20, 12);
+    // do Output.printInt(1900);
+    do Output.moveCursor(21, 12);
+    do Output.printInt(20000);
+    // do Output.moveCursor(22, 12);
+    // do Output.printInt(21000);
+
+    do Output.moveCursor(1, 1);
+    do Output.printString("Statistics");
+
+    // do Output.moveCursor(1, 0);
+    // do Output.printString("Next");
+    // do Output.moveCursor(2, 0);
+    // do Output.printString("Score:");
+    // do Output.moveCursor(3, 0);
+    // do Output.printString("Lines:");
+    // do Output.moveCursor(4, 0);
+    // do Output.printString("Level:");
+    // do Output.moveCursor(5, 0);
+    // do Output.printInt(32000);
 
     // FIXME: TestMesh
     while(testRow > 28){
@@ -108,18 +220,9 @@ class TetrisGame {
 
     // Run until game over
     while (~gameOver){
-
-      // FIXME:
-      do Output.moveCursor(11, 30);
-      do gameMesh.printAlloc();
-
-
       let curTetromino = TetrominoSpawner.getO(gameBackground);
       let doSpawn = curTetromino.canSpawn();
 
-      // FIXME:
-      do Output.moveCursor(12, 30);
-      do gameMesh.printAlloc();
       if(doSpawn){
         // Enter the fall sequence
         do tetrominoFall(curTetromino);
@@ -133,6 +236,7 @@ class TetrisGame {
     }
 
     // Display game over
+    // FIXME:
     do Output.moveCursor(11, 2);
     do Output.printString(" Game over! ");
 
@@ -184,10 +288,6 @@ class TetrisGame {
         else{
           let falling = false;
           do addTetrominoToMesh(curTetromino);
-
-      // FIXME:
-      do Output.moveCursor(13, 30);
-      do gameMesh.printAlloc();
           do removeFullLines();
         }
       }
@@ -276,10 +376,6 @@ class TetrisGame {
 
     let rowsToRemove = getRowsToRemove();
 
-
-      // FIXME:
-      do Output.moveCursor(14, 30);
-      do gameMesh.printAlloc();
     while(rowNumber < gameBackground.getVisibleRows()){
       if(rowsToRemove[rowNumber]){
         let nRowsToRemove = nRowsToRemove + 1;
@@ -301,10 +397,6 @@ class TetrisGame {
       }
 
       do gameBackground.clearLinesAnimation(rowsToRemove);
-
-      // FIXME:
-      do Output.moveCursor(15, 35);
-      do gameMesh.printAlloc();
 
       // Collapse full rows
       do gameBackground.collapse(rowsToRemove);
@@ -330,40 +422,15 @@ class TetrisGame {
     var Array rowsToRemove;
     var Mesh backgroundMesh;
 
-
-    // // FIXME: Moving this below the ctor of Array and no problem
-    //   // FIXME:
-    //   do Output.printString(" Game over! :");
-
-    // // FIXME:
-    // do Output.printInt(gameBackground.getVisibleRows());
-
     // Disposed in removeFullLines
     let rowsToRemove = Array.new(gameBackground.getVisibleRows());
-    // FIXME:
-    // do Sys.wait(2000);
 
     let backgroundMesh = gameBackground.getBackgroundMesh();
     let curRow = gameBackground.getSkipRows();
 
-      // // FIXME:
-      // do Output.moveCursor(10, 30);
-      // do Output.printString("curRow (initial):");
-      // do Output.printInt(curRow);
-
     // Loop over all visible rows
     while(curRow < gameBackground.getMeshRows()){
       let xInd = 0;
-
-      // // FIXME:
-      // do Output.moveCursor(11, 30);
-      // do Output.printString("curRow :");
-      // do Output.printInt(curRow);
-
-      // do Output.moveCursor(12, 10);
-      // do Output.printString("curRow - gameBackground.getSkipRows() :");
-      // do Output.printInt(curRow - gameBackground.getSkipRows());
-      // do Sys.wait(250);
 
       // Loop over all rows in a column
       // Reset foundWhiteSpace
