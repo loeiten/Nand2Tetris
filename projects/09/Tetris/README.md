@@ -109,6 +109,12 @@ Characters:
 8*3 = 24
 2 character spacing => 24 + 2*8 = 40 pixel extra in frameStartLenX_
 
+```text
+[Num blocks] * (size + spacing + [1 for the start position of next block])
+19*(9 + 1 + 1) = 209
+```
+
+
 ### Next frame
 
 Idea:
