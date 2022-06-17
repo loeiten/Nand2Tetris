@@ -104,6 +104,11 @@ No padding
 
 Side: 6*(9+1+1)=66
 
+Characters:
+512/64 = 8... so 8 pixel/char i x dir
+8*3 = 24
+2 character spacing => 24 + 2*8 = 40 pixel extra in frameStartLenX_
+
 ### Next frame
 
 Idea:

@@ -72,12 +72,13 @@ class TetrisGame {
     var int testCol;
     let testRow = 39;
 
+    // Subtract 1 from frameStartY, and added to frameLenY
     // FIXME:
     let statistics = Background.new(
       1, // frameStartX_
-      23,   // frameStartY_
-      67, // frameLenX_
-      231, // frameLenY_ (240 + 1 for next line + 1 for frame line)
+      22,   // frameStartY_
+      107, // frameLenX_
+      232, // frameLenY_ (240 + 1 for next line + 1 for frame line)
       9,  // tetrominoElementSize_
       0,  // skipRows_
       6,  // meshCols_
@@ -85,7 +86,9 @@ class TetrisGame {
     );
     do statistics.drawFrame();
     let statMesh = statistics.getBackgroundMesh();
-    do statMesh.setState(0, 0, true);
+    // do statMesh.setState(0, 0, true);
+    // do statMesh.setState(5, 20, true);
+
     // Draw I
     do statMesh.setState(1, 1, true);
     do statMesh.setState(2, 1, true);
@@ -122,52 +125,51 @@ class TetrisGame {
     do statMesh.setState(2, 19, true);
     do statMesh.setState(3, 19, true);
 
-    do statMesh.setState(5, 20, true);
     do statistics.drawMesh(false, statMesh, 0, 0);
-    // do Output.moveCursor(2, 12);
+    // do Output.moveCursor(2, 8);
     // do Output.printInt(100);
-    do Output.moveCursor(3, 12);
+    do Output.moveCursor(3, 8);
     do Output.printInt(200);
-    // do Output.moveCursor(4, 12);
+    // do Output.moveCursor(4, 8);
     // do Output.printInt(300);
-    // do Output.moveCursor(5, 12);
+    // do Output.moveCursor(5, 8);
     // do Output.printInt(400);
-    do Output.moveCursor(6, 12);
+    do Output.moveCursor(6, 8);
     do Output.printInt(500);
-    // do Output.moveCursor(7, 12);
+    // do Output.moveCursor(7, 8);
     // do Output.printInt(600);
-    // do Output.moveCursor(8, 12);
+    // do Output.moveCursor(8, 8);
     // do Output.printInt(700);
-    do Output.moveCursor(9, 12);
+    do Output.moveCursor(9, 8);
     do Output.printInt(800);
-    // do Output.moveCursor(10, 12);
+    // do Output.moveCursor(10, 8);
     // do Output.printInt(900);
-    // do Output.moveCursor(11, 12);
+    // do Output.moveCursor(11, 8);
     // do Output.printInt(1000);
-    do Output.moveCursor(12, 12);
+    do Output.moveCursor(12, 8);
     do Output.printInt(1100);
-    // do Output.moveCursor(13, 12);
+    // do Output.moveCursor(13, 8);
     // do Output.printInt(1200);
-    // do Output.moveCursor(14, 12);
+    // do Output.moveCursor(14, 8);
     // do Output.printInt(1300);
-    do Output.moveCursor(15, 12);
+    do Output.moveCursor(15, 8);
     do Output.printInt(1400);
-    // do Output.moveCursor(16, 12);
+    // do Output.moveCursor(16, 8);
     // do Output.printInt(1500);
-    // do Output.moveCursor(17, 12);
+    // do Output.moveCursor(17, 8);
     // do Output.printInt(1600);
-    do Output.moveCursor(18, 12);
+    do Output.moveCursor(18, 8);
     do Output.printInt(1700);
-    // do Output.moveCursor(19, 12);
+    // do Output.moveCursor(19, 8);
     // do Output.printInt(1800);
-    // do Output.moveCursor(20, 12);
+    // do Output.moveCursor(20, 8);
     // do Output.printInt(1900);
-    do Output.moveCursor(21, 12);
+    do Output.moveCursor(21, 8);
     do Output.printInt(20000);
-    // do Output.moveCursor(22, 12);
+    // do Output.moveCursor(22, 8);
     // do Output.printInt(21000);
 
-    do Output.moveCursor(1, 1);
+    do Output.moveCursor(1, 2);
     do Output.printString("Statistics");
 
     // do Output.moveCursor(1, 0);
