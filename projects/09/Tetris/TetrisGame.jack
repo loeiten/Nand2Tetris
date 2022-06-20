@@ -22,6 +22,7 @@ class TetrisGame {
     // FIXME: Make game speed work with level
     let gameSpeed = 500;
 
+    // FIXME: No underscores in public API
     // Initialize the background (see README.md for calculation)
     // NOTE: The mesh is 40 according to
     // https://tetris.fandom.com/wiki/Tetris_Guideline#List_of_rules_(as_of_2009)
@@ -488,6 +489,8 @@ class TetrisGame {
    * Get rows to remove
    *
    * \warning The returned array must be manually destroyed
+   *
+   * \return Array containing the rows to remove
    */
   method Array getRowsToRemove(){
     var int xInd;  // The x coordinate of the Mesh

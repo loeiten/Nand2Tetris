@@ -1,0 +1,84 @@
+/** Implements the NextTetromino class. */
+
+class NextTetromino {
+  field Array currentBag;  // The current 7-bag of next tetrominos
+  field Array nextBag;  // The next 7-bag of next tetrominos
+  field int curBagIteration;  // The current bag iteration
+  field int bagSize;  // The bag size
+
+  // FIXME:
+  field int dummyCounter;
+
+  /** Construct the NextTetromino object. */
+  constructor NextTetromino new() {
+    let bagSize = 7;
+    let curBagIteration = 0;
+    let currentBag = Array.new(bagSize);
+    let nextBag = Array.new(bagSize);
+    do generateBag(currentBag);
+    do generateBag(nextBag);
+  }
+
+  /** Dispose this NextTetromino object. */
+  method void dispose(){
+    do currentBag.dispose();
+    do nextBag.dispose();
+    do Memory.deAlloc(this);
+    return;
+  }
+
+  /**
+   * Get the next tetromino
+   *
+   * \warning The returned tetromino must be manually destroyed
+   *
+   * \return The next tetromino
+   */
+  // FIXME: Can test with int numbers first
+  method Tetromino getNextTetromino(){
+    var Tetromino curTetromino;
+    var int counter;
+
+    let curTetromino = currentBag[0];
+
+    // Advance all tetrominos in the current bag with one position
+    // NOTE: bagSize-1 as we are accessing counter + 1
+    while(counter < (bagSize - 1)){
+      let currentBag[counter] = currentBag[counter + 1];
+      let counter = counter + 1;
+    }
+    // Manually move over the first tetromino from the next bag to the current bag
+    // NOTE: -1 as we start to count from 0
+    let currentBag[bagSize - 1] = nextBag[0];
+    // Reset the counter
+    let counter = 0;
+    // Advance all tetrominos in the current bag with one position
+    // NOTE: bagSize-1 as we are accessing counter + 1
+    while(counter < (bagSize - 1)){
+      let nextBag[counter] = nextBag[counter + 1];
+      let counter = counter + 1;
+    }
+
+    if(curBagIteration = bagSize){
+      // FIXME:
+      do generateBag(nextBag);
+      // Reset curBagIteration
+      let curBagIteration = 0;
+    } else {
+      // Update the curBagIteration
+      let curBagIteration = curBagIteration + 1;
+    }
+    return curTetromino;
+  }
+
+  function void generateBag(Array bag){
+    while(counter < bagSize){
+      // FIXME: Replace int with tetromino
+      let bag[counter] = counter + dummyCounter*bagSize
+      let counter = counter + 1;
+    }
+    // FIXME: Delete me
+    let dummyCounter = dummyCounter + 1;
+  }
+
+}
