@@ -15,8 +15,10 @@ class NextTetromino {
     let curBagIteration = 0;
     let currentBag = Array.new(bagSize);
     let nextBag = Array.new(bagSize);
+    // FIXME:
     do generateBag(currentBag);
     do generateBag(nextBag);
+    return this;
   }
 
   /** Dispose this NextTetromino object. */
@@ -35,8 +37,11 @@ class NextTetromino {
    * \return The next tetromino
    */
   // FIXME: Can test with int numbers first
-  method Tetromino getNextTetromino(){
-    var Tetromino curTetromino;
+  // method Tetromino getNextTetromino(){
+  method int getNextTetromino(){
+    // FIXME: Can test with int numbers first
+    // var Tetromino curTetromino;
+    var int curTetromino;
     var int counter;
 
     let curTetromino = currentBag[0];
@@ -71,14 +76,18 @@ class NextTetromino {
     return curTetromino;
   }
 
-  function void generateBag(Array bag){
+  method void generateBag(Array bag){
+    var int counter;
+    let counter = 0;
     while(counter < bagSize){
       // FIXME: Replace int with tetromino
-      let bag[counter] = counter + dummyCounter*bagSize
+      let bag[counter] = counter + (dummyCounter*bagSize);
       let counter = counter + 1;
     }
     // FIXME: Delete me
     let dummyCounter = dummyCounter + 1;
+
+    return;
   }
 
 }
