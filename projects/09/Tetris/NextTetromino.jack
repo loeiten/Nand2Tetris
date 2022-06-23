@@ -6,16 +6,12 @@ class NextTetromino {
   field int curBagIteration;  // The current bag iteration
   field int bagSize;  // The bag size
 
-  // FIXME:
-  field int dummyCounter;
-
   /** Construct the NextTetromino object. */
   constructor NextTetromino new() {
     let bagSize = 7;
     let curBagIteration = 0;
     let currentBag = Array.new(bagSize);
     let nextBag = Array.new(bagSize);
-    // FIXME:
     do generateBag(currentBag);
     do generateBag(nextBag);
     return this;
@@ -36,12 +32,8 @@ class NextTetromino {
    *
    * \return The next tetromino
    */
-  // FIXME: Can test with int numbers first
-  // method Tetromino getNextTetromino(){
-  method int getNextTetromino(){
-    // FIXME: Can test with int numbers first
-    // var Tetromino curTetromino;
-    var int curTetromino;
+  method Tetromino getNextTetromino(){
+    var Tetromino curTetromino;
     var int counter;
 
     let curTetromino = currentBag[0];
@@ -65,7 +57,6 @@ class NextTetromino {
     }
 
     if(curBagIteration = bagSize){
-      // FIXME:
       do generateBag(nextBag);
       // Reset curBagIteration
       let curBagIteration = 0;
@@ -76,16 +67,27 @@ class NextTetromino {
     return curTetromino;
   }
 
+  /**
+   *
+   */
   method void generateBag(Array bag){
-    var int counter;
-    let counter = 0;
-    while(counter < bagSize){
-      // FIXME: Replace int with tetromino
-      let bag[counter] = counter + (dummyCounter*bagSize);
-      let counter = counter + 1;
-    }
-    // FIXME: Delete me
-    let dummyCounter = dummyCounter + 1;
+    // FIXME: Put in loop
+    // var int counter;
+    // let counter = 0;
+    // while(counter < bagSize){
+    //   // FIXME: Replace int with tetromino
+    //   let bag[counter] = TetrominoSpawner.getO();
+    //   let counter = counter + 1;
+    // }
+    // FIXME: Make setBackground and setRelative
+    // FIXME: y and x is inverted
+    let bag[0] = TetrominoSpawner.getI();
+    let bag[1] = TetrominoSpawner.getJ();
+    let bag[2] = TetrominoSpawner.getL();
+    let bag[3] = TetrominoSpawner.getO();
+    let bag[4] = TetrominoSpawner.getS();
+    let bag[5] = TetrominoSpawner.getT();
+    let bag[6] = TetrominoSpawner.getZ();
 
     return;
   }

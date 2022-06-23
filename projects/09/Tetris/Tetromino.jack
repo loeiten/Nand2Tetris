@@ -24,13 +24,11 @@ class Tetromino {
    * \param tetrominoMesh_ The mesh of the tetromino itself
    * \param relativeXInd_ x-coordinate in the background mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
    * \param relativeYInd_ y-coordinate in the background mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
-   * \param tetrominoElementSize_ Size of a tetromino element
    * \param background_ The background to interact with
    */
   constructor Tetromino new(Mesh tetrominoMesh_,
                             int relativeXInd_,
                             int relativeYInd_,
-                            int tetrominoElementSize_,
                             Background background_) {
     let tetrominoMesh = tetrominoMesh_;
 
@@ -147,7 +145,7 @@ class Tetromino {
       if (gameYInd > (gameMesh.getRows() - 1)){ return false; }
 
       // Check whether we would collide
-      if (gameMesh.getState(gameXInd, gameYInd)){ return false; }
+      if (gameMesh.getState(gameYInd, gameXInd)){ return false; }
       let tetrominoMeshIndex = tetrominoMeshIndex + 1;
     }
 

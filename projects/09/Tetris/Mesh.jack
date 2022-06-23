@@ -63,15 +63,15 @@ class Mesh {
   /**
    * Return the state at given x and y coordinates
    *
-   * \param xInd The x coordinate of the Mesh
    * \param yInd The y coordinate of the Mesh
+   * \param xInd The x coordinate of the Mesh
    * \return The state at the given x and y coordinates
    */
-  method bool getState(int xInd, int yInd){
+  method bool getState(int yInd, int xInd){
     var int index;
     var bool state;
 
-    let index = getMeshArrayIndex(xInd, yInd);
+    let index = getMeshArrayIndex(yInd, xInd);
     let state = meshArray[index];
 
     return state;
@@ -80,14 +80,14 @@ class Mesh {
   /**
    * Set the state at given x and y coordinates
    *
-   * \param xInd The x coordinate of the Mesh
    * \param yInd The y coordinate of the Mesh
+   * \param xInd The x coordinate of the Mesh
    * \param state The state to set
    */
-  method void setState(int xInd, int yInd, bool state){
+  method void setState(int yInd, int xInd, bool state){
     var int index;
 
-    let index = getMeshArrayIndex(xInd, yInd);
+    let index = getMeshArrayIndex(yInd, xInd);
     let meshArray[index] = state;
     return;
   }
@@ -95,11 +95,11 @@ class Mesh {
   /**
    * Translates a set of x and y coordinates into an index
    *
-   * \param xInd The x coordinate of the Mesh
    * \param yInd The y coordinate of the Mesh
+   * \param xInd The x coordinate of the Mesh
    * \return The corresponding index
    */
-  method int getMeshArrayIndex(int xInd, int yInd){
+  method int getMeshArrayIndex(int yInd, int xInd){
     return xInd + (yInd*cols);
   }
 

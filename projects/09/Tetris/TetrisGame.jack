@@ -4,6 +4,7 @@
 
 /** Class responsible for updating the model of the game */
 class TetrisGame {
+  field NextTetromino nextTetromino;
   field int gameSpeed;  // Speed of the game
 
   field Background gameBackground;  // The game background
@@ -22,6 +23,7 @@ class TetrisGame {
     // FIXME: Make game speed work with level
     let gameSpeed = 500;
 
+    let nextTetromino = NextTetromino.new();
     // FIXME: No underscores in public API
     // Initialize the background (see README.md for calculation)
     // NOTE: The mesh is 40 according to
@@ -43,6 +45,7 @@ class TetrisGame {
 
   /** Dispose this game. */
   method void dispose() {
+    do nextTetromino.dispose();
     do gameBackground.dispose();
     do Memory.deAlloc(this);
     return;
@@ -89,44 +92,44 @@ class TetrisGame {
     );
     do statistics.drawFrame();
     let statMesh = statistics.getBackgroundMesh();
-    // do statMesh.setState(0, 0, true);
-    // do statMesh.setState(5, 20, true);
+    // do statMesh.setState(0, 0,true);
+    // do statMesh.setState(20, 5, true);
 
     // Draw I
     do statMesh.setState(1, 1, true);
-    do statMesh.setState(2, 1, true);
-    do statMesh.setState(3, 1, true);
-    do statMesh.setState(4, 1, true);
-    // Draw J
+    do statMesh.setState(1, 2, true);
     do statMesh.setState(1, 3, true);
     do statMesh.setState(1, 4, true);
-    do statMesh.setState(2, 4, true);
-    do statMesh.setState(3, 4, true);
+    // Draw J
+    do statMesh.setState(3, 1, true);
+    do statMesh.setState(4, 1, true);
+    do statMesh.setState(4, 2, true);
+    do statMesh.setState(4, 3, true);
     // Draw L
-    do statMesh.setState(3, 6, true);
-    do statMesh.setState(1, 7, true);
-    do statMesh.setState(2, 7, true);
-    do statMesh.setState(3, 7, true);
+    do statMesh.setState(6, 3, true);
+    do statMesh.setState(7, 1, true);
+    do statMesh.setState(7, 2, true);
+    do statMesh.setState(7, 3, true);
     // Draw O
-    do statMesh.setState(1, 9,  true);
-    do statMesh.setState(2, 9,  true);
-    do statMesh.setState(1, 10, true);
-    do statMesh.setState(2, 10, true);
+    do statMesh.setState(9, 1,  true);
+    do statMesh.setState(9, 2,  true);
+    do statMesh.setState(10, 1, true);
+    do statMesh.setState(10, 2, true);
     // Draw S
-    do statMesh.setState(2, 12, true);
-    do statMesh.setState(3, 12, true);
-    do statMesh.setState(1, 13, true);
-    do statMesh.setState(2, 13, true);
+    do statMesh.setState(12, 2, true);
+    do statMesh.setState(12, 3, true);
+    do statMesh.setState(13, 1, true);
+    do statMesh.setState(13, 2, true);
     // Draw T
-    do statMesh.setState(2, 15, true);
-    do statMesh.setState(1, 16, true);
-    do statMesh.setState(2, 16, true);
-    do statMesh.setState(3, 16, true);
+    do statMesh.setState(15, 2, true);
+    do statMesh.setState(16, 1, true);
+    do statMesh.setState(16, 2, true);
+    do statMesh.setState(16, 3, true);
     // Draw Z
-    do statMesh.setState(1, 18, true);
-    do statMesh.setState(2, 18, true);
-    do statMesh.setState(2, 19, true);
-    do statMesh.setState(3, 19, true);
+    do statMesh.setState(18, 1, true);
+    do statMesh.setState(18, 2, true);
+    do statMesh.setState(19, 2, true);
+    do statMesh.setState(19, 3, true);
 
     do statistics.drawMesh(false, statMesh, 0, 0);
     // do Output.moveCursor(2, 13);
@@ -201,38 +204,38 @@ class TetrisGame {
     do next.drawFrame();
     let nextMesh = next.getBackgroundMesh();
     // do nextMesh.setState(0, 0, true);
-    // do nextMesh.setState(5, 20, true);
+    // do nextMesh.setState(20, 5, true);
 
     // Draw I
     do nextMesh.setState(1, 1, true);
-    do nextMesh.setState(2, 1, true);
-    do nextMesh.setState(3, 1, true);
-    do nextMesh.setState(4, 1, true);
-    // Draw J
+    do nextMesh.setState(1, 2, true);
     do nextMesh.setState(1, 3, true);
     do nextMesh.setState(1, 4, true);
-    do nextMesh.setState(2, 4, true);
-    do nextMesh.setState(3, 4, true);
+    // Draw J
+    do nextMesh.setState(3, 1, true);
+    do nextMesh.setState(4, 1, true);
+    do nextMesh.setState(4, 2, true);
+    do nextMesh.setState(4, 3, true);
     // Draw L
-    do nextMesh.setState(3, 6, true);
-    do nextMesh.setState(1, 7, true);
-    do nextMesh.setState(2, 7, true);
-    do nextMesh.setState(3, 7, true);
+    do nextMesh.setState(6, 3, true);
+    do nextMesh.setState(7, 1, true);
+    do nextMesh.setState(7, 2, true);
+    do nextMesh.setState(7, 3, true);
     // Draw O
-    do nextMesh.setState(1, 9,  true);
-    do nextMesh.setState(2, 9,  true);
-    do nextMesh.setState(1, 10, true);
-    do nextMesh.setState(2, 10, true);
+    do nextMesh.setState(9, 1, true);
+    do nextMesh.setState(9, 2, true);
+    do nextMesh.setState(10, 1, true);
+    do nextMesh.setState(10, 2, true);
     // Draw S
-    do nextMesh.setState(2, 12, true);
-    do nextMesh.setState(3, 12, true);
-    do nextMesh.setState(1, 13, true);
-    do nextMesh.setState(2, 13, true);
+    do nextMesh.setState(12, 2, true);
+    do nextMesh.setState(12, 3, true);
+    do nextMesh.setState(13, 1, true);
+    do nextMesh.setState(13, 2, true);
     // Draw T
-    do nextMesh.setState(2, 15, true);
-    do nextMesh.setState(1, 16, true);
-    do nextMesh.setState(2, 16, true);
-    do nextMesh.setState(3, 16, true);
+    do nextMesh.setState(15, 2, true);
+    do nextMesh.setState(16, 1, true);
+    do nextMesh.setState(16, 2, true);
+    do nextMesh.setState(16, 3, true);
 
     do next.drawMesh(false, nextMesh, 0, 0);
 
@@ -263,32 +266,32 @@ class TetrisGame {
     while(testRow > 28){
       let testCol = 0;
       while (testCol < 10){
-        do gameMesh.setState(testCol, testRow, true);
+        do gameMesh.setState(testRow, testCol, true);
         let testCol = testCol + 1;
       }
       let testRow = testRow - 1;
     }
 
     // Make holes
-    do gameMesh.setState(0, 39, false);
-    do gameMesh.setState(2, 39, false);
-    do gameMesh.setState(4, 39, false);
-    do gameMesh.setState(6, 39, false);
-    do gameMesh.setState(8, 39, false);
+    do gameMesh.setState(39, 0, false);
+    do gameMesh.setState(39, 2, false);
+    do gameMesh.setState(39, 4, false);
+    do gameMesh.setState(39, 6, false);
+    do gameMesh.setState(39, 8, false);
     // 38 is due to clearing
-    do gameMesh.setState(1, 37, false);
-    do gameMesh.setState(3, 37, false);
-    do gameMesh.setState(5, 37, false);
-    do gameMesh.setState(7, 37, false);
-    do gameMesh.setState(9, 37, false);
+    do gameMesh.setState(37, 1, false);
+    do gameMesh.setState(37, 3, false);
+    do gameMesh.setState(37, 5, false);
+    do gameMesh.setState(37, 7, false);
+    do gameMesh.setState(37, 9, false);
     // 36 - 35 is due to clearing
-    do gameMesh.setState(0, 34, false);
-    do gameMesh.setState(4, 34, false);
-    do gameMesh.setState(5, 34, false);
-    do gameMesh.setState(9, 34, false);
+    do gameMesh.setState(34, 0, false);
+    do gameMesh.setState(34, 4, false);
+    do gameMesh.setState(34, 5, false);
+    do gameMesh.setState(34, 9, false);
     // 33 - 30 is due to clearing
-    do gameMesh.setState(1, 29, false);
-    do gameMesh.setState(8, 29, false);
+    do gameMesh.setState(29, 1, false);
+    do gameMesh.setState(29, 8, false);
 
     do gameBackground.drawMesh(false, gameMesh, 0, 0);
 
@@ -435,7 +438,7 @@ class TetrisGame {
       let tetrominoIndexArray = tetrominoMesh.getMeshIndices(tetrominoIndex);
       let gameXInd = curTetromino.getRelativeIndX() + tetrominoIndexArray[0];
       let gameYInd = curTetromino.getRelativeIndY() + tetrominoIndexArray[1];
-      do gameMesh.setState(gameXInd, gameYInd, true);
+      do gameMesh.setState(gameYInd, gameXInd, true);
       let tetrominoIndex = tetrominoIndex + 1;
     }
     do gameBackground.drawMesh(false, gameMesh, 0, 0);
@@ -516,7 +519,7 @@ class TetrisGame {
       // Reset foundWhiteSpace
       let foundWhiteSpace = false;
       while ((xInd < backgroundMesh.getCols()) & (~foundWhiteSpace)){
-        let state = backgroundMesh.getState(xInd, curRow);
+        let state = backgroundMesh.getState(curRow, xInd);
         if(state = 0){
           let foundWhiteSpace = true;
         }

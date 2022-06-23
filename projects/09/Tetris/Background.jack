@@ -146,8 +146,8 @@ class Background {
           // Loop over all rows
           while(xInd < meshCols){
             // Set the element of the row to be cleared to the row above
-            let state = backgroundMesh.getState(xInd, meshRow);
-            do backgroundMesh.setState(xInd, meshRow + 1, state);
+            let state = backgroundMesh.getState(meshRow, xInd);
+            do backgroundMesh.setState(meshRow + 1, xInd, state);
             let xInd = xInd+1;
           }
           let meshRow = meshRow - 1;
@@ -216,7 +216,7 @@ class Background {
         ((-1 < meshYInd) & (meshYInd < mesh.getRows()))
       ){
         // NOTE: We need the actual y-coordinate to get the state
-        let state = mesh.getState(meshXInd, meshYInd);
+        let state = mesh.getState(meshYInd, meshXInd);
         // NOTE: We only draw the active part of the mesh as the inactive part
         //       may overlap with the background
         // FIXME: Need another way of not drawing active state...if not can get probs with collapse

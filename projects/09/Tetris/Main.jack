@@ -1,29 +1,10 @@
 /** Initializes a new Tetris game and starts running it. */
 class Main {
     function void main() {
-        // FIXME:
-        var NextTetromino nextTetromino;
-        var int curInt;
-        var int count;
-
-        let nextTetromino = NextTetromino.new();
-
-
-        let count = 0;
-        while(count < 21){
-          let curInt = nextTetromino.getNextTetromino();
-
-          do Output.printInt(curInt);
-          do Sys.wait(500);
-          let count = count + 1;
-        }
-
-
-
-        // var TetrisGame game;
-        // let game = TetrisGame.new();
-        // do game.run();
-        // do game.dispose();
+        var TetrisGame game;
+        let game = TetrisGame.new();
+        do game.run();
+        do game.dispose();
         return;
     }
 }
