@@ -1,24 +1,59 @@
-/** Implements the NextTetromino class. */
+/**
+  * Implements the NextTetromino class.
+  *
+  * This class is responsible for
+  * 1. Generating the 7-bags
+  * 2. Returning the next tetromino
+  * 3. Update the next display
+  */
 
 class NextTetromino {
+  field Background nextBackground; // The background for the next tetrominos
+  field Background gameBackground_; // The background for the game
+  field Mesh nextMesh;  // The mesh containing the next tetrominos
   field Array currentBag;  // The current 7-bag of next tetrominos
   field Array nextBag;  // The next 7-bag of next tetrominos
   field int curBagIteration;  // The current bag iteration
   field int bagSize;  // The bag size
 
-  /** Construct the NextTetromino object. */
-  constructor NextTetromino new() {
+  /**
+   * Construct the NextTetromino object.
+   *
+   * \param gameBackground The background for the game
+   */
+  constructor NextTetromino new(Background gameBackground) {
+    let gameBackground_ = gameBackground;
+    // Create the next background
+    // Subtract 1 from frameStartY, and added to frameLenY
+    let nextBackground = Background.new(
+      347, // frameStartX_  // 155 + 122 + 70
+      22,   // frameStartY_
+      68, // frameLenX_ + 2 + 2
+      200, // frameLenY_ (209 + 1 for next line + 1 for frame line)
+      9,  // tetrominoElementSize_
+      0,  // skipRows_
+      6,  // meshCols_
+      17   // meshRows_
+    );
+    do nextBackground.drawFrame();
+    let nextMesh = nextBackground.getBackgroundMesh();
+
+    // Set size and iteration
     let bagSize = 7;
     let curBagIteration = 0;
+
+    // Construct the bags
     let currentBag = Array.new(bagSize);
     let nextBag = Array.new(bagSize);
     do generateBag(currentBag);
     do generateBag(nextBag);
+
     return this;
   }
 
   /** Dispose this NextTetromino object. */
   method void dispose(){
+    do nextBackground.dispose();
     do currentBag.dispose();
     do nextBag.dispose();
     do Memory.deAlloc(this);
@@ -34,6 +69,7 @@ class NextTetromino {
    */
   method Tetromino getNextTetromino(){
     var Tetromino curTetromino;
+    var Mesh curTetrominoMesh;
     var int counter;
 
     let curTetromino = currentBag[0];
@@ -64,11 +100,28 @@ class NextTetromino {
       // Update the curBagIteration
       let curBagIteration = curBagIteration + 1;
     }
+
+    // Update and draw the next column
+    do updateNextColumn();
+
+    // Update the tetromino
+    do curTetromino.setBackground(gameBackground_);
+    let curTetrominoMesh = curTetromino.getTetrominoMesh();
+    if (curTetrominoMesh.getMeshLength() = 16){
+      // 4x4 tetrominos
+      do curTetromino.setRelativePosition(19, 3);
+    } else {
+      // 3x3 tetrominos
+      do curTetromino.setRelativePosition(18, 3);
+    }
+
     return curTetromino;
   }
 
   /**
+   * Generate a bag of tetrominos
    *
+   * \param bag The bag where the tetrominos are to be put in
    */
   method void generateBag(Array bag){
     // FIXME: Put in loop
@@ -79,15 +132,53 @@ class NextTetromino {
     //   let bag[counter] = TetrominoSpawner.getO();
     //   let counter = counter + 1;
     // }
-    // FIXME: Make setBackground and setRelative
-    // FIXME: y and x is inverted
-    let bag[0] = TetrominoSpawner.getI();
-    let bag[1] = TetrominoSpawner.getJ();
-    let bag[2] = TetrominoSpawner.getL();
-    let bag[3] = TetrominoSpawner.getO();
-    let bag[4] = TetrominoSpawner.getS();
-    let bag[5] = TetrominoSpawner.getT();
-    let bag[6] = TetrominoSpawner.getZ();
+    // FIXME: YOU ARE HERE: You just added relY and relX
+    let bag[0] = TetrominoSpawner.getI(nextMesh, 0, 1);
+    let bag[1] = TetrominoSpawner.getJ(nextMesh, 2, 1);
+    let bag[2] = TetrominoSpawner.getL(nextMesh, 5, 1);
+    let bag[3] = TetrominoSpawner.getO(nextMesh, 8, 1);
+    let bag[4] = TetrominoSpawner.getS(nextMesh, 11, 1);
+    let bag[5] = TetrominoSpawner.getT(nextMesh, 14, 1);
+    let bag[6] = TetrominoSpawner.getZ(nextMesh, 0, 1);
+
+    return;
+  }
+
+  /** Update and draw the next column */
+  method void updateNextColumn(){
+    // FIXME: YOU ARE HERE: Do this based on the actual tetrominos (and only 6 ones)
+    // Draw I
+    do nextMesh.setState(1, 1, true);
+    do nextMesh.setState(1, 2, true);
+    do nextMesh.setState(1, 3, true);
+    do nextMesh.setState(1, 4, true);
+    // Draw J
+    do nextMesh.setState(3, 1, true);
+    do nextMesh.setState(4, 1, true);
+    do nextMesh.setState(4, 2, true);
+    do nextMesh.setState(4, 3, true);
+    // Draw L
+    do nextMesh.setState(6, 3, true);
+    do nextMesh.setState(7, 1, true);
+    do nextMesh.setState(7, 2, true);
+    do nextMesh.setState(7, 3, true);
+    // Draw O
+    do nextMesh.setState(9, 1, true);
+    do nextMesh.setState(9, 2, true);
+    do nextMesh.setState(10, 1, true);
+    do nextMesh.setState(10, 2, true);
+    // Draw S
+    do nextMesh.setState(12, 2, true);
+    do nextMesh.setState(12, 3, true);
+    do nextMesh.setState(13, 1, true);
+    do nextMesh.setState(13, 2, true);
+    // Draw T
+    do nextMesh.setState(15, 2, true);
+    do nextMesh.setState(16, 1, true);
+    do nextMesh.setState(16, 2, true);
+    do nextMesh.setState(16, 3, true);
+
+    do next.drawMesh(false, nextMesh, 0, 0);
 
     return;
   }

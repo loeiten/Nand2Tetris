@@ -83,6 +83,28 @@ class Tetromino {
   }
 
   /**
+   * Set the background
+   *
+   * \param background The new background
+   */
+  method void setBackground(Background background_){
+    let background = background_;
+    return;
+  }
+
+  /**
+   * Set the relative position
+   *
+   * \param yInd The relative y index
+   * \param xInd The relative x index
+   */
+  method void setRelativePosition(int yInd, int xInd){
+    let relativeYInd = yInd;
+    let relativeXInd = xInd;
+    return;
+  }
+
+  /**
    * Rotate the tetromino clockwise
    */
   method void rotate(){
