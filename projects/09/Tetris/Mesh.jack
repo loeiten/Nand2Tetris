@@ -112,10 +112,10 @@ class Mesh {
    *  - The second index is the y coordinate of the Mesh
    */
   method Array getMeshIndices(int index){
-    // x-index (integer division)
+    // x-index (modulus operator)
     let coordinates[0] = Algorithm.mod(index, cols_);
 
-    // y-index (modolus operator)
+    // y-index (integer division)
     let coordinates[1] = index/cols_;
 
     return coordinates;

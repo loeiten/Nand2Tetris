@@ -3,18 +3,20 @@
  */
 
 /**
- * Class for spawing tetrominos
+ * Class for spawning tetrominos
  */
 class TetrominoSpawner {
 
   /**
-   * Return the I tetromino
+   * Spawn a I tetromino
    *
    * \warning The tetromino must be manually destroyed
    *
-   * \param The background to spawn the tetromino on
+   * \param background The background to spawn the tetromino on
+   * \param relativeYInd The y-index of the background mesh to spawn on
+   * \param relativeXInd The x-index of the background mesh to spawn on
    */
-  function Tetromino getI(Background background){
+  function Tetromino spawnI(Background background, int relativeYInd, int relativeXInd){
     // NOTE: The tetromino mesh is destroyed by the tetromino itself, so we will not destroy it here
     var Mesh tetrominoMesh;
     var Tetromino tetromino;
@@ -24,22 +26,25 @@ class TetrominoSpawner {
     do  tetrominoMesh.setState(1, 2, true);
     do  tetrominoMesh.setState(1, 3, true);
     let tetromino = Tetromino.new(tetrominoMesh,
-                                  18, // y-coodrinate in the gameMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
-                                  3,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
-                                  background // Background
+                                  relativeYInd,  // y-coordinate in the backgroundMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
+                                  relativeXInd,  // x-coordinate in the backgroundMesh (this is the center as we are counting from 0)
+                                  background,  // Background
+                                  0  // Type
                                  );
 
     return tetromino;
   }
 
   /**
-   * Return the J tetromino
+   * Spawn a J tetromino
    *
    * \warning The tetromino must be manually destroyed
    *
-   * \param The background to spawn the tetromino on
+   * \param background The background to spawn the tetromino on
+   * \param relativeYInd The y-index of the background mesh to spawn on
+   * \param relativeXInd The x-index of the background mesh to spawn on
    */
-  function Tetromino getJ(Background background){
+  function Tetromino spawnJ(Background background, int relativeYInd, int relativeXInd){
     // NOTE: The tetromino mesh is destroyed by the tetromino itself, so we will not destroy it here
     var Mesh tetrominoMesh;
     var Tetromino tetromino;
@@ -49,22 +54,25 @@ class TetrominoSpawner {
     do  tetrominoMesh.setState(1, 1, true);
     do  tetrominoMesh.setState(1, 2, true);
     let tetromino = Tetromino.new(tetrominoMesh,
-                                  19, // y-coodrinate in the gameMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
-                                  3,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
-                                  background // Background
+                                  relativeYInd,  // y-coordinate in the backgroundMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
+                                  relativeXInd,  // x-coordinate in the backgroundMesh (this is the center as we are counting from 0)
+                                  background, // Background
+                                  1  // Type
                                  );
 
     return tetromino;
   }
 
   /**
-   * Return the L tetromino
+   * Spawn a L tetromino
    *
    * \warning The tetromino must be manually destroyed
    *
-   * \param The background to spawn the tetromino on
+   * \param background The background to spawn the tetromino on
+   * \param relativeYInd The y-index of the background mesh to spawn on
+   * \param relativeXInd The x-index of the background mesh to spawn on
    */
-  function Tetromino getL(Background background){
+  function Tetromino spawnL(Background background, int relativeYInd, int relativeXInd){
     // NOTE: The tetromino mesh is destroyed by the tetromino itself, so we will not destroy it here
     var Mesh tetrominoMesh;
     var Tetromino tetromino;
@@ -74,22 +82,25 @@ class TetrominoSpawner {
     do  tetrominoMesh.setState(1, 1, true);
     do  tetrominoMesh.setState(1, 3, true);
     let tetromino = Tetromino.new(tetrominoMesh,
-                                  19, // y-coodrinate in the gameMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
-                                  3,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
-                                  background // Background
+                                  relativeYInd,  // y-coordinate in the backgroundMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
+                                  relativeXInd,  // x-coordinate in the backgroundMesh (this is the center as we are counting from 0)
+                                  background, // Background
+                                  2  // Type
                                  );
 
     return tetromino;
   }
 
   /**
-   * Return the O tetromino
+   * Spawn a O tetromino
    *
    * \warning The tetromino must be manually destroyed
    *
-   * \param The background to spawn the tetromino on
+   * \param background The background to spawn the tetromino on
+   * \param relativeYInd The y-index of the background mesh to spawn on
+   * \param relativeXInd The x-index of the background mesh to spawn on
    */
-  function Tetromino getO(Background background){
+  function Tetromino spawnO(Background background, int relativeYInd, int relativeXInd){
     // NOTE: The tetromino mesh is destroyed by the tetromino itself, so we will not destroy it here
     var Mesh tetrominoMesh;
     var Tetromino tetromino;
@@ -99,22 +110,25 @@ class TetrominoSpawner {
     do  tetrominoMesh.setState(2, 1, true);
     do  tetrominoMesh.setState(2, 2, true);
     let tetromino = Tetromino.new(tetrominoMesh,
-                                  18, // y-coodrinate in the gameMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
-                                  3,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
-                                  background // Background
+                                  relativeYInd,  // y-coordinate in the backgroundMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
+                                  relativeXInd,  // x-coordinate in the backgroundMesh (this is the center as we are counting from 0)
+                                  background, // Background
+                                  3  // Type
                                  );
 
     return tetromino;
   }
 
   /**
-   * Return the S tetromino
+   * Spawn a S tetromino
    *
    * \warning The tetromino must be manually destroyed
    *
-   * \param The background to spawn the tetromino on
+   * \param background The background to spawn the tetromino on
+   * \param relativeYInd The y-index of the background mesh to spawn on
+   * \param relativeXInd The x-index of the background mesh to spawn on
    */
-  function Tetromino getS(Background background){
+  function Tetromino spawnS(Background background, int relativeYInd, int relativeXInd){
     // NOTE: The tetromino mesh is destroyed by the tetromino itself, so we will not destroy it here
     var Mesh tetrominoMesh;
     var Tetromino tetromino;
@@ -124,22 +138,25 @@ class TetrominoSpawner {
     do  tetrominoMesh.setState(1, 0, true);
     do  tetrominoMesh.setState(1, 1, true);
     let tetromino = Tetromino.new(tetrominoMesh,
-                                  19, // y-coodrinate in the gameMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
-                                  3,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
-                                  background // Background
+                                  relativeYInd,  // y-coordinate in the backgroundMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
+                                  relativeXInd,  // x-coordinate in the backgroundMesh (this is the center as we are counting from 0)
+                                  background, // Background
+                                  4  // Type
                                  );
 
     return tetromino;
   }
 
   /**
-   * Return the T tetromino
+   * Spawn a T tetromino
    *
    * \warning The tetromino must be manually destroyed
    *
-   * \param The background to spawn the tetromino on
+   * \param background The background to spawn the tetromino on
+   * \param relativeYInd The y-index of the background mesh to spawn on
+   * \param relativeXInd The x-index of the background mesh to spawn on
    */
-  function Tetromino getT(Background background){
+  function Tetromino spawnT(Background background, int relativeYInd, int relativeXInd){
     // NOTE: The tetromino mesh is destroyed by the tetromino itself, so we will not destroy it here
     var Mesh tetrominoMesh;
     var Tetromino tetromino;
@@ -149,22 +166,25 @@ class TetrominoSpawner {
     do  tetrominoMesh.setState(1, 1, true);
     do  tetrominoMesh.setState(1, 2, true);
     let tetromino = Tetromino.new(tetrominoMesh,
-                                  19, // y-coodrinate in the gameMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
-                                  3,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
-                                  background // Background
+                                  relativeYInd,  // y-coordinate in the backgroundMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
+                                  relativeXInd,  // x-coordinate in the backgroundMesh (this is the center as we are counting from 0)
+                                  background, // Background
+                                  5  // Type
                                  );
 
     return tetromino;
   }
 
   /**
-   * Return the Z tetromino
+   * Spawn a Z tetromino
    *
    * \warning The tetromino must be manually destroyed
    *
-   * \param The background to spawn the tetromino on
+   * \param background The background to spawn the tetromino on
+   * \param relativeYInd The y-index of the background mesh to spawn on
+   * \param relativeXInd The x-index of the background mesh to spawn on
    */
-  function Tetromino getZ(Background background){
+  function Tetromino spawnZ(Background background, int relativeYInd, int relativeXInd){
     // NOTE: The tetromino mesh is destroyed by the tetromino itself, so we will not destroy it here
     var Mesh tetrominoMesh;
     var Tetromino tetromino;
@@ -174,9 +194,10 @@ class TetrominoSpawner {
     do  tetrominoMesh.setState(1, 1, true);
     do  tetrominoMesh.setState(1, 2, true);
     let tetromino = Tetromino.new(tetrominoMesh,
-                                  19, // y-coodrinate in the gameMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
-                                  3,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
-                                  background // Background
+                                  relativeYInd,  // y-coordinate in the backgroundMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
+                                  relativeXInd,  // x-coordinate in the backgroundMesh (this is the center as we are counting from 0)
+                                  background, // Background
+                                  6  // Type
                                  );
 
     return tetromino;

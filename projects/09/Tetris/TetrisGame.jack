@@ -4,8 +4,11 @@
 
 /** Class responsible for updating the model of the game */
 class TetrisGame {
-  field NextTetromino nextTetromino;
   field int gameSpeed;  // Speed of the game
+  field String gameOverString;  // String containing game over
+
+  field NextTetrominos nextTetrominos;  // The column containing the next tetrominos
+  field Score score;  // The score table
 
   field Background gameBackground;  // The game background
   // Destroyed by the gameBackground
@@ -23,7 +26,6 @@ class TetrisGame {
     // FIXME: Make game speed work with level
     let gameSpeed = 500;
 
-    // FIXME: No underscores in public API
     // Initialize the background (see README.md for calculation)
     // NOTE: The mesh is 40 according to
     // https://tetris.fandom.com/wiki/Tetris_Guideline#List_of_rules_(as_of_2009)
@@ -39,15 +41,19 @@ class TetrisGame {
     let gameMesh = gameBackground.getBackgroundMesh();
     do gameBackground.drawFrame();
 
-    let nextTetromino = NextTetromino.new();
+    let nextTetrominos = NextTetrominos.new(gameBackground);
+    let score = Score.new();
+
+    let gameOverString = " Game over! ";
 
     return this;
   }
 
   /** Dispose this game. */
   method void dispose() {
-    do nextTetromino.dispose();
+    do nextTetrominos.dispose();
     do gameBackground.dispose();
+    do gameOverString.dispose();
     do Memory.deAlloc(this);
     return;
   }
@@ -68,150 +74,10 @@ class TetrisGame {
 
     var Tetromino curTetromino;  // The current tetromino
 
-    // FIXME: Must also dispose
-    var Background statistics;
-    var Mesh statMesh;
-    var Background next;
-    var Mesh nextMesh;
-
     // FIXME: Remove
     var int testRow;
     var int testCol;
     let testRow = 39;
-
-    // Subtract 1 from frameStartY, and added to frameLenY
-    // FIXME:
-    let statistics = Background.new(
-      35, // frameStartX  // FIXME: Fiddle around with numbers to look nice
-      22,   // frameStartY
-      107, // frameLenX
-      232, // frameLenY (240 + 1 for next line + 1 for frame line)
-      9,  // tetrominoElementSize
-      0,  // skipRows
-      6,  // meshCols
-      21   // meshRows
-    );
-    do statistics.drawFrame();
-    let statMesh = statistics.getBackgroundMesh();
-    // do statMesh.setState(0, 0,true);
-    // do statMesh.setState(20, 5, true);
-
-    // Draw I
-    do statMesh.setState(1, 1, true);
-    do statMesh.setState(1, 2, true);
-    do statMesh.setState(1, 3, true);
-    do statMesh.setState(1, 4, true);
-    // Draw J
-    do statMesh.setState(3, 1, true);
-    do statMesh.setState(4, 1, true);
-    do statMesh.setState(4, 2, true);
-    do statMesh.setState(4, 3, true);
-    // Draw L
-    do statMesh.setState(6, 3, true);
-    do statMesh.setState(7, 1, true);
-    do statMesh.setState(7, 2, true);
-    do statMesh.setState(7, 3, true);
-    // Draw O
-    do statMesh.setState(9, 1,  true);
-    do statMesh.setState(9, 2,  true);
-    do statMesh.setState(10, 1, true);
-    do statMesh.setState(10, 2, true);
-    // Draw S
-    do statMesh.setState(12, 2, true);
-    do statMesh.setState(12, 3, true);
-    do statMesh.setState(13, 1, true);
-    do statMesh.setState(13, 2, true);
-    // Draw T
-    do statMesh.setState(15, 2, true);
-    do statMesh.setState(16, 1, true);
-    do statMesh.setState(16, 2, true);
-    do statMesh.setState(16, 3, true);
-    // Draw Z
-    do statMesh.setState(18, 1, true);
-    do statMesh.setState(18, 2, true);
-    do statMesh.setState(19, 2, true);
-    do statMesh.setState(19, 3, true);
-
-    do statistics.drawMesh(false, statMesh, 0, 0);
-    // do Output.moveCursor(2, 13);
-    // do Output.printInt(100);
-    do Output.moveCursor(3, 13);
-    do Output.printInt(2);
-    // do Output.moveCursor(4, 13);
-    // do Output.printInt(300);
-    // do Output.moveCursor(5, 13);
-    // do Output.printInt(400);
-    do Output.moveCursor(6, 13);
-    do Output.printInt(500);
-    // do Output.moveCursor(7, 13);
-    // do Output.printInt(600);
-    // do Output.moveCursor(8, 13);
-    // do Output.printInt(700);
-    do Output.moveCursor(9, 13);
-    do Output.printInt(800);
-    // do Output.moveCursor(10, 13);
-    // do Output.printInt(900);
-    // do Output.moveCursor(11, 13);
-    // do Output.printInt(1000);
-    do Output.moveCursor(12, 13);
-    do Output.printInt(1100);
-    // do Output.moveCursor(13, 13);
-    // do Output.printInt(1200);
-    // do Output.moveCursor(14, 13);
-    // do Output.printInt(1300);
-    do Output.moveCursor(15, 13);
-    do Output.printInt(1400);
-    // do Output.moveCursor(16, 13);
-    // do Output.printInt(1500);
-    // do Output.moveCursor(17, 13);
-    // do Output.printInt(1600);
-    do Output.moveCursor(18, 13);
-    do Output.printInt(1700);
-    // do Output.moveCursor(19, 13);
-    // do Output.printInt(1800);
-    // do Output.moveCursor(20, 13);
-    // do Output.printInt(1900);
-    do Output.moveCursor(21, 13);
-    do Output.printInt(20000);
-    // do Output.moveCursor(22, 13);
-    // do Output.printInt(21000);
-
-    do Output.moveCursor(1, 6);
-    do Output.printString("Statistics");
-
-    // do Output.moveCursor(1, 0);
-    // do Output.printString("Next");
-    // do Output.moveCursor(2, 0);
-    // do Output.printString("Score:");
-    // do Output.moveCursor(3, 0);
-    // do Output.printString("Lines:");
-    // do Output.moveCursor(4, 0);
-    // do Output.printString("Level:");
-    // do Output.moveCursor(5, 0);
-    // do Output.printInt(32000);
-
-
-    do Output.moveCursor(1, 46);
-    do Output.printString("Next");
-
-    // FIXME:
-    do Output.moveCursor(11, 26);
-    do Output.printString(" Game over! ");
-
-    do Output.moveCursor(2, 55);
-    do Output.printString("Score:");
-    do Output.moveCursor(3, 55);
-    do Output.printInt(20000);
-
-    do Output.moveCursor(7, 55);
-    do Output.printString("Lines:");
-    do Output.moveCursor(8, 55);
-    do Output.printInt(30000);
-
-    do Output.moveCursor(12, 55);
-    do Output.printString("Level:");
-    do Output.moveCursor(13, 55);
-    do Output.printInt(30000);
 
     // FIXME: TestMesh
     while(testRow > 28){
@@ -252,7 +118,7 @@ class TetrisGame {
 
     // Run until game over
     while (~gameOver){
-      let curTetromino = TetrominoSpawner.getO(gameBackground);
+      let curTetromino = TetrominoSpawner.spawnO(gameBackground, 3, 18);
       let doSpawn = curTetromino.canSpawn();
 
       if(doSpawn){
@@ -268,9 +134,8 @@ class TetrisGame {
     }
 
     // Display game over
-    // FIXME:
     do Output.moveCursor(11, 26);
-    do Output.printString(" Game over! ");
+    do Output.printString(gameOverString);
 
     return;
   }
@@ -490,6 +355,40 @@ class TetrisGame {
     }
 
     return rowsToRemove;
+  }
+
+  /**
+   * Update game speed
+   *
+   * According to
+   * https://tetris.fandom.com/wiki/Tetris_Worlds#Gravity
+   */
+  method void updateGameSpeed(){
+    // NOTE: As we are only working with integers, we must make a look-up table of the scores
+    var int level;
+    let level = score.getLevel();
+
+    if(level = 1){ let gameSpeed = 1000; }
+    if(level = 2){ let gameSpeed = 793; }
+    if(level = 3){ let gameSpeed = 618; }
+    if(level = 4){ let gameSpeed = 473; }
+    if(level = 5){ let gameSpeed = 355; }
+    if(level = 6){ let gameSpeed = 262; }
+    if(level = 7){ let gameSpeed = 190; }
+    if(level = 8){ let gameSpeed = 135; }
+    if(level = 9){ let gameSpeed = 94; }
+    if(level = 10){ let gameSpeed = 64; }
+    if(level = 11){ let gameSpeed = 43; }
+    if(level = 12){ let gameSpeed = 28; }
+    if(level = 13){ let gameSpeed = 18; }
+    if(level = 14){ let gameSpeed = 11; }
+    if(level = 15){ let gameSpeed = 7; }
+    if(level = 16){ let gameSpeed = 4; }
+    if(level = 17){ let gameSpeed = 3; }
+    if(level = 18){ let gameSpeed = 1; }
+    if(level = 19){ let gameSpeed = 0; }
+
+    return;
   }
 
 }

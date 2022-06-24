@@ -1,0 +1,91 @@
+/**
+ * Implements the Score.
+ */
+
+/** Class responsible for drawing updating and draw the score */
+class Score {
+  field int scoreCount;
+  field int lineCount;
+  field int levelCount;
+
+  field String scoreString;
+  field String lineString;
+  field String levelString;
+
+  /** Construct Score */
+  constructor Score new() {
+    // Note: We start at level 1
+    let levelCount = 1;
+
+    let scoreString = "Score:";
+    let lineString = "Lines:";
+    let levelString = "Level:";
+
+    do Output.moveCursor(2, 55);
+    do Output.printString(scoreString);
+    do Output.moveCursor(3, 55);
+    do Output.printInt(scoreCount);
+
+    do Output.moveCursor(7, 55);
+    do Output.printString(lineString);
+    do Output.moveCursor(8, 55);
+    do Output.printInt(lineCount);
+
+    do Output.moveCursor(12, 55);
+    do Output.printString(levelString);
+    do Output.moveCursor(13, 55);
+    do Output.printInt(levelCount);
+    return this;
+  }
+
+  /** Dispose the score */
+  method void dispose(){
+    do scoreString.dispose();
+    do lineString.dispose();
+    do levelString.dispose();
+    do Memory.deAlloc(this);
+    return;
+  }
+
+  /** Return current level */
+  method int getLevel(){
+    return levelCount;
+  }
+
+  /**
+   * Update the score and print it
+   *
+   * \param additionalScore Score to add
+   */
+  method void updateScore(int additionalScore){
+    let scoreCount = scoreCount + additionalScore;
+    do Output.moveCursor(3, 55);
+    do Output.printInt(scoreCount);
+    return;
+  }
+
+  /**
+   * Update the line and print it
+   *
+   * \param additionalLine Lines to add
+   */
+  method void updateLine(int additionalLine){
+    let lineCount = lineCount + additionalLine;
+    do Output.moveCursor(8, 55);
+    do Output.printInt(lineCount);
+    return;
+  }
+
+  /**
+   * Update the level and print it.
+   *
+   * NOTE: We can only level up one level at the time
+   */
+  method void updateLevel(){
+    let levelCount = levelCount;
+    do Output.moveCursor(13, 55);
+    do Output.printInt(levelCount);
+    return;
+  }
+
+}

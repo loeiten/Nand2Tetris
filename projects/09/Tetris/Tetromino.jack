@@ -16,6 +16,8 @@ class Tetromino {
   field Mesh tetrominoMesh_;  // The mesh of the tetromino itself
   field Background background_;  // The background to interact with
 
+  field String tetrominoName;  // Name of the tetromino
+
   static int allocs;  // Number of times this has been allocated
 
   /**
@@ -25,11 +27,13 @@ class Tetromino {
    * \param relativeYInd y-coordinate in the background mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
    * \param relativeXInd x-coordinate in the background mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
    * \param background The background to interact with
+   * \param int The type of tetromino (0-I, 1-J, 2-L, 3-O, 4-S, 5-T, 6-Z)
    */
   constructor Tetromino new(Mesh tetrominoMesh,
                             int relativeYInd,
                             int relativeXInd,
-                            Background background) {
+                            Background background,
+                            int type) {
     let tetrominoMesh_ = tetrominoMesh;
 
     let relativeXInd_ = relativeXInd;
@@ -39,6 +43,14 @@ class Tetromino {
 
     let allocs = allocs + 1;
 
+    if(type = 0){ let tetrominoName = "I"; }
+    if(type = 1){ let tetrominoName = "J"; }
+    if(type = 2){ let tetrominoName = "L"; }
+    if(type = 3){ let tetrominoName = "O"; }
+    if(type = 4){ let tetrominoName = "S"; }
+    if(type = 5){ let tetrominoName = "T"; }
+    if(type = 6){ let tetrominoName = "Z"; }
+
     return this;
   }
 
@@ -46,13 +58,15 @@ class Tetromino {
    * Destroy the Tetromino
    *
    * Disposes:
-   * - The tetrominoMesh_
+   * - The tetrominoMesh
+   * - The tetrominoName
    * - This
    */
   method void dispose (){
     let allocs = allocs - 1;
 
     do tetrominoMesh_.dispose();
+    do tetrominoName.dispose();
     do Memory.deAlloc(this);
     return;
   }
@@ -80,6 +94,10 @@ class Tetromino {
   /** Return relativeYInd_ */
   method int getRelativeIndY(){
     return relativeYInd_;
+  }
+  /** Return relativeYInd_ */
+  method String getTetrominoName(){
+    return tetrominoName;
   }
 
   /**
@@ -132,11 +150,11 @@ class Tetromino {
   /**
    * Return true if it's possible to place the tetromino with the new coordinates in the gameMesh
    *
-   * \param newrelativeYInd The new y-coordinate in the gameMesh
-   * \param newrelativeXInd The new x-coordinate in the gameMesh
+   * \param newRelativeYInd The new y-coordinate in the gameMesh
+   * \param newRelativeXInd The new x-coordinate in the gameMesh
    * \return true if it's possible to place the tetromino
    */
-  method bool canBePlaced(int newrelativeYInd, int newrelativeXInd){
+  method bool canBePlaced(int newRelativeYInd, int newRelativeXInd){
     var int tetrominoMeshIndex;
     var int tetrominoXIndex;
     var int tetrominoYIndex;
@@ -153,8 +171,8 @@ class Tetromino {
       let tetrominoXIndex = tetrominoIndices[0];
       let tetrominoYIndex = tetrominoIndices[1];
 
-      let gameXInd = newrelativeXInd + tetrominoXIndex;
-      let gameYInd = newrelativeYInd + tetrominoYIndex;
+      let gameXInd = newRelativeXInd + tetrominoXIndex;
+      let gameYInd = newRelativeYInd + tetrominoYIndex;
 
       // Check that x is within limits
       if (gameXInd < 0){ return false; }
@@ -180,11 +198,11 @@ class Tetromino {
    * \return true if it's possible to move the tetromino down
    */
   method bool canMoveDown(){
-    var int newrelativeYInd;
+    var int newRelativeYInd;
     var bool canPlace;
 
-    let newrelativeYInd = relativeYInd_ + 1;
-    let canPlace = canBePlaced(newrelativeYInd, relativeXInd_);
+    let newRelativeYInd = relativeYInd_ + 1;
+    let canPlace = canBePlaced(newRelativeYInd, relativeXInd_);
 
     return canPlace;
   }
@@ -195,11 +213,11 @@ class Tetromino {
    * \return true if it's possible to move the tetromino to the left
    */
   method bool canMoveLeft(){
-    var int newrelativeXInd;
+    var int newRelativeXInd;
     var bool canPlace;
 
-    let newrelativeXInd = relativeXInd_ - 1;
-    let canPlace = canBePlaced(relativeYInd_, newrelativeXInd);
+    let newRelativeXInd = relativeXInd_ - 1;
+    let canPlace = canBePlaced(relativeYInd_, newRelativeXInd);
     return canPlace;
   }
 
@@ -209,11 +227,11 @@ class Tetromino {
    * \return true if it's possible to move the tetromino to the right
    */
   method bool canMoveRight(){
-    var int newrelativeXInd;
+    var int newRelativeXInd;
     var bool canPlace;
 
-    let newrelativeXInd = relativeXInd_ + 1;
-    let canPlace = canBePlaced(relativeYInd_, newrelativeXInd);
+    let newRelativeXInd = relativeXInd_ + 1;
+    let canPlace = canBePlaced(relativeYInd_, newRelativeXInd);
     return canPlace;
   }
 

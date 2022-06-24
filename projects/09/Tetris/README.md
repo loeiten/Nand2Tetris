@@ -120,6 +120,39 @@ Characters:
 Idea:
 Could actually make a class for just drawing tetrominos where input is center pixel...or make it part of tetromino class :)
 
+We need 4*6 = 24 elements
+
+The max is obtained when the left-over pixels are less than the size of a block
+
+```text
+256 - 5 - 24*(size + 1) > size
+251 - 24*size - 24 *1 > size
+227 > size + 24*size
+227 > 25*size
+227/25 > size
+9 > size
+```
+
+So max size is 8
+
+All 24 blocks will therefore occupy
+
+```text
+[Num blocks] * (size + spacing + [1 for the start position of next block])
+24*(8 + 1 + 1) = 240
+```
+
+If we pad equally top and bottom, we get
+
+```text
+256-240 = 16
+16 - bottom line - top line =
+16 - 2 = 14
+14/2 = 7
+```
+
+Thus, we get `frameStartY = 6`
+
 ## Random number generator
 
 - [Linear Congruential Generator](https://web.archive.org/web/20201022060109/http://nand2tetris-questions-and-answers-forum.32033.n3.nabble.com/Pseudo-Random-Number-Generator-td4026059.html), **NOTE**: The bug in `randRange` (addressed by Mark in some posts below)
