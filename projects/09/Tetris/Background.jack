@@ -179,10 +179,10 @@ class Background {
    *
    * \param erase Draw with color false even if state is true
    * \param mesh The Mesh to draw on the background
-   * \param relativeXInd The x index of the input mesh relative to the background (counted from the top left)
    * \param relativeYInd The y index of the input mesh relative to the background (counted from the top left)
+   * \param relativeXInd The x index of the input mesh relative to the background (counted from the top left)
    */
-  method void drawMesh(bool erase, Mesh mesh, int relativeXInd, int relativeYInd){
+  method void drawMesh(bool erase, Mesh mesh, int relativeYInd, int relativeXInd){
     var int backgroundIndex;  // Index in the background mesh
     var int backgroundXInd;  // The x coordinate of the background mesh
     var int backgroundYInd;  // The y coordinate of the background mesh

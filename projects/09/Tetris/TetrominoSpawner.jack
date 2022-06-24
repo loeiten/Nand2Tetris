@@ -24,8 +24,8 @@ class TetrominoSpawner {
     do  tetrominoMesh.setState(1, 2, true);
     do  tetrominoMesh.setState(1, 3, true);
     let tetromino = Tetromino.new(tetrominoMesh,
-                                  3,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
                                   18, // y-coodrinate in the gameMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
+                                  3,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
                                   background // Background
                                  );
 
@@ -49,8 +49,8 @@ class TetrominoSpawner {
     do  tetrominoMesh.setState(1, 1, true);
     do  tetrominoMesh.setState(1, 2, true);
     let tetromino = Tetromino.new(tetrominoMesh,
-                                  3,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
                                   19, // y-coodrinate in the gameMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
+                                  3,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
                                   background // Background
                                  );
 
@@ -74,8 +74,8 @@ class TetrominoSpawner {
     do  tetrominoMesh.setState(1, 1, true);
     do  tetrominoMesh.setState(1, 3, true);
     let tetromino = Tetromino.new(tetrominoMesh,
-                                  3,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
                                   19, // y-coodrinate in the gameMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
+                                  3,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
                                   background // Background
                                  );
 
@@ -99,8 +99,8 @@ class TetrominoSpawner {
     do  tetrominoMesh.setState(2, 1, true);
     do  tetrominoMesh.setState(2, 2, true);
     let tetromino = Tetromino.new(tetrominoMesh,
-                                  3,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
                                   18, // y-coodrinate in the gameMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
+                                  3,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
                                   background // Background
                                  );
 
@@ -124,8 +124,8 @@ class TetrominoSpawner {
     do  tetrominoMesh.setState(1, 0, true);
     do  tetrominoMesh.setState(1, 1, true);
     let tetromino = Tetromino.new(tetrominoMesh,
-                                  3,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
                                   19, // y-coodrinate in the gameMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
+                                  3,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
                                   background // Background
                                  );
 
@@ -149,8 +149,8 @@ class TetrominoSpawner {
     do  tetrominoMesh.setState(1, 1, true);
     do  tetrominoMesh.setState(1, 2, true);
     let tetromino = Tetromino.new(tetrominoMesh,
-                                  3,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
                                   19, // y-coodrinate in the gameMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
+                                  3,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
                                   background // Background
                                  );
 
@@ -174,8 +174,8 @@ class TetrominoSpawner {
     do  tetrominoMesh.setState(1, 1, true);
     do  tetrominoMesh.setState(1, 2, true);
     let tetromino = Tetromino.new(tetrominoMesh,
-                                  3,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
                                   19, // y-coodrinate in the gameMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
+                                  3,  // x-coordinate in the gameMesh (this is the center as we are counting from 0)
                                   background // Background
                                  );
 
