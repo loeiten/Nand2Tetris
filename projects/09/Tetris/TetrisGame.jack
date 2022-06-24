@@ -27,14 +27,14 @@ class TetrisGame {
     // Initialize the background (see README.md for calculation)
     // NOTE: The mesh is 40 according to
     // https://tetris.fandom.com/wiki/Tetris_Guideline#List_of_rules_(as_of_2009)
-    let gameBackground = Background.new(185, // frameStartX_  // FIXME: Fiddle around with pixels to look nice + 20
-                                        6,   // frameStartY_
-                                        122, // frameLenX_
-                                        242, // frameLenY_ (240 + 1 for next line + 1 for frame line)
-                                        10,  // tetrominoElementSize_
-                                        20,  // skipRows_
-                                        10,  // meshCols_
-                                        40   // meshRows_
+    let gameBackground = Background.new(185, // frameStartX  // FIXME: Fiddle around with pixels to look nice + 20
+                                        6,   // frameStartY
+                                        122, // frameLenX
+                                        242, // frameLenY (240 + 1 for next line + 1 for frame line)
+                                        10,  // tetrominoElementSize
+                                        20,  // skipRows
+                                        10,  // meshCols
+                                        40   // meshRows
                                         );
     let gameMesh = gameBackground.getBackgroundMesh();
     do gameBackground.drawFrame();
@@ -82,14 +82,14 @@ class TetrisGame {
     // Subtract 1 from frameStartY, and added to frameLenY
     // FIXME:
     let statistics = Background.new(
-      35, // frameStartX_  // FIXME: Fiddle around with numbers to look nice
-      22,   // frameStartY_
-      107, // frameLenX_
-      232, // frameLenY_ (240 + 1 for next line + 1 for frame line)
-      9,  // tetrominoElementSize_
-      0,  // skipRows_
-      6,  // meshCols_
-      21   // meshRows_
+      35, // frameStartX  // FIXME: Fiddle around with numbers to look nice
+      22,   // frameStartY
+      107, // frameLenX
+      232, // frameLenY (240 + 1 for next line + 1 for frame line)
+      9,  // tetrominoElementSize
+      0,  // skipRows
+      6,  // meshCols
+      21   // meshRows
     );
     do statistics.drawFrame();
     let statMesh = statistics.getBackgroundMesh();

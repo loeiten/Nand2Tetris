@@ -6,16 +6,16 @@
  * The background is the location where all inactive tetrominos are drawn
  */
 class Background {
-  field int frameStartX;  // The pixel column for the start of the frame
-  field int frameStartY;  // The pixel row for the start of the frame
-  field int tetrominoStartX;  // The pixel column for the start of the tetromino
-  field int tetrominoStartY;  // The pixel row for the start of the tetromino
-  field int frameLenX;  // The length of the frame in the x direction
-  field int frameLenY;  // The length of the frame in the y direction
-  field int tetrominoElementSize;  // The size of a tetromino element
-  field int skipRows;  // Number of invisible rows (counting from the top)
-  field int meshCols;  // Number of columns in the mesh
-  field int meshRows;  // Number of rows in the mesh
+  field int frameStartX_;  // The pixel column for the start of the frame
+  field int frameStartY_;  // The pixel row for the start of the frame
+  field int tetrominoStartX_;  // The pixel column for the start of the tetromino
+  field int tetrominoStartY_;  // The pixel row for the start of the tetromino
+  field int frameLenX_;  // The length of the frame in the x direction
+  field int frameLenY_;  // The length of the frame in the y direction
+  field int tetrominoElementSize_;  // The size of a tetromino element
+  field int skipRows_;  // Number of invisible rows (counting from the top)
+  field int meshCols_;  // Number of columns in the mesh
+  field int meshRows_;  // Number of rows in the mesh
   field int visibleRows;  // Number of visible rows
 
   field Mesh backgroundMesh;  // Mesh holding the state of each element
@@ -25,41 +25,41 @@ class Background {
   /**
    * Construct the Background
    *
-   * \param frameStartX_ The pixel column for the start of the background
-   * \param frameStartY_ The pixel row for the start of the background
-   * \param frameLenX_ The length of the frame in the x direction
-   * \param frameLenY_ The length of the frame in the y direction
-   * \param tetrominoElementSize_ The size of a tetromino element
-   * \param skipRows_ Number of invisible rows (counting from the top)
-   * \param meshCols_ Number of columns for the backgroundMesh
-   * \param meshRows_ Number of rows for the backgroundMesh
+   * \param frameStartX The pixel column for the start of the background
+   * \param frameStartY The pixel row for the start of the background
+   * \param frameLenX The length of the frame in the x direction
+   * \param frameLenY The length of the frame in the y direction
+   * \param tetrominoElementSize The size of a tetromino element
+   * \param skipRows Number of invisible rows (counting from the top)
+   * \param meshCols Number of columns for the backgroundMesh
+   * \param meshRows Number of rows for the backgroundMesh
    */
-  constructor Background new(int frameStartX_,
-                             int frameStartY_,
-                             int frameLenX_,
-                             int frameLenY_,
-                             int tetrominoElementSize_,
-                             int skipRows_,
-                             int meshCols_,
-                             int meshRows_) {
-    let frameStartX = frameStartX_;
-    let frameStartY = frameStartY_;
+  constructor Background new(int frameStartX,
+                             int frameStartY,
+                             int frameLenX,
+                             int frameLenY,
+                             int tetrominoElementSize,
+                             int skipRows,
+                             int meshCols,
+                             int meshRows) {
+    let frameStartX_ = frameStartX;
+    let frameStartY_ = frameStartY;
 
     // The start of the tetromino is +1 padding and +1 for the line
-    let tetrominoStartX = frameStartX + 2;
-    let tetrominoStartY = frameStartY + 2;
+    let tetrominoStartX_ = frameStartX_ + 2;
+    let tetrominoStartY_ = frameStartY_ + 2;
 
-    let frameLenX = frameLenX_;
-    let frameLenY = frameLenY_;
+    let frameLenX_ = frameLenX;
+    let frameLenY_ = frameLenY;
 
-    let tetrominoElementSize = tetrominoElementSize_;
+    let tetrominoElementSize_ = tetrominoElementSize;
 
-    let meshCols = meshCols_;
-    let meshRows = meshRows_;
-    let skipRows = skipRows_;
-    let visibleRows = meshRows - skipRows;
+    let meshCols_ = meshCols;
+    let meshRows_ = meshRows;
+    let skipRows_ = skipRows;
+    let visibleRows = meshRows_ - skipRows_;
 
-    let backgroundMesh = Mesh.new(meshCols, meshRows);
+    let backgroundMesh = Mesh.new(meshCols_, meshRows_);
 
     let allocs = allocs + 1;
 
@@ -97,12 +97,12 @@ class Background {
 
   /** Return the number of rows in the Mesh*/
   method int getMeshRows(){
-    return meshRows;
+    return meshRows_;
   }
 
   /** Return the skip rows */
   method int getSkipRows(){
-    return skipRows;
+    return skipRows_;
   }
 
   /** Return the visible rows */
@@ -130,21 +130,21 @@ class Background {
 
     var bool state;
 
-    // NOTE: meshRows counts the total number of rows
+    // NOTE: meshRows_ counts the total number of rows
     //       potentialCollapseRow will be used as a index (starting at 0)
     //       Hence we need to subtract by one
-    let potentialCollapseRow = meshRows - 1;
+    let potentialCollapseRow = meshRows_ - 1;
 
-    while(potentialCollapseRow > skipRows){
-      if(rowsToCollapse[potentialCollapseRow - skipRows]){
+    while(potentialCollapseRow > skipRows_){
+      if(rowsToCollapse[potentialCollapseRow - skipRows_]){
         // Start at the row immediately above the collapsed row
         // Also take into account previously cleared rows
         let meshRow = potentialCollapseRow - 1 + clearedRows;
-        while(meshRow > skipRows){
+        while(meshRow > skipRows_){
           let xInd = 0;
 
           // Loop over all rows
-          while(xInd < meshCols){
+          while(xInd < meshCols_){
             // Set the element of the row to be cleared to the row above
             let state = backgroundMesh.getState(meshRow, xInd);
             do backgroundMesh.setState(meshRow + 1, xInd, state);
@@ -166,10 +166,10 @@ class Background {
   method void drawFrame(){
     // Draw background frame
     do Screen.setColor(true);
-    do Screen.drawLine(frameStartX, frameStartY, frameStartX + frameLenX, frameStartY);
-    do Screen.drawLine(frameStartX, frameStartY, frameStartX, frameStartY + frameLenY);
-    do Screen.drawLine(frameStartX + frameLenX, frameStartY, frameStartX + frameLenX, frameStartY + frameLenY);
-    do Screen.drawLine(frameStartX, frameStartY + frameLenY, frameStartX + frameLenX, frameStartY + frameLenY);
+    do Screen.drawLine(frameStartX_, frameStartY_, frameStartX_ + frameLenX_, frameStartY_);
+    do Screen.drawLine(frameStartX_, frameStartY_, frameStartX_, frameStartY_ + frameLenY_);
+    do Screen.drawLine(frameStartX_ + frameLenX_, frameStartY_, frameStartX_ + frameLenX_, frameStartY_ + frameLenY_);
+    do Screen.drawLine(frameStartX_, frameStartY_ + frameLenY_, frameStartX_ + frameLenX_, frameStartY_ + frameLenY_);
 
     return;
   }
@@ -196,7 +196,7 @@ class Background {
     // Will be destroyed by the Mesh
     var Array backgroundCoordinates;  // Array holding the (x, y) coordinate of the background mesh
 
-    let backgroundIndex = skipRows * meshCols;
+    let backgroundIndex = skipRows_ * meshCols_;
 
     while (backgroundIndex < backgroundMesh.getMeshLength()){
       // Get the background coordinates
@@ -222,9 +222,9 @@ class Background {
         // FIXME: Need another way of not drawing active state...if not can get probs with collapse
         // if(state){
           // Subtract rows to skip, so that we only draw the visible part of the mesh
-          let backgroundYInd = backgroundYInd - skipRows;
-          let startPixelX = tetrominoStartX + (tetrominoElementSize*backgroundXInd) + (2*backgroundXInd);
-          let startPixelY = tetrominoStartY + (tetrominoElementSize*backgroundYInd) + (2*backgroundYInd);
+          let backgroundYInd = backgroundYInd - skipRows_;
+          let startPixelX = tetrominoStartX_ + (tetrominoElementSize_*backgroundXInd) + (2*backgroundXInd);
+          let startPixelY = tetrominoStartY_ + (tetrominoElementSize_*backgroundYInd) + (2*backgroundYInd);
 
           if(erase){
             do Screen.setColor(false);
@@ -233,8 +233,8 @@ class Background {
           }
           do Screen.drawRectangle(startPixelX,
                                   startPixelY,
-                                  startPixelX+tetrominoElementSize,
-                                  startPixelY+tetrominoElementSize);
+                                  startPixelX+tetrominoElementSize_,
+                                  startPixelY+tetrominoElementSize_);
         // }
 
       }
@@ -259,23 +259,23 @@ class Background {
     var int startPixelX;  // The pixel column to start draw a rectangle from
     var int startPixelY;  // The pixel row to start draw a rectangle from
 
-    let curRow = skipRows;
+    let curRow = skipRows_;
 
     do Screen.setColor(color);
 
     // Loop over all visible rows
-    while(curRow < meshRows){
-      let visibleRow = curRow - skipRows;
+    while(curRow < meshRows_){
+      let visibleRow = curRow - skipRows_;
       let drawRow = rowsToDraw[visibleRow];
 
       if(drawRow){
         let xInd = 0;
 
         // Loop over all rows in a column
-        while (xInd < meshCols){
-          let startPixelX = tetrominoStartX + (tetrominoElementSize*xInd) + (2*xInd);
-          let startPixelY = tetrominoStartY + (tetrominoElementSize*visibleRow) + (2*visibleRow);
-          do Screen.drawRectangle(startPixelX, startPixelY, startPixelX+tetrominoElementSize, startPixelY+tetrominoElementSize);
+        while (xInd < meshCols_){
+          let startPixelX = tetrominoStartX_ + (tetrominoElementSize_*xInd) + (2*xInd);
+          let startPixelY = tetrominoStartY_ + (tetrominoElementSize_*visibleRow) + (2*visibleRow);
+          do Screen.drawRectangle(startPixelX, startPixelY, startPixelX+tetrominoElementSize_, startPixelY+tetrominoElementSize_);
           let xInd = xInd + 1;
         }
       }
@@ -303,7 +303,7 @@ class Background {
     var int xIndRightCounter;
     var int xIndLeftCounter;
 
-    let xIndHalf = (meshCols/2);
+    let xIndHalf = (meshCols_/2);
     let xIndLeftCounter = 1;
     let xIndRight = xIndHalf + xIndRightCounter;
     let xIndLeft = xIndRight - xIndLeftCounter;
@@ -311,23 +311,23 @@ class Background {
     do Screen.setColor(false);
 
     // Loop over half the xInds
-    while(xIndRight < meshCols){
+    while(xIndRight < meshCols_){
 
       // Loop over all visible rows
-      let curRow = skipRows;
-      while(curRow < meshRows){
-        let visibleRow = curRow - skipRows;
+      let curRow = skipRows_;
+      while(curRow < meshRows_){
+        let visibleRow = curRow - skipRows_;
         let clearRow = rowsToClear[visibleRow];
 
         if(clearRow){
           // Remove the right element
-          let startPixelX = tetrominoStartX + (tetrominoElementSize*xIndRight) + (2*xIndRight);
-          let startPixelY = tetrominoStartY + (tetrominoElementSize*visibleRow) + (2*visibleRow);
-          do Screen.drawRectangle(startPixelX, startPixelY, startPixelX+tetrominoElementSize, startPixelY+tetrominoElementSize);
+          let startPixelX = tetrominoStartX_ + (tetrominoElementSize_*xIndRight) + (2*xIndRight);
+          let startPixelY = tetrominoStartY_ + (tetrominoElementSize_*visibleRow) + (2*visibleRow);
+          do Screen.drawRectangle(startPixelX, startPixelY, startPixelX+tetrominoElementSize_, startPixelY+tetrominoElementSize_);
           // Remove the left element
-          let startPixelX = tetrominoStartX + (tetrominoElementSize*xIndLeft) + (2*xIndLeft);
-          let startPixelY = tetrominoStartY + (tetrominoElementSize*visibleRow) + (2*visibleRow);
-          do Screen.drawRectangle(startPixelX, startPixelY, startPixelX+tetrominoElementSize, startPixelY+tetrominoElementSize);
+          let startPixelX = tetrominoStartX_ + (tetrominoElementSize_*xIndLeft) + (2*xIndLeft);
+          let startPixelY = tetrominoStartY_ + (tetrominoElementSize_*visibleRow) + (2*visibleRow);
+          do Screen.drawRectangle(startPixelX, startPixelY, startPixelX+tetrominoElementSize_, startPixelY+tetrominoElementSize_);
         }
 
         let curRow = curRow + 1;

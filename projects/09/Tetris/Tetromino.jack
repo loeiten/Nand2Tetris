@@ -10,32 +10,32 @@
  * - Draw and erase the tetromino within another mesh
  */
 class Tetromino {
-  field int relativeXInd;  // x-coordinate in the background mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
-  field int relativeYInd;  // y-coordinate in the background mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
+  field int relativeXInd_;  // x-coordinate in the background mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
+  field int relativeYInd_;  // y-coordinate in the background mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
 
-  field Mesh tetrominoMesh;  // The mesh of the tetromino itself
-  field Background background;  // The background to interact with
+  field Mesh tetrominoMesh_;  // The mesh of the tetromino itself
+  field Background background_;  // The background to interact with
 
   static int allocs;  // Number of times this has been allocated
 
   /**
    * Construct the tetromino
    *
-   * \param tetrominoMesh_ The mesh of the tetromino itself
-   * \param relativeYInd_ y-coordinate in the background mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
-   * \param relativeXInd_ x-coordinate in the background mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
-   * \param background_ The background to interact with
+   * \param tetrominoMesh The mesh of the tetromino itself
+   * \param relativeYInd y-coordinate in the background mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
+   * \param relativeXInd x-coordinate in the background mesh (i.e. not the tetromino mesh coordinate) relative to top left corner of relativeMesh
+   * \param background The background to interact with
    */
-  constructor Tetromino new(Mesh tetrominoMesh_,
-                            int relativeYInd_,
-                            int relativeXInd_,
-                            Background background_) {
-    let tetrominoMesh = tetrominoMesh_;
+  constructor Tetromino new(Mesh tetrominoMesh,
+                            int relativeYInd,
+                            int relativeXInd,
+                            Background background) {
+    let tetrominoMesh_ = tetrominoMesh;
 
-    let relativeXInd = relativeXInd_;
-    let relativeYInd = relativeYInd_;
+    let relativeXInd_ = relativeXInd;
+    let relativeYInd_ = relativeYInd;
 
-    let background = background_;
+    let background_ = background;
 
     let allocs = allocs + 1;
 
@@ -46,13 +46,13 @@ class Tetromino {
    * Destroy the Tetromino
    *
    * Disposes:
-   * - The tetrominoMesh
+   * - The tetrominoMesh_
    * - This
    */
   method void dispose (){
     let allocs = allocs - 1;
 
-    do tetrominoMesh.dispose();
+    do tetrominoMesh_.dispose();
     do Memory.deAlloc(this);
     return;
   }
@@ -67,19 +67,19 @@ class Tetromino {
     return;
   }
 
-  /** Return the tetrominoMesh */
+  /** Return the tetrominoMesh_ */
   method int getTetrominoMesh(){
-    return tetrominoMesh;
+    return tetrominoMesh_;
   }
 
-  /** Return relativeXInd */
+  /** Return relativeXInd_ */
   method int getRelativeIndX(){
-    return relativeXInd;
+    return relativeXInd_;
   }
 
-  /** Return relativeYInd */
+  /** Return relativeYInd_ */
   method int getRelativeIndY(){
-    return relativeYInd;
+    return relativeYInd_;
   }
 
   /**
@@ -87,8 +87,8 @@ class Tetromino {
    *
    * \param background The new background
    */
-  method void setBackground(Background background_){
-    let background = background_;
+  method void setBackground(Background background){
+    let background_ = background;
     return;
   }
 
@@ -99,8 +99,8 @@ class Tetromino {
    * \param xInd The relative x index
    */
   method void setRelativePosition(int yInd, int xInd){
-    let relativeYInd = yInd;
-    let relativeXInd = xInd;
+    let relativeYInd_ = yInd;
+    let relativeXInd_ = xInd;
     return;
   }
 
@@ -119,10 +119,10 @@ class Tetromino {
   method bool canSpawn(){
     var bool canBeSpawn;
 
-    let canBeSpawn = canBePlaced(relativeYInd, relativeXInd);
+    let canBeSpawn = canBePlaced(relativeYInd_, relativeXInd_);
 
     if(canBeSpawn){
-      do background.drawMesh(false, tetrominoMesh, relativeYInd, relativeXInd);
+      do background_.drawMesh(false, tetrominoMesh_, relativeYInd_, relativeXInd_);
       return true;
     } else{
       return false;
@@ -146,10 +146,10 @@ class Tetromino {
     var Array tetrominoIndices;  // Will be destroyed by the Mesh
     var Mesh gameMesh;
 
-    let gameMesh = background.getBackgroundMesh();
+    let gameMesh = background_.getBackgroundMesh();
 
-    while(tetrominoMeshIndex < tetrominoMesh.getMeshLength()){
-      let tetrominoIndices = tetrominoMesh.getMeshIndices(tetrominoMeshIndex);
+    while(tetrominoMeshIndex < tetrominoMesh_.getMeshLength()){
+      let tetrominoIndices = tetrominoMesh_.getMeshIndices(tetrominoMeshIndex);
       let tetrominoXIndex = tetrominoIndices[0];
       let tetrominoYIndex = tetrominoIndices[1];
 
@@ -183,8 +183,8 @@ class Tetromino {
     var int newrelativeYInd;
     var bool canPlace;
 
-    let newrelativeYInd = relativeYInd + 1;
-    let canPlace = canBePlaced(newrelativeYInd, relativeXInd);
+    let newrelativeYInd = relativeYInd_ + 1;
+    let canPlace = canBePlaced(newrelativeYInd, relativeXInd_);
 
     return canPlace;
   }
@@ -198,8 +198,8 @@ class Tetromino {
     var int newrelativeXInd;
     var bool canPlace;
 
-    let newrelativeXInd = relativeXInd - 1;
-    let canPlace = canBePlaced(relativeYInd, newrelativeXInd);
+    let newrelativeXInd = relativeXInd_ - 1;
+    let canPlace = canBePlaced(relativeYInd_, newrelativeXInd);
     return canPlace;
   }
 
@@ -212,38 +212,38 @@ class Tetromino {
     var int newrelativeXInd;
     var bool canPlace;
 
-    let newrelativeXInd = relativeXInd + 1;
-    let canPlace = canBePlaced(relativeYInd, newrelativeXInd);
+    let newrelativeXInd = relativeXInd_ + 1;
+    let canPlace = canBePlaced(relativeYInd_, newrelativeXInd);
     return canPlace;
   }
 
   /** Move the tetromino down in the game mesh */
   method void moveDown(){
     // Erase
-    do background.drawMesh(true, tetrominoMesh, relativeYInd, relativeXInd);
-    let relativeYInd = relativeYInd + 1;
+    do background_.drawMesh(true, tetrominoMesh_, relativeYInd_, relativeXInd_);
+    let relativeYInd_ = relativeYInd_ + 1;
     // Draw
-    do background.drawMesh(false, tetrominoMesh, relativeYInd, relativeXInd);
+    do background_.drawMesh(false, tetrominoMesh_, relativeYInd_, relativeXInd_);
     return;
   }
 
   /** Move the tetromino to the left in the game mesh */
   method void moveLeft(){
     // Erase
-    do background.drawMesh(true, tetrominoMesh, relativeYInd, relativeXInd);
-    let relativeXInd = relativeXInd - 1;
+    do background_.drawMesh(true, tetrominoMesh_, relativeYInd_, relativeXInd_);
+    let relativeXInd_ = relativeXInd_ - 1;
     // Draw
-    do background.drawMesh(false, tetrominoMesh, relativeYInd, relativeXInd);
+    do background_.drawMesh(false, tetrominoMesh_, relativeYInd_, relativeXInd_);
     return;
   }
 
   /** Move the tetromino to the right in the game mesh */
   method void moveRight(){
     // Erase
-    do background.drawMesh(true, tetrominoMesh, relativeYInd, relativeXInd);
-    let relativeXInd = relativeXInd + 1;
+    do background_.drawMesh(true, tetrominoMesh_, relativeYInd_, relativeXInd_);
+    let relativeXInd_ = relativeXInd_ + 1;
     // Draw
-    do background.drawMesh(false, tetrominoMesh, relativeYInd, relativeXInd);
+    do background_.drawMesh(false, tetrominoMesh_, relativeYInd_, relativeXInd_);
     return;
   }
 

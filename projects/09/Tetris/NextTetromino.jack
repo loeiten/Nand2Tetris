@@ -26,14 +26,14 @@ class NextTetromino {
     // Create the next background
     // Subtract 1 from frameStartY, and added to frameLenY
     let nextBackground = Background.new(
-      347, // frameStartX_  // 155 + 122 + 70
-      22,   // frameStartY_
-      68, // frameLenX_ + 2 + 2
-      200, // frameLenY_ (209 + 1 for next line + 1 for frame line)
-      9,  // tetrominoElementSize_
-      0,  // skipRows_
-      6,  // meshCols_
-      17   // meshRows_
+      347, // frameStartX  // 155 + 122 + 70
+      22,   // frameStartY
+      68, // frameLenX + 2 + 2
+      200, // frameLenY (209 + 1 for next line + 1 for frame line)
+      9,  // tetrominoElementSize
+      0,  // skipRows
+      6,  // meshCols
+      17   // meshRows
     );
     do nextBackground.drawFrame();
     let nextMesh = nextBackground.getBackgroundMesh();

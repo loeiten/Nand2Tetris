@@ -6,8 +6,8 @@
  * Class representing a mesh or a grid where elements have either state 0 or 1
  */
 class Mesh {
-  field int cols;  // Number of cols in the Mesh
-  field int rows;  // Number of rows in the Mesh
+  field int cols_;  // Number of cols_ in the Mesh
+  field int rows_;  // Number of rows_ in the Mesh
   field int meshLength;  // Total number of elements in the Mesh
 
   field Array meshArray;  // Array holding the state of each element
@@ -18,13 +18,13 @@ class Mesh {
   /**
    * Construct the mesh
    *
-   * \param cols_ Number of columns in the Mesh
-   * \param rows_ Number of rows in the Mesh
+   * \param cols Number of columns in the Mesh
+   * \param rows Number of rows_ in the Mesh
    */
-  constructor Mesh new(int cols_, int rows_) {
-    let cols = cols_;
-    let rows = rows_;
-    let meshLength = cols * rows;
+  constructor Mesh new(int cols, int rows) {
+    let cols_ = cols;
+    let rows_ = rows;
+    let meshLength = cols_ * rows_;
 
     let meshArray = Array.new(meshLength);
     let coordinates = Array.new(2);
@@ -100,7 +100,7 @@ class Mesh {
    * \return The corresponding index
    */
   method int getMeshArrayIndex(int yInd, int xInd){
-    return xInd + (yInd*cols);
+    return xInd + (yInd*cols_);
   }
 
   /**
@@ -113,10 +113,10 @@ class Mesh {
    */
   method Array getMeshIndices(int index){
     // x-index (integer division)
-    let coordinates[0] = Algorithm.mod(index, cols);
+    let coordinates[0] = Algorithm.mod(index, cols_);
 
     // y-index (modolus operator)
-    let coordinates[1] = index/cols;
+    let coordinates[1] = index/cols_;
 
     return coordinates;
   }
@@ -128,12 +128,12 @@ class Mesh {
 
   /** Return the number columns in the mesh */
   method int getCols(){
-    return cols;
+    return cols_;
   }
 
-  /** Return the number rows in the mesh */
+  /** Return the number rows_ in the mesh */
   method int getRows(){
-    return rows;
+    return rows_;
   }
 
 }
