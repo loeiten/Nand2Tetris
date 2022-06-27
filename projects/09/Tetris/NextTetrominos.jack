@@ -174,6 +174,9 @@ class NextTetrominos {
     let curTetromino = currentBag[counter];
     let tetrominoMesh = curTetromino.getTetrominoMesh();
 
+    // Clear the mesh
+    do nextMesh.clearMesh();
+
     if(tetrominoMesh.getMeshLength() = 9){
       // Pad with one cell if the first tetromino is a 3x3 tetromino
       let padFirstTetromino = 1;
@@ -183,10 +186,6 @@ class NextTetrominos {
 
     // NOTE: We only want to show the next tetrominos for bagSize - 1
     while (counter < (bagSize - 1)){
-      // FIXME:
-      // do Output.moveCursor(0,0);
-      // do Output.printInt(counter);
-
       let curTetromino = currentBag[counter];
 
       if(counter > 0){
@@ -202,23 +201,14 @@ class NextTetrominos {
 
       // Update the location of the current bags
       let newRelativeYInd = (counter * cellSpace) + padFirstTetromino - padOTetromino;
-      // FIXME:
-      // do curTetromino.setRelativePosition(newRelativeYInd, 1);
-      // FIXME:
-      // do Output.moveCursor(1,1);
-      // do Output.printString(curTetromino.getTetrominoName());
-      // do Output.moveCursor(2,1);
-      // do Output.printInt(newRelativeYInd);
-
       let tetrominoMesh = curTetromino.getTetrominoMesh();
-
-      do nextBackground.drawMesh(false, tetrominoMesh, newRelativeYInd, 1);
+      do curTetromino.setRelativePosition(newRelativeYInd, 1);
+      do nextMesh.addTetrominoToMesh(curTetromino);
 
       let counter = counter + 1;
-      // FIXME:
-      // do Sys.wait(1000);
     }
 
+    do nextBackground.drawMesh(false, nextMesh, 0, 0);
 
     return;
   }

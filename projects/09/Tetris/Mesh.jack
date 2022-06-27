@@ -136,4 +136,81 @@ class Mesh {
     return rows_;
   }
 
+  /** Clear the current mesh */
+  method void clearMesh(){
+    var Array meshIndices;
+    var int index;
+    while(index < meshLength){
+      let meshIndices = getMeshIndices(index);
+      do setState(meshIndices[1], meshIndices[0], false);
+      let index = index + 1;
+    }
+
+    return;
+  }
+
+  /**
+   * Add a tetromino to the mesh
+   *
+   * \param tetromino The tetromino to add to the mesh
+   */
+  method void addTetrominoToMesh(Tetromino tetromino){
+    var int xInd;  // x-coordinate in the gameMesh
+    var int yInd;  // y-coordinate in the gameMesh
+    var int tetrominoIndex;  // Index in the tetromino mesh
+
+    var int tetrominoMeshLength;  // Length of the tetromino mesh
+    var Array tetrominoIndexArray;  // The array for the tetromino coordinates
+    var Mesh tetrominoMesh;  // The tetromino mesh
+
+    let tetrominoMesh = tetromino.getTetrominoMesh();
+    let tetrominoMeshLength = tetrominoMesh.getMeshLength();
+
+    // FIXME:
+    // do Output.moveCursor(0, 0);
+    // do Output.printString("tetrominoType: ");
+    // do Output.printInt(tetromino.getTetrominoType());
+    // do Output.moveCursor(1, 0);
+    // do Output.printString("tetrominoIndex");
+    // do Output.moveCursor(3, 0);
+    // do Output.printString("tetrominoMeshLength: ");
+    // do Output.printInt(tetrominoMeshLength);
+    // do Output.moveCursor(4, 0);
+    // do Output.printString("xInd: ");
+    // do Output.moveCursor(5, 0);
+    // do Output.printString("     ");
+    // do Output.moveCursor(6, 0);
+    // do Output.printString("yInd: ");
+    // do Output.moveCursor(7, 0);
+    // do Output.printString("     ");
+
+    // Add tetromino to the game mesh
+    let tetrominoIndex = 0;
+    while(tetrominoIndex < tetrominoMeshLength){
+      let tetrominoIndexArray = tetrominoMesh.getMeshIndices(tetrominoIndex);
+      let xInd = tetromino.getRelativeIndX() + tetrominoIndexArray[0];
+      let yInd = tetromino.getRelativeIndY() + tetrominoIndexArray[1];
+    // // FIXME:3s
+    // do Output.moveCursor(2, 0);
+    // do Output.printInt(tetrominoIndex);
+    // do Output.moveCursor(5, 0);
+    // do Output.printInt(xInd);
+    // do Output.moveCursor(7, 0);
+    // do Output.printInt(yInd);
+    // do Sys.wait(500);
+      if(tetrominoMesh.getState(tetrominoIndexArray[1], tetrominoIndexArray[0])){
+        do setState(yInd, xInd, true);
+      }
+      let tetrominoIndex = tetrominoIndex + 1;
+    }
+
+    // do Output.moveCursor(0, 0);
+    // do Output.printString("Bye!");
+    // do Output.moveCursor(2, 0);
+    // do Output.printString("Bye!");
+    // do Sys.wait(500);
+
+    return;
+  }
+
 }

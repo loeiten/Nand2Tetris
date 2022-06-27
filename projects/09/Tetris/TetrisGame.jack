@@ -191,7 +191,8 @@ class TetrisGame {
         }
         else{
           let falling = false;
-          do addTetrominoToMesh(curTetromino);
+          do gameMesh.addTetrominoToMesh(curTetromino);
+          do gameBackground.drawMesh(false, gameMesh, 0, 0);
           do removeFullLines();
         }
       }
@@ -233,39 +234,6 @@ class TetrisGame {
         do curTetromino.moveRight();
       }
     }
-
-    return;
-  }
-
-  /**
-   * Add the tetromino to the mesh
-   *
-   * \param curTetromino The current tetromino
-   */
-  method void addTetrominoToMesh(Tetromino curTetromino){
-    var int gameXInd;  // x-coordinate in the gameMesh
-    var int gameYInd;  // y-coordinate in the gameMesh
-    var int tetrominoIndex;  // Index in the tetromino mesh
-
-    var int tetrominoMeshLength;  // Length of the tetromino mesh
-    // Will be destroyed when Mesh is destroyed in Tetromino
-    var Array tetrominoIndexArray;  // The array for the tetromino coordinates
-    // Will be destroyed by the Tetromino
-    var Mesh tetrominoMesh;  // The tetromino mesh
-
-    let tetrominoMesh = curTetromino.getTetrominoMesh();
-    let tetrominoMeshLength = tetrominoMesh.getMeshLength();
-
-    // Add tetromino to the game mesh
-    let tetrominoIndex = 0;
-    while(tetrominoIndex < tetrominoMeshLength){
-      let tetrominoIndexArray = tetrominoMesh.getMeshIndices(tetrominoIndex);
-      let gameXInd = curTetromino.getRelativeIndX() + tetrominoIndexArray[0];
-      let gameYInd = curTetromino.getRelativeIndY() + tetrominoIndexArray[1];
-      do gameMesh.setState(gameYInd, gameXInd, true);
-      let tetrominoIndex = tetrominoIndex + 1;
-    }
-    do gameBackground.drawMesh(false, gameMesh, 0, 0);
 
     return;
   }
