@@ -67,7 +67,7 @@ class Score {
     if(nRows = 1){ do updateScore(100*levelCount); }
     if(nRows = 2){ do updateScore(300*levelCount); }
     if(nRows = 3){ do updateScore(500*levelCount); }
-    if(nRows = 4){ do updateScore(800*levelCount); }
+    if(nRows > 3){ do updateScore(800*levelCount); }
     return;
   }
 
@@ -117,7 +117,7 @@ class Score {
    * NOTE: We can only level up one level at the time
    */
   method void updateLevel(){
-    let levelCount = levelCount;
+    let levelCount = levelCount + 1;
     do Output.moveCursor(13, 55);
     do Output.printInt(levelCount);
     return;

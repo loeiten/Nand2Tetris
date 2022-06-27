@@ -122,6 +122,25 @@ class TetrisGame {
 
     // FIXME:
     do score.updateLine(9);
+    // FIXME:
+    do score.updateLevel();
+    do score.updateLevel();
+    do score.updateLevel();
+    do score.updateLevel();
+    do score.updateLevel();
+    do score.updateLevel();
+    do score.updateLevel();
+    do score.updateLevel();
+    do score.updateLevel();
+    do score.updateLevel();
+    do score.updateLevel();
+    do score.updateLevel();
+    do score.updateLevel();
+    do score.updateLevel();
+    do score.updateLevel();
+    do score.updateLevel();
+    do score.updateLevel();
+    do updateGameSpeed();
 
 
 
@@ -157,6 +176,7 @@ class TetrisGame {
   method void tetrominoFall(Tetromino curTetromino){
     var int countDown;  // Count down until next move down
     var bool falling;  // Whether or not the tetromino is still falling
+    var bool lockDelayed;  // Whether or not the lock delay is active
     var char key;  // Variable for capturing key stroke
     var char prevKey;  // Variable for the previous key stroke
 
@@ -167,9 +187,14 @@ class TetrisGame {
     // do Output.printInt(gameSpeed);
 
 
+    let lockDelayed = false;
     let falling = true;
 
     while(falling){
+
+      if(lockDelayed){
+        // FIXME: YOU ARE HERE, LET THINGS FALL
+      }
 
       // Wait for a key to be pressed
       while(((key=0) & (countDown > 0))){
@@ -200,12 +225,17 @@ class TetrisGame {
         if(curTetromino.canMoveDown()){
           do curTetromino.moveDown();
           let countDown = gameSpeed;
-        }
-        else{
-          let falling = false;
-          do gameMesh.addTetrominoToMesh(curTetromino);
-          do gameBackground.drawMesh(false, false, gameMesh, 0, 0);
-          do removeFullLines();
+        } else{
+          // Lock delay of half a second
+          if(~lockDelayed){
+            let lockDelayed = true;
+            let countDown = 500;
+          } else {
+            let falling = false;
+            do gameMesh.addTetrominoToMesh(curTetromino);
+            do gameBackground.drawMesh(false, false, gameMesh, 0, 0);
+            do removeFullLines();
+          }
         }
       }
     }
@@ -302,10 +332,15 @@ class TetrisGame {
       // Calculate additional score
       do score.updateWithCollapseScore(nRowsToRemove);
 
+      // // FIXME:
+      // do Output.moveCursor(0,0);
+      // do Output.printInt(prevLineMod);
+      // do Output.printInt(newLineMod);
+
       // Decide whether to level-up
       if(prevLineMod>newLineMod){
         do score.updateLevel();
-        let gameSpeed = updateGameSpeed();
+        do updateGameSpeed();
       }
 
     }
@@ -401,7 +436,9 @@ class TetrisGame {
     if(level = 16){ let gameSpeed = 4; }
     if(level = 17){ let gameSpeed = 3; }
     if(level = 18){ let gameSpeed = 1; }
-    if(level = 19){ let gameSpeed = 0; }
+
+    // NOTE: If we set gameSpeed to 0, we are not able to move the tetrominos
+    //       as we start on countDown = 0
 
     // // FIXME:
     // do Output.moveCursor(2,0);
