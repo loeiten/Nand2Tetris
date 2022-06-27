@@ -13,6 +13,7 @@ class NextTetrominos {
   field Mesh nextMesh;  // The mesh containing the next tetrominos
   field Array currentBag;  // The current 7-bag of next tetrominos
   field Array nextBag;  // The next 7-bag of next tetrominos
+  field Array numberBag;  // Bag of numbers representing the tetromino types
   field String nextString;  // String holding "Next"
   field int curBagIteration;  // The current bag iteration
   field int bagSize;  // The bag size
@@ -48,6 +49,7 @@ class NextTetrominos {
     // Construct the bags
     let currentBag = Array.new(bagSize);
     let nextBag = Array.new(bagSize);
+    let numberBag = Array.new(bagSize);
     do generateBag(currentBag);
     do generateBag(nextBag);
 
@@ -66,6 +68,7 @@ class NextTetrominos {
     do nextBackground.dispose();
     do currentBag.dispose();
     do nextBag.dispose();
+    do numberBag.dispose();
     // NOTE: We dispose the strings in the destructor
     //       Destroying elsewhere appears to mess with field int initialization
     do nextString.dispose();
@@ -90,10 +93,6 @@ class NextTetrominos {
     // Advance all tetrominos in the current bag with one position
     // NOTE: bagSize-1 as we are accessing counter + 1
     while(counter < (bagSize - 1)){
-    // // FIXME:
-    // do Output.moveCursor(2, 0);
-    // do Output.printInt(counter+1);
-    // do Sys.wait(500);
       let currentBag[counter] = currentBag[counter + 1];
       let counter = counter + 1;
     }
@@ -105,17 +104,9 @@ class NextTetrominos {
     // Advance all tetrominos in the current bag with one position
     // NOTE: bagSize-1 as we are accessing counter + 1
     while(counter < (bagSize - 1)){
-    // // FIXME:
-    // do Output.moveCursor(3, 0);
-    // do Output.printInt(counter+1);
-    // do Sys.wait(500);
       let nextBag[counter] = nextBag[counter + 1];
       let counter = counter + 1;
     }
-
-    // // FIXME:
-    // do Output.moveCursor(0, 0);
-    // do Output.printInt(curBagIteration);
 
     if(curBagIteration = bagSize){
       do generateBag(nextBag);
@@ -143,39 +134,97 @@ class NextTetrominos {
     return curTetromino;
   }
 
+  method void fillNumberBag(){
+    var int counter;
+    var int randNumber;
+    var int curHigh;
+    var int curLow;
+
+    // // FIXME:
+    // var bool inArray;
+    // do Output.moveCursor(0, 0);
+    // do Output.printString("Start");
+
+    // Initialize all members to -1
+    while(counter < bagSize){
+      let numberBag[counter] = -1;
+      let counter = counter + 1;
+    }
+
+    // // FIXME:
+    // do Output.moveCursor(1, 0);
+    // do Output.printString("After minus 1");
+
+    // Reset the counter
+    let counter = 0;
+    let randNumber = -1;
+    let curHigh = bagSize - 1;
+    let curLow = 0;
+    while(counter < bagSize){
+
+    // // FIXME:
+    // do Output.moveCursor(2, 0);
+    // do Output.printString("Before inArray");
+    //  let inArray = Algorithm.intInArray(randNumber, numberBag, bagSize);
+    // do Output.moveCursor(3, 0);
+    // do Output.printString("inArray: ");
+    // do Output.printInt(inArray);
+
+      while(Algorithm.intInArray(randNumber, numberBag, bagSize)){
+    // // FIXME:
+    // do Output.moveCursor(4, 0);
+    // do Output.printString("Before randNumber");
+        // Update the random number
+        let randNumber = LCGRandom.randRange(curLow, curHigh);
+    // // FIXME:
+    //   let inArray = Algorithm.intInArray(randNumber, numberBag, bagSize);
+    // do Output.moveCursor(3, 0);
+    // do Output.printString("After randNumber");
+      }
+      // Reduce the range if we've hit the extremes of the range
+      if(randNumber = curHigh){
+        let curHigh = curHigh - 1;
+      }
+      if(randNumber = curLow){
+        let curLow = curLow + 1;
+      }
+      let numberBag[counter] = randNumber;
+      let counter = counter + 1;
+    }
+
+    return;
+  }
+
+  // FIXME: delme
+  method Array getNumberBag(){
+    return numberBag;
+  }
+
   /**
    * Generate a bag of tetrominos
    *
    * \param bag The bag where the tetrominos are to be put in
    */
   method void generateBag(Array bag){
-    // FIXME: Put in loop
-    // var int counter;
-    // let counter = 0;
-    // while(counter < bagSize){
-    //   // FIXME: Replace with random number generator
-    //   let bag[counter] = TetrominoSpawner.spawnO();
-    //   let counter = counter + 1;
-    // }
+    var int counter;
+    var int curTetrominoType;
 
-    // NOTE: The relative x and y indices will be updated in updateNextColumn,
-    //       so we might as well set them to 0 here
+    do fillNumberBag();
 
-    let bag[0] = TetrominoSpawner.spawnI(nextMesh, 0, 0);
-    let bag[1] = TetrominoSpawner.spawnJ(nextMesh, 0, 0);
-    let bag[2] = TetrominoSpawner.spawnL(nextMesh, 0, 0);
-    let bag[3] = TetrominoSpawner.spawnO(nextMesh, 0, 0);
-    let bag[4] = TetrominoSpawner.spawnS(nextMesh, 0, 0);
-    let bag[5] = TetrominoSpawner.spawnT(nextMesh, 0, 0);
-    let bag[6] = TetrominoSpawner.spawnZ(nextMesh, 0, 0);
+    while(counter < bagSize){
+      let curTetrominoType = numberBag[counter];
+      // NOTE: The relative x and y indices will be updated in updateNextColumn,
+      //       so we might as well set them to 0 here
+      if(curTetrominoType = 0){ let bag[counter] = TetrominoSpawner.spawnI(nextMesh, 0, 0); }
+      if(curTetrominoType = 1){ let bag[counter] = TetrominoSpawner.spawnJ(nextMesh, 0, 0); }
+      if(curTetrominoType = 2){ let bag[counter] = TetrominoSpawner.spawnL(nextMesh, 0, 0); }
+      if(curTetrominoType = 3){ let bag[counter] = TetrominoSpawner.spawnO(nextMesh, 0, 0); }
+      if(curTetrominoType = 4){ let bag[counter] = TetrominoSpawner.spawnS(nextMesh, 0, 0); }
+      if(curTetrominoType = 5){ let bag[counter] = TetrominoSpawner.spawnT(nextMesh, 0, 0); }
+      if(curTetrominoType = 6){ let bag[counter] = TetrominoSpawner.spawnZ(nextMesh, 0, 0); }
 
-    // let bag[0] = 0;
-    // let bag[1] = 0;
-    // let bag[2] = 0;
-    // let bag[3] = 0;
-    // let bag[4] = 0;
-    // let bag[5] = 0;
-    // let bag[6] = 0;
+      let counter = counter + 1;
+    }
 
     return;
   }

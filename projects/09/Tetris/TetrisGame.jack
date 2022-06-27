@@ -21,8 +21,13 @@ class TetrisGame {
    * The constructor will:
    * - Draw the background frame
    * - Initialize the background
+   * FIXME: Also fix missing docstrings
+   *
+   * \param seed The seed
    */
-  constructor TetrisGame new() {
+  constructor TetrisGame new(int seed) {
+    // Set seed
+    do LCGRandom.setSeed(seed);
     // Initialize the background (see README.md for calculation)
     // NOTE: The mesh is 40 according to
     // https://tetris.fandom.com/wiki/Tetris_Guideline#List_of_rules_(as_of_2009)
@@ -43,13 +48,7 @@ class TetrisGame {
     let score = Score.new();
 
     // Set initial game speed
-    // FIXME: Make game speed work with level
     do updateGameSpeed();
-    // let gameSpeed = 500;
-    // // FIXME:
-    // do Output.moveCursor(3,0);
-    // do Output.printInt(gameSpeed);
-    // do Sys.wait(1000);
 
     let gameOverString = " Game over! ";
 
@@ -75,6 +74,7 @@ class TetrisGame {
    * 4. Check if a row is covered and remove the row
    * 5. Update the score
    * 6. Check if the game is over
+   * FIXME: More?
    */
   method void run() {
     var bool doSpawn;  // Whether we will spawn or not
@@ -82,9 +82,30 @@ class TetrisGame {
 
     var Tetromino curTetromino;  // The current tetromino
 
+
+
+
+
+
+
     // FIXME: Remove
     var int testRow;
     var int testCol;
+
+    // FIXME:
+    var Array myBag;
+    var int i;
+    do nextTetrominos.fillNumberBag();
+    let myBag = nextTetrominos.getNumberBag();
+    while(i < 7){
+      do Output.moveCursor(i, 0);
+      do Output.printInt(myBag[i]);
+      let i= i+1;
+    }
+    do Sys.wait(1000);
+
+
+
     let testRow = 39;
 
     // FIXME: TestMesh
@@ -182,18 +203,15 @@ class TetrisGame {
 
     let countDown = gameSpeed;
 
-    // // FIXME:
-    // do Output.moveCursor(0,0);
-    // do Output.printInt(gameSpeed);
-
-
     let lockDelayed = false;
     let falling = true;
 
     while(falling){
 
       if(lockDelayed){
-        // FIXME: YOU ARE HERE, LET THINGS FALL
+        while(curTetromino.canMoveDown()){
+          do curTetromino.moveDown();
+        }
       }
 
       // Wait for a key to be pressed
@@ -332,11 +350,6 @@ class TetrisGame {
       // Calculate additional score
       do score.updateWithCollapseScore(nRowsToRemove);
 
-      // // FIXME:
-      // do Output.moveCursor(0,0);
-      // do Output.printInt(prevLineMod);
-      // do Output.printInt(newLineMod);
-
       // Decide whether to level-up
       if(prevLineMod>newLineMod){
         do score.updateLevel();
@@ -414,10 +427,6 @@ class TetrisGame {
     var int level;
     let level = score.getLevel();
 
-    // // FIXME:
-    // do Output.moveCursor(1,0);
-    // do Output.printInt(level);
-
     if(level = 1){ let gameSpeed = 1000; }
     if(level = 2){ let gameSpeed = 793; }
     if(level = 3){ let gameSpeed = 618; }
@@ -439,11 +448,6 @@ class TetrisGame {
 
     // NOTE: If we set gameSpeed to 0, we are not able to move the tetrominos
     //       as we start on countDown = 0
-
-    // // FIXME:
-    // do Output.moveCursor(2,0);
-    // do Output.printInt(gameSpeed);
-    // do Sys.wait(1000);
 
     return;
   }

@@ -2,7 +2,7 @@
 class Main {
     function void main() {
         var TetrisGame game;
-        let game = TetrisGame.new();
+        let game = TetrisGame.new(0);
         do game.run();
         do game.dispose();
         return;

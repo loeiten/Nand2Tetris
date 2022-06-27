@@ -20,4 +20,20 @@ class Algorithm {
     return modolus;
   }
 
+  function bool intInArray(int number, Array theArray, int arraySize){
+    var bool inArray;
+    var int counter;
+    var int curNumber;
+
+    let inArray = false;
+    while((counter < arraySize) & (~inArray)){
+      let curNumber = theArray[counter];
+      if(curNumber = number){
+        let inArray = true;
+      }
+      let counter = counter + 1;
+    }
+
+    return inArray;
+  }
 }
