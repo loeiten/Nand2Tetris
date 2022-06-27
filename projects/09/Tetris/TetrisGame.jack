@@ -118,11 +118,12 @@ class TetrisGame {
 
     // Run until game over
     while (~gameOver){
-      let curTetromino = TetrominoSpawner.spawnO(gameBackground, 18, 3);
+      let curTetromino = nextTetrominos.getNextTetrominos();
       let doSpawn = curTetromino.canSpawn();
 
       if(doSpawn){
         // Enter the fall sequence
+        do stats.updateCounter(curTetromino.getTetrominoType());
         do tetrominoFall(curTetromino);
       }
       // The game can end by "Top out" if a tetromino cannot spawn:
