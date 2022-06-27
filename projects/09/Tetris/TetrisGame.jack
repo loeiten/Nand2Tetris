@@ -93,16 +93,16 @@ class TetrisGame {
     var int testCol;
 
     // FIXME:
-    var Array myBag;
-    var int i;
-    do nextTetrominos.fillNumberBag();
-    let myBag = nextTetrominos.getNumberBag();
-    while(i < 7){
-      do Output.moveCursor(i, 0);
-      do Output.printInt(myBag[i]);
-      let i= i+1;
-    }
-    do Sys.wait(1000);
+    // var Array myBag;
+    // var int i;
+    // do nextTetrominos.fillNumberBag();
+    // let myBag = nextTetrominos.getNumberBag();
+    // while(i < 7){
+    //   do Output.moveCursor(i, 0);
+    //   do Output.printInt(myBag[i]);
+    //   let i= i+1;
+    // }
+    // do Sys.wait(1000);
 
 
 

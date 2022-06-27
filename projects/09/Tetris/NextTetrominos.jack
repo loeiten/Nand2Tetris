@@ -60,6 +60,9 @@ class NextTetrominos {
     do Output.printString(nextString);
     do updateNextColumn();
 
+    // FIXME:
+    // do Sys.wait(1000);
+
     return this;
   }
 
@@ -259,6 +262,11 @@ class NextTetrominos {
     // NOTE: We only want to show the next tetrominos for bagSize - 1
     while (counter < (bagSize - 1)){
       let curTetromino = currentBag[counter];
+
+
+      // // FIXME:
+      // do Output.moveCursor(counter, 0);
+      // do Output.printInt(curTetromino.getTetrominoType());
 
       if(counter > 0){
         let tetrominoType = curTetromino.getTetrominoType();
