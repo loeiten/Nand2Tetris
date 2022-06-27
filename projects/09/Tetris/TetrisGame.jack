@@ -114,27 +114,12 @@ class TetrisGame {
     do gameMesh.setState(29, 1, false);
     do gameMesh.setState(29, 8, false);
 
-    do gameBackground.drawMesh(false, gameMesh, 0, 0);
-
-
-    // FIXME:
-    // do Sys.wait(1000);
-
-    // // FIXME:
-    // do Output.moveCursor(1,1);
-    // do Output.printString("gameOver: ");
-    // do Output.printInt(gameOver);
-
+    do gameBackground.drawMesh(false, false, gameMesh, 0, 0);
 
     // Run until game over
     while (~gameOver){
       let curTetromino = TetrominoSpawner.spawnO(gameBackground, 18, 3);
       let doSpawn = curTetromino.canSpawn();
-
-      // // FIXME:
-      // do Output.moveCursor(0,0);
-      // do Output.printString("doSpawn: ");
-      // do Output.printInt(doSpawn);
 
       if(doSpawn){
         // Enter the fall sequence
@@ -200,7 +185,7 @@ class TetrisGame {
         else{
           let falling = false;
           do gameMesh.addTetrominoToMesh(curTetromino);
-          do gameBackground.drawMesh(false, gameMesh, 0, 0);
+          do gameBackground.drawMesh(false, false, gameMesh, 0, 0);
           do removeFullLines();
         }
       }

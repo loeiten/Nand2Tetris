@@ -218,7 +218,11 @@ class NextTetrominos {
       let counter = counter + 1;
     }
 
-    do nextBackground.drawMesh(false, nextMesh, 0, 0);
+    // Draw the background
+    // Remove remaining tetrominos
+    do nextBackground.drawMesh(true, true, nextMesh, 0, 0);
+    // Draw the background
+    do nextBackground.drawMesh(false, false, nextMesh, 0, 0);
 
     return;
   }

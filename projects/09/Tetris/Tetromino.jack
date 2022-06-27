@@ -136,17 +136,9 @@ class Tetromino {
     let canBeSpawn = canBePlaced(relativeYInd_, relativeXInd_);
 
     if(canBeSpawn){
-      // // FIXME:
-      // do Output.moveCursor(3,0);
-      // do Output.printString("canBeSpawn: true");
-
-      do background_.drawMesh(false, tetrominoMesh_, relativeYInd_, relativeXInd_);
+      do background_.drawMesh(false, false, tetrominoMesh_, relativeYInd_, relativeXInd_);
       return true;
     } else{
-      // // FIXME:
-      // do Output.moveCursor(3,0);
-      // do Output.printString("canBeSpawn: false");
-
       return false;
     }
   }
@@ -178,46 +170,20 @@ class Tetromino {
       let backgroundXInd = newRelativeXInd + tetrominoXIndex;
       let backgroundYInd = newRelativeYInd + tetrominoYIndex;
 
-      // // FIXME:
-      // do Output.moveCursor(10,0);
-      // do Output.printString("backgroundXInd: ");
-      // do Output.printInt(backgroundXInd);
-      // do Output.moveCursor(11,0);
-      // do Output.printString("backgroundYInd: ");
-      // do Output.printInt(backgroundYInd);
-      // do Output.moveCursor(12,0);
-      // do Output.printString("tetrominoXIndex: ");
-      // do Output.printInt(tetrominoXIndex);
-      // do Output.moveCursor(13,0);
-      // do Output.printString("tetrominoYIndex: ");
-      // do Output.printInt(tetrominoYIndex);
-      // do Output.moveCursor(7,0);
-      // do Output.printString("a");
-      // Check that x is within limits
-      if (backgroundXInd < 0){ return false; }
-      // // FIXME:
-      // do Output.printString("b");
-      // -1 as backgroundXInd counts from 0
-      if (backgroundXInd > (backgroundMesh.getCols() - 1)){ return false; }
+      if(tetrominoMesh_.getState(tetrominoYIndex, tetrominoXIndex)){
+        // Check that x is within limits
+        if (backgroundXInd < 0){ return false; }
+        // -1 as backgroundXInd counts from 0
+        if (backgroundXInd > (backgroundMesh.getCols() - 1)){ return false; }
 
-      // // FIXME:
-      // do Output.printString("c");
+        // Check that y is within limits
+        if (backgroundYInd < 0){ return false; }
+        // -1 as backgroundYInd counts from 0
+        if (backgroundYInd > (backgroundMesh.getRows() - 1)){ return false; }
 
-      // Check that y is within limits
-      if (backgroundYInd < 0){ return false; }
-      // // FIXME:
-      // do Output.printString("d");
-
-      // -1 as backgroundYInd counts from 0
-      if (backgroundYInd > (backgroundMesh.getRows() - 1)){ return false; }
-
-      // // FIXME:
-      // do Output.printString("e");
-
-      // Check whether we would collide
-      if (backgroundMesh.getState(backgroundYInd, backgroundXInd)){ return false; }
-      // // FIXME:
-      // do Output.printString("f");
+        // Check whether we would collide
+        if (backgroundMesh.getState(backgroundYInd, backgroundXInd)){ return false; }
+      }
 
       let tetrominoMeshIndex = tetrominoMeshIndex + 1;
     }
@@ -270,31 +236,31 @@ class Tetromino {
 
   /** Move the tetromino down in the background mesh */
   method void moveDown(){
-    // Erase
-    do background_.drawMesh(true, tetrominoMesh_, relativeYInd_, relativeXInd_);
+    // Erase the previous position
+    do background_.drawMesh(true, false, tetrominoMesh_, relativeYInd_, relativeXInd_);
     let relativeYInd_ = relativeYInd_ + 1;
     // Draw
-    do background_.drawMesh(false, tetrominoMesh_, relativeYInd_, relativeXInd_);
+    do background_.drawMesh(false, false, tetrominoMesh_, relativeYInd_, relativeXInd_);
     return;
   }
 
   /** Move the tetromino to the left in the background mesh */
   method void moveLeft(){
-    // Erase
-    do background_.drawMesh(true, tetrominoMesh_, relativeYInd_, relativeXInd_);
+    // Erase the previous position
+    do background_.drawMesh(true, false, tetrominoMesh_, relativeYInd_, relativeXInd_);
     let relativeXInd_ = relativeXInd_ - 1;
     // Draw
-    do background_.drawMesh(false, tetrominoMesh_, relativeYInd_, relativeXInd_);
+    do background_.drawMesh(false, false, tetrominoMesh_, relativeYInd_, relativeXInd_);
     return;
   }
 
   /** Move the tetromino to the right in the background mesh */
   method void moveRight(){
-    // Erase
-    do background_.drawMesh(true, tetrominoMesh_, relativeYInd_, relativeXInd_);
+    // Erase the previous position
+    do background_.drawMesh(true, false, tetrominoMesh_, relativeYInd_, relativeXInd_);
     let relativeXInd_ = relativeXInd_ + 1;
     // Draw
-    do background_.drawMesh(false, tetrominoMesh_, relativeYInd_, relativeXInd_);
+    do background_.drawMesh(false, false, tetrominoMesh_, relativeYInd_, relativeXInd_);
     return;
   }
 
