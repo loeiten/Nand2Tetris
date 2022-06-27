@@ -16,19 +16,10 @@ class Statistics {
   field int countT;
   field int countZ;
 
-  // The string representation
-  field String stringI;
-  field String stringJ;
-  field String stringL;
-  field String stringO;
-  field String stringS;
-  field String stringT;
-  field String stringZ;
+  field String statString;
 
   /** Construct Statistics */
   constructor Statistics new() {
-    var String statString;
-
     // Subtract 1 from frameStartY, and added to frameLenY
     let statBackground = Background.new(
       35, // frameStartX  // FIXME: Fiddle around with numbers to look nice
@@ -85,7 +76,6 @@ class Statistics {
     let statString = "Statistics";
     do Output.moveCursor(1, 6);
     do Output.printString(statString);
-    do statString.dispose();
 
     // Print
     do Output.moveCursor(3, 13);
@@ -111,50 +101,46 @@ class Statistics {
     do statBackground.dispose();
     do statMesh.dispose();
 
-    do stringI.dispose();
-    do stringJ.dispose();
-    do stringL.dispose();
-    do stringO.dispose();
-    do stringS.dispose();
-    do stringT.dispose();
-    do stringZ.dispose();
+    // NOTE: We dispose the strings in the destructor
+    //       Destroying elsewhere appears to mess with field int initialization
+    do statString.dispose();
 
     do Memory.deAlloc(this);
     return;
   }
 
-  method void updateCounter(String tetrominoName){
-    if (tetrominoName = stringI){
+  method void updateCounter(int tetrominoType){
+    if (tetrominoType = 0){
       let countI = countI + 1;
       do Output.moveCursor(3, 13);
       do Output.printInt(countI);
     }
-    if (tetrominoName = stringJ){
+    if (tetrominoType = 1){
       let countJ = countJ + 1;
       do Output.moveCursor(6, 13);
       do Output.printInt(countJ);
     }
-    if (tetrominoName = stringL){
+    if (tetrominoType = 2){
       let countL = countL + 1;
       do Output.moveCursor(9, 13);
       do Output.printInt(countL);
     }
-    if (tetrominoName = stringO){
+    if (tetrominoType = 3){
       let countO = countO + 1;
       do Output.moveCursor(12, 13);
       do Output.printInt(countO);
     }
-    if (tetrominoName = stringS){
+    if (tetrominoType = 4){
       let countS = countS + 1;
       do Output.moveCursor(15, 13);
       do Output.printInt(countS);
     }
-    if (tetrominoName = stringT){
+    if (tetrominoType = 5){
       let countT = countT + 1;
       do Output.moveCursor(18, 13);
       do Output.printInt(countT);
     }
-    if (tetrominoName = stringZ){
+    if (tetrominoType = 6){
       let countZ = countZ + 1;
       do Output.moveCursor(21, 13);
       do Output.printInt(countZ);

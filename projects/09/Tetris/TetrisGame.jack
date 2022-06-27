@@ -39,11 +39,8 @@ class TetrisGame {
     do gameBackground.drawFrame();
 
     let nextTetrominos = NextTetrominos.new(gameBackground);
-    // let stats = Statistics.new();
-    // let score = Score.new();
-
-    // FIXME:
-    do Sys.wait(2000);
+    let stats = Statistics.new();
+    let score = Score.new();
 
     // Set initial game speed
     // FIXME: Make game speed work with level
@@ -57,10 +54,10 @@ class TetrisGame {
 
   /** Dispose this game. */
   method void dispose() {
-    do nextTetrominos.dispose();
-    do stats.dispose();
     do gameBackground.dispose();
     do gameOverString.dispose();
+    do stats.dispose();
+    do nextTetrominos.dispose();
     do Memory.deAlloc(this);
     return;
   }
@@ -120,13 +117,24 @@ class TetrisGame {
     do gameBackground.drawMesh(false, gameMesh, 0, 0);
 
 
+    // FIXME:
+    // do Sys.wait(1000);
 
+    // // FIXME:
+    // do Output.moveCursor(1,1);
+    // do Output.printString("gameOver: ");
+    // do Output.printInt(gameOver);
 
 
     // Run until game over
     while (~gameOver){
-      let curTetromino = TetrominoSpawner.spawnO(gameBackground, 3, 18);
+      let curTetromino = TetrominoSpawner.spawnO(gameBackground, 18, 3);
       let doSpawn = curTetromino.canSpawn();
+
+      // // FIXME:
+      // do Output.moveCursor(0,0);
+      // do Output.printString("doSpawn: ");
+      // do Output.printInt(doSpawn);
 
       if(doSpawn){
         // Enter the fall sequence

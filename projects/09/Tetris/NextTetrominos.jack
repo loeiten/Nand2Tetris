@@ -13,6 +13,7 @@ class NextTetrominos {
   field Mesh nextMesh;  // The mesh containing the next tetrominos
   field Array currentBag;  // The current 7-bag of next tetrominos
   field Array nextBag;  // The next 7-bag of next tetrominos
+  field String nextString;  // String holding "Next"
   field int curBagIteration;  // The current bag iteration
   field int bagSize;  // The bag size
 
@@ -22,7 +23,6 @@ class NextTetrominos {
    * \param gameBackground The background for the game
    */
   constructor NextTetrominos new(Background gameBackground) {
-    var String nextString;
 
     let gameBackground_ = gameBackground;
     // Create the next background
@@ -55,84 +55,86 @@ class NextTetrominos {
     let nextString = "Next";
     do Output.moveCursor(1, 45);
     do Output.printString(nextString);
-    do nextString.dispose();
     do updateNextColumn();
 
     return this;
   }
 
-  /** Dispose this NextTetrominos object. */
+  /** dispose this nextTetrominos object. */
   method void dispose(){
     do nextBackground.dispose();
     do currentBag.dispose();
     do nextBag.dispose();
+    // NOTE: We dispose the strings in the destructor
+    //       Destroying elsewhere appears to mess with field int initialization
+    do nextString.dispose();
     do Memory.deAlloc(this);
     return;
   }
 
-  /**
-   * Get the next tetromino
-   *
-   * \warning The returned tetromino must be manually destroyed
-   *
-   * \return The next tetromino
-   */
-  method Tetromino getNextTetrominos(){
-    var Tetromino curTetromino;
-    var Mesh curTetrominoMesh;
-    var int counter;
-
-    let curTetromino = currentBag[0];
-
-    // Advance all tetrominos in the current bag with one position
-    // NOTE: bagSize-1 as we are accessing counter + 1
-    while(counter < (bagSize - 1)){
-      let currentBag[counter] = currentBag[counter + 1];
-      let counter = counter + 1;
-    }
-    // Manually move over the first tetromino from the next bag to the current bag
-    // NOTE: -1 as we start to count from 0
-    let currentBag[bagSize - 1] = nextBag[0];
-    // Reset the counter
-    let counter = 0;
-    // Advance all tetrominos in the current bag with one position
-    // NOTE: bagSize-1 as we are accessing counter + 1
-    while(counter < (bagSize - 1)){
-      let nextBag[counter] = nextBag[counter + 1];
-      let counter = counter + 1;
-    }
-
-    if(curBagIteration = bagSize){
-      do generateBag(nextBag);
-      // Reset curBagIteration
-      let curBagIteration = 0;
-    } else {
-      // Update the curBagIteration
-      let curBagIteration = curBagIteration + 1;
-    }
-
-    // Update and draw the next column
-    do updateNextColumn();
-
-    // Update the tetromino
-    do curTetromino.setBackground(gameBackground_);
-    let curTetrominoMesh = curTetromino.getTetrominoMesh();
-    if (curTetrominoMesh.getMeshLength() = 16){
-      // 4x4 tetrominos
-      do curTetromino.setRelativePosition(19, 3);
-    } else {
-      // 3x3 tetrominos
-      do curTetromino.setRelativePosition(18, 3);
-    }
-
-    return curTetromino;
-  }
-
-  /**
-   * Generate a bag of tetrominos
-   *
-   * \param bag The bag where the tetrominos are to be put in
-   */
+//  /**
+//   * get the next tetromino
+//   *
+//   * \warning the returned tetromino must be manually destroyed
+//   *
+//   * \return the next tetromino
+//   */
+//  method tetromino getNextTetrominos(){
+//    var tetromino curtetromino;
+//    var Mesh curTetrominoMesh;
+//    var int counter;
+//
+//    let curTetromino = currentBag[0];
+//
+//    // Advance all tetrominos in the current bag with one position
+//    // NOTE: bagSize-1 as we are accessing counter + 1
+//    while(counter < (bagSize - 1)){
+//      let currentBag[counter] = currentBag[counter + 1];
+//      let counter = counter + 1;
+//    }
+//    // Manually move over the first tetromino from the next bag to the current bag
+//    // NOTE: -1 as we start to count from 0
+//    let currentBag[bagSize - 1] = nextBag[0];
+//    // Reset the counter
+//    let counter = 0;
+//    // Advance all tetrominos in the current bag with one position
+//    // NOTE: bagSize-1 as we are accessing counter + 1
+//    while(counter < (bagSize - 1)){
+//      let nextBag[counter] = nextBag[counter + 1];
+//      let counter = counter + 1;
+//    }
+//
+//    if(curBagIteration = bagSize){
+//      do generateBag(nextBag);
+//      // Reset curBagIteration
+//      let curBagIteration = 0;
+//    } else {
+//      // Update the curBagIteration
+//      let curBagIteration = curBagIteration + 1;
+//    }
+//
+//    // Update and draw the next column
+//    do updateNextColumn();
+//
+//    // Update the tetromino
+//    do curTetromino.setBackground(gameBackground_);
+//    let curTetrominoMesh = curTetromino.getTetrominoMesh();
+//    if (curTetrominoMesh.getMeshLength() = 16){
+//      // 4x4 tetrominos
+//      do curTetromino.setRelativePosition(19, 3);
+//    } else {
+//      // 3x3 tetrominos
+//      do curTetromino.setRelativePosition(18, 3);
+//    }
+//
+//    return curTetromino;
+//  }
+//
+//  /**
+//   * Generate a bag of tetrominos
+//   *
+//   * \param bag The bag where the tetrominos are to be put in
+//   */
   method void generateBag(Array bag){
     // FIXME: Put in loop
     // var int counter;
@@ -154,9 +156,17 @@ class NextTetrominos {
     let bag[5] = TetrominoSpawner.spawnT(nextMesh, 0, 0);
     let bag[6] = TetrominoSpawner.spawnZ(nextMesh, 0, 0);
 
+    // let bag[0] = 0;
+    // let bag[1] = 0;
+    // let bag[2] = 0;
+    // let bag[3] = 0;
+    // let bag[4] = 0;
+    // let bag[5] = 0;
+    // let bag[6] = 0;
+
     return;
   }
-
+//
   /** Update and draw the next column */
   method void updateNextColumn(){
     var Tetromino curTetromino;
