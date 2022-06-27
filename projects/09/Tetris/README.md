@@ -153,6 +153,12 @@ If we pad equally top and bottom, we get
 
 Thus, we get `frameStartY = 6`
 
+## No T-spin in score
+
+## No combo in score
+
+## Fixed goal level up
+
 ## Random number generator
 
 - [Linear Congruential Generator](https://web.archive.org/web/20201022060109/http://nand2tetris-questions-and-answers-forum.32033.n3.nabble.com/Pseudo-Random-Number-Generator-td4026059.html), **NOTE**: The bug in `randRange` (addressed by Mark in some posts below)

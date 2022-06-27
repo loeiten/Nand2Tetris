@@ -44,8 +44,12 @@ class TetrisGame {
 
     // Set initial game speed
     // FIXME: Make game speed work with level
-    let gameSpeed = updateGameSpeed();
-    let gameSpeed = 500;
+    do updateGameSpeed();
+    // let gameSpeed = 500;
+    // // FIXME:
+    // do Output.moveCursor(3,0);
+    // do Output.printInt(gameSpeed);
+    // do Sys.wait(1000);
 
     let gameOverString = " Game over! ";
 
@@ -116,6 +120,14 @@ class TetrisGame {
 
     do gameBackground.drawMesh(false, false, gameMesh, 0, 0);
 
+    // FIXME:
+    do score.updateLine(9);
+
+
+
+
+
+
     // Run until game over
     while (~gameOver){
       let curTetromino = nextTetrominos.getNextTetrominos();
@@ -123,8 +135,8 @@ class TetrisGame {
 
       if(doSpawn){
         // Enter the fall sequence
-        do stats.updateCounter(curTetromino.getTetrominoType());
         do tetrominoFall(curTetromino);
+        do stats.updateCounter(curTetromino.getTetrominoType());
       }
       // The game can end by "Top out" if a tetromino cannot spawn:
       // https://tetris.fandom.com/wiki/Top_out
@@ -149,6 +161,12 @@ class TetrisGame {
     var char prevKey;  // Variable for the previous key stroke
 
     let countDown = gameSpeed;
+
+    // // FIXME:
+    // do Output.moveCursor(0,0);
+    // do Output.printInt(gameSpeed);
+
+
     let falling = true;
 
     while(falling){
@@ -203,17 +221,22 @@ class TetrisGame {
    * \param key Current key stroke
    */
   method void moveWithKeyboard(Tetromino curTetromino, int countDown, char key){
+    var int cellsMoved;
+
     // Capture up arrow
     if (key = 131) {
       let countDown = 0;
       while(curTetromino.canMoveDown()){
           do curTetromino.moveDown();
+          let cellsMoved = cellsMoved + 1;
       }
+      do score.updateWithHardDropScore(cellsMoved);
     }
     // Capture down arrow
     if (key = 133) {
       if(curTetromino.canMoveDown()){
         do curTetromino.moveDown();
+        do score.updateWithSoftDropScore();
       }
     }
     // Capture left arrow
@@ -238,6 +261,9 @@ class TetrisGame {
     var int nRowsToRemove;
     var int rowNumber;
     var int blinkSpeed;
+    var int additionalScore;
+    var int prevLineMod;
+    var int newLineMod;
 
     let blinkSpeed = 150;
 
@@ -267,6 +293,21 @@ class TetrisGame {
 
       // Collapse full rows
       do gameBackground.collapse(rowsToRemove);
+
+      // Update line count
+      let prevLineMod = Algorithm.mod(score.getLines(), 10);
+      do score.updateLine(nRowsToRemove);
+      let newLineMod = Algorithm.mod(score.getLines(), 10);
+
+      // Calculate additional score
+      do score.updateWithCollapseScore(nRowsToRemove);
+
+      // Decide whether to level-up
+      if(prevLineMod>newLineMod){
+        do score.updateLevel();
+        let gameSpeed = updateGameSpeed();
+      }
+
     }
 
     // Created in getRowsToRemove
@@ -338,6 +379,10 @@ class TetrisGame {
     var int level;
     let level = score.getLevel();
 
+    // // FIXME:
+    // do Output.moveCursor(1,0);
+    // do Output.printInt(level);
+
     if(level = 1){ let gameSpeed = 1000; }
     if(level = 2){ let gameSpeed = 793; }
     if(level = 3){ let gameSpeed = 618; }
@@ -357,6 +402,11 @@ class TetrisGame {
     if(level = 17){ let gameSpeed = 3; }
     if(level = 18){ let gameSpeed = 1; }
     if(level = 19){ let gameSpeed = 0; }
+
+    // // FIXME:
+    // do Output.moveCursor(2,0);
+    // do Output.printInt(gameSpeed);
+    // do Sys.wait(1000);
 
     return;
   }

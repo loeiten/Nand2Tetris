@@ -53,6 +53,40 @@ class Score {
     return levelCount;
   }
 
+  /** Return current lines */
+  method int getLines(){
+    return lineCount;
+  }
+
+  /**
+   * Updates the score from a collapse
+   *
+   * \param nRows The number of rows in the collapse
+   */
+  method void updateWithCollapseScore(int nRows){
+    if(nRows = 1){ do updateScore(100*levelCount); }
+    if(nRows = 2){ do updateScore(300*levelCount); }
+    if(nRows = 3){ do updateScore(500*levelCount); }
+    if(nRows = 4){ do updateScore(800*levelCount); }
+    return;
+  }
+
+  /** Returns the score from a soft drop */
+  method void updateWithSoftDropScore(){
+    do updateScore(1);
+    return;
+  }
+
+  /**
+   * Returns the score from a hard drop
+   *
+   * \param cellsMoved The number of cells moved
+   */
+  method void updateWithHardDropScore(int cellsMoved){
+    do updateScore(2*cellsMoved);
+    return;
+  }
+
   /**
    * Update the score and print it
    *
