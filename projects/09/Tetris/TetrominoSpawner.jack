@@ -49,7 +49,7 @@ class TetrominoSpawner {
     var Mesh tetrominoMesh;
     var Tetromino tetromino;
     let tetrominoMesh = Mesh.new(3, 3);
-    do  tetrominoMesh.setState(0, 1, true);
+    do  tetrominoMesh.setState(0, 0, true);
     do  tetrominoMesh.setState(1, 0, true);
     do  tetrominoMesh.setState(1, 1, true);
     do  tetrominoMesh.setState(1, 2, true);
@@ -80,7 +80,7 @@ class TetrominoSpawner {
     do  tetrominoMesh.setState(0, 2, true);
     do  tetrominoMesh.setState(1, 0, true);
     do  tetrominoMesh.setState(1, 1, true);
-    do  tetrominoMesh.setState(1, 3, true);
+    do  tetrominoMesh.setState(1, 2, true);
     let tetromino = Tetromino.new(tetrominoMesh,
                                   relativeYInd,  // y-coordinate in the backgroundMesh (first 20 rows are hidden, spawn at row 21 counted from bottom)
                                   relativeXInd,  // x-coordinate in the backgroundMesh (this is the center as we are counting from 0)

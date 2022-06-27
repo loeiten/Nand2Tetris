@@ -16,7 +16,7 @@ class Tetromino {
   field Mesh tetrominoMesh_;  // The mesh of the tetromino itself
   field Background background_;  // The background to interact with
 
-  field String tetrominoName;  // Name of the tetromino
+  field int tetrominoType;  // Type of the tetromino
 
   static int allocs;  // Number of times this has been allocated
 
@@ -41,15 +41,9 @@ class Tetromino {
 
     let background_ = background;
 
-    let allocs = allocs + 1;
+    let tetrominoType = type;
 
-    if(type = 0){ let tetrominoName = "I"; }
-    if(type = 1){ let tetrominoName = "J"; }
-    if(type = 2){ let tetrominoName = "L"; }
-    if(type = 3){ let tetrominoName = "O"; }
-    if(type = 4){ let tetrominoName = "S"; }
-    if(type = 5){ let tetrominoName = "T"; }
-    if(type = 6){ let tetrominoName = "Z"; }
+    let allocs = allocs + 1;
 
     return this;
   }
@@ -95,9 +89,13 @@ class Tetromino {
   method int getRelativeIndY(){
     return relativeYInd_;
   }
-  /** Return relativeYInd_ */
-  method String getTetrominoName(){
-    return tetrominoName;
+  /**
+   * Return the tetromino type
+   *
+   * 0-I, 1-J, 2-L, 3-O, 4-S, 5-T, 6-Z
+   */
+  method int getTetrominoType(){
+    return tetrominoType;
   }
 
   /**

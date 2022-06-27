@@ -31,12 +31,12 @@ class NextTetrominos {
     let nextBackground = Background.new(
       347, // frameStartX  // 155 + 122 + 70
       22,   // frameStartY
-      68, // frameLenX + 2 + 2
-      200, // frameLenY (209 + 1 for next line + 1 for frame line)
+      56, // frameLenX + 2 + 2
+      222, // frameLenY (209 + 1 for next line + 1 for frame line)
       7,  // tetrominoElementSize
       0,  // skipRows
       6,  // meshCols
-      17   // meshRows
+      24   // meshRows
     );
     let nextMesh = nextBackground.getBackgroundMesh();
 
@@ -53,9 +53,10 @@ class NextTetrominos {
     // Display
     do nextBackground.drawFrame();
     let nextString = "Next";
-    do Output.moveCursor(1, 46);
+    do Output.moveCursor(1, 45);
     do Output.printString(nextString);
     do nextString.dispose();
+    do updateNextColumn();
 
     return this;
   }
@@ -141,13 +142,17 @@ class NextTetrominos {
     //   let bag[counter] = TetrominoSpawner.spawnO();
     //   let counter = counter + 1;
     // }
-    let bag[0] = TetrominoSpawner.spawnI(nextMesh, 0, 1);
-    let bag[1] = TetrominoSpawner.spawnJ(nextMesh, 2, 1);
-    let bag[2] = TetrominoSpawner.spawnL(nextMesh, 5, 1);
-    let bag[3] = TetrominoSpawner.spawnO(nextMesh, 8, 1);
-    let bag[4] = TetrominoSpawner.spawnS(nextMesh, 11, 1);
-    let bag[5] = TetrominoSpawner.spawnT(nextMesh, 14, 1);
-    let bag[6] = TetrominoSpawner.spawnZ(nextMesh, 0, 1);
+
+    // NOTE: The relative x and y indices will be updated in updateNextColumn,
+    //       so we might as well set them to 0 here
+
+    let bag[0] = TetrominoSpawner.spawnI(nextMesh, 0, 0);
+    let bag[1] = TetrominoSpawner.spawnJ(nextMesh, 0, 0);
+    let bag[2] = TetrominoSpawner.spawnL(nextMesh, 0, 0);
+    let bag[3] = TetrominoSpawner.spawnO(nextMesh, 0, 0);
+    let bag[4] = TetrominoSpawner.spawnS(nextMesh, 0, 0);
+    let bag[5] = TetrominoSpawner.spawnT(nextMesh, 0, 0);
+    let bag[6] = TetrominoSpawner.spawnZ(nextMesh, 0, 0);
 
     return;
   }
@@ -155,24 +160,65 @@ class NextTetrominos {
   /** Update and draw the next column */
   method void updateNextColumn(){
     var Tetromino curTetromino;
+    var Mesh tetrominoMesh;
 
     var int counter;
     var int newRelativeYInd;
+    var int tetrominoType;
     var int cellSpace;  // Allocate 4 elements to each cell
+    var int padFirstTetromino;  // Pad if the first tetromino is 3x3
+    var int padOTetromino;  // Pad the tetromino if count != 0 and name = O
 
     let cellSpace = 4;
 
-    // NOTE: We only want to show the next tetrominos for bagSize - 1
-    while (counter < (bagSize - 1)){
-      // Update the location of the current bags
-      let newRelativeYInd = counter * cellSpace;
-      let curTetromino = currentBag[counter];
-      do curTetromino.setRelativePosition(newRelativeYInd, 1);
+    let curTetromino = currentBag[counter];
+    let tetrominoMesh = curTetromino.getTetrominoMesh();
 
-      let counter = counter + 1;
+    if(tetrominoMesh.getMeshLength() = 9){
+      // Pad with one cell if the first tetromino is a 3x3 tetromino
+      let padFirstTetromino = 1;
+    } else {
+      let padFirstTetromino = 0;
     }
 
-    do next.drawMesh(false, nextMesh, 0, 0);
+    // NOTE: We only want to show the next tetrominos for bagSize - 1
+    while (counter < (bagSize - 1)){
+      // FIXME:
+      // do Output.moveCursor(0,0);
+      // do Output.printInt(counter);
+
+      let curTetromino = currentBag[counter];
+
+      if(counter > 0){
+        let tetrominoType = curTetromino.getTetrominoType();
+        // In case we are dealing with a O tetromino:
+        // We will negatively pad with one cell to align with the other tetrominos
+        if(tetrominoType = 3){
+          let padOTetromino = 1;
+        } else {
+          let padOTetromino = 0;
+        }
+      }
+
+      // Update the location of the current bags
+      let newRelativeYInd = (counter * cellSpace) + padFirstTetromino - padOTetromino;
+      // FIXME:
+      // do curTetromino.setRelativePosition(newRelativeYInd, 1);
+      // FIXME:
+      // do Output.moveCursor(1,1);
+      // do Output.printString(curTetromino.getTetrominoName());
+      // do Output.moveCursor(2,1);
+      // do Output.printInt(newRelativeYInd);
+
+      let tetrominoMesh = curTetromino.getTetrominoMesh();
+
+      do nextBackground.drawMesh(false, tetrominoMesh, newRelativeYInd, 1);
+
+      let counter = counter + 1;
+      // FIXME:
+      // do Sys.wait(1000);
+    }
+
 
     return;
   }

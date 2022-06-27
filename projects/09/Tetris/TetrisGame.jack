@@ -8,6 +8,7 @@ class TetrisGame {
   field String gameOverString;  // String containing game over
 
   field NextTetrominos nextTetrominos;  // The column containing the next tetrominos
+  field Statistics stats;  // The column containing the statistics
   field Score score;  // The score table
 
   field Background gameBackground;  // The game background
@@ -22,10 +23,6 @@ class TetrisGame {
    * - Initialize the background
    */
   constructor TetrisGame new() {
-    // Set initial game speed
-    // FIXME: Make game speed work with level
-    let gameSpeed = 500;
-
     // Initialize the background (see README.md for calculation)
     // NOTE: The mesh is 40 according to
     // https://tetris.fandom.com/wiki/Tetris_Guideline#List_of_rules_(as_of_2009)
@@ -42,7 +39,16 @@ class TetrisGame {
     do gameBackground.drawFrame();
 
     let nextTetrominos = NextTetrominos.new(gameBackground);
-    let score = Score.new();
+    // let stats = Statistics.new();
+    // let score = Score.new();
+
+    // FIXME:
+    do Sys.wait(2000);
+
+    // Set initial game speed
+    // FIXME: Make game speed work with level
+    let gameSpeed = updateGameSpeed();
+    let gameSpeed = 500;
 
     let gameOverString = " Game over! ";
 
@@ -52,6 +58,7 @@ class TetrisGame {
   /** Dispose this game. */
   method void dispose() {
     do nextTetrominos.dispose();
+    do stats.dispose();
     do gameBackground.dispose();
     do gameOverString.dispose();
     do Memory.deAlloc(this);
@@ -134,7 +141,7 @@ class TetrisGame {
     }
 
     // Display game over
-    do Output.moveCursor(11, 26);
+    do Output.moveCursor(11, 25);
     do Output.printString(gameOverString);
 
     return;
@@ -189,6 +196,7 @@ class TetrisGame {
         }
       }
     }
+
     return;
   }
 

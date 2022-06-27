@@ -81,7 +81,7 @@ class Statistics {
 
     // Display
     do statBackground.drawFrame();
-    do statistics.drawMesh(false, statMesh, 0, 0);
+    do statBackground.drawMesh(false, statMesh, 0, 0);
     let statString = "Statistics";
     do Output.moveCursor(1, 6);
     do Output.printString(statString);
