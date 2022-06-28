@@ -88,9 +88,9 @@ class TetrisGame {
 
 
 
-    // FIXME: Remove
-    var int testRow;
-    var int testCol;
+    // // FIXME: Remove
+    // var int testRow;
+    // var int testCol;
 
     // FIXME:
     // var Array myBag;
@@ -106,62 +106,62 @@ class TetrisGame {
 
 
 
-    let testRow = 39;
+    // let testRow = 39;
 
-    // FIXME: TestMesh
-    while(testRow > 28){
-      let testCol = 0;
-      while (testCol < 10){
-        do gameMesh.setState(testRow, testCol, true);
-        let testCol = testCol + 1;
-      }
-      let testRow = testRow - 1;
-    }
+    // // FIXME: TestMesh
+    // while(testRow > 28){
+    //   let testCol = 0;
+    //   while (testCol < 10){
+    //     do gameMesh.setState(testRow, testCol, true);
+    //     let testCol = testCol + 1;
+    //   }
+    //   let testRow = testRow - 1;
+    // }
 
-    // Make holes
-    do gameMesh.setState(39, 0, false);
-    do gameMesh.setState(39, 2, false);
-    do gameMesh.setState(39, 4, false);
-    do gameMesh.setState(39, 6, false);
-    do gameMesh.setState(39, 8, false);
-    // 38 is due to clearing
-    do gameMesh.setState(37, 1, false);
-    do gameMesh.setState(37, 3, false);
-    do gameMesh.setState(37, 5, false);
-    do gameMesh.setState(37, 7, false);
-    do gameMesh.setState(37, 9, false);
-    // 36 - 35 is due to clearing
-    do gameMesh.setState(34, 0, false);
-    do gameMesh.setState(34, 4, false);
-    do gameMesh.setState(34, 5, false);
-    do gameMesh.setState(34, 9, false);
-    // 33 - 30 is due to clearing
-    do gameMesh.setState(29, 1, false);
-    do gameMesh.setState(29, 8, false);
+    // // Make holes
+    // do gameMesh.setState(39, 0, false);
+    // do gameMesh.setState(39, 2, false);
+    // do gameMesh.setState(39, 4, false);
+    // do gameMesh.setState(39, 6, false);
+    // do gameMesh.setState(39, 8, false);
+    // // 38 is due to clearing
+    // do gameMesh.setState(37, 1, false);
+    // do gameMesh.setState(37, 3, false);
+    // do gameMesh.setState(37, 5, false);
+    // do gameMesh.setState(37, 7, false);
+    // do gameMesh.setState(37, 9, false);
+    // // 36 - 35 is due to clearing
+    // do gameMesh.setState(34, 0, false);
+    // do gameMesh.setState(34, 4, false);
+    // do gameMesh.setState(34, 5, false);
+    // do gameMesh.setState(34, 9, false);
+    // // 33 - 30 is due to clearing
+    // do gameMesh.setState(29, 1, false);
+    // do gameMesh.setState(29, 8, false);
 
-    do gameBackground.drawMesh(false, false, gameMesh, 0, 0);
+    // do gameBackground.drawMesh(false, false, gameMesh, 0, 0);
 
     // FIXME:
-    do score.updateLine(9);
+    // do score.updateLine(9);
     // FIXME:
-    do score.updateLevel();
-    do score.updateLevel();
-    do score.updateLevel();
-    do score.updateLevel();
-    do score.updateLevel();
-    do score.updateLevel();
-    do score.updateLevel();
-    do score.updateLevel();
-    do score.updateLevel();
-    do score.updateLevel();
-    do score.updateLevel();
-    do score.updateLevel();
-    do score.updateLevel();
-    do score.updateLevel();
-    do score.updateLevel();
-    do score.updateLevel();
-    do score.updateLevel();
-    do updateGameSpeed();
+    // do score.updateLevel();
+    // do score.updateLevel();
+    // do score.updateLevel();
+    // do score.updateLevel();
+    // do score.updateLevel();
+    // do score.updateLevel();
+    // do score.updateLevel();
+    // do score.updateLevel();
+    // do score.updateLevel();
+    // do score.updateLevel();
+    // do score.updateLevel();
+    // do score.updateLevel();
+    // do score.updateLevel();
+    // do score.updateLevel();
+    // do score.updateLevel();
+    // do score.updateLevel();
+    // do score.updateLevel();
+    // do updateGameSpeed();
 
 
 
@@ -271,15 +271,6 @@ class TetrisGame {
   method void moveWithKeyboard(Tetromino curTetromino, int countDown, char key){
     var int cellsMoved;
 
-    // Capture up arrow
-    if (key = 131) {
-      let countDown = 0;
-      while(curTetromino.canMoveDown()){
-          do curTetromino.moveDown();
-          let cellsMoved = cellsMoved + 1;
-      }
-      do score.updateWithHardDropScore(cellsMoved);
-    }
     // Capture down arrow
     if (key = 133) {
       if(curTetromino.canMoveDown()){
@@ -298,6 +289,19 @@ class TetrisGame {
       if(curTetromino.canMoveRight()){
         do curTetromino.moveRight();
       }
+    }
+    // Capture space (hard drop)
+    if (key = 32) {
+      let countDown = 0;
+      while(curTetromino.canMoveDown()){
+          do curTetromino.moveDown();
+          let cellsMoved = cellsMoved + 1;
+      }
+      do score.updateWithHardDropScore(cellsMoved);
+    }
+    // Capture up arrow (rotate)
+    if (key = 131) {
+      do curTetromino.rotate();
     }
 
     return;

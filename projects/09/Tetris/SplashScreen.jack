@@ -1,0 +1,108 @@
+/** Implements the SplashScreen class */
+class SplashScreen {
+  field String line1;
+  field String line2;
+  field String line3;
+  field String line4;
+  field String line5;
+  field String line6;
+  field String line7;
+  field String line8;
+  field String line9;
+  field String line10;
+  field String line11;
+  field String line12;
+  field String line13;
+  field String line14;
+  field String line15;
+
+  constructor SplashScreen new(){
+    let line1 = "Tetris (c) 1985~2022 Tetris Holding.";
+    let line2 = "Tetris logos, Tetris theme song and Tetriminos are trademarks";
+    let line3 = "of Tetris Holding.";
+    let line4 = "The Tetris trade dress is owned by Tetris Holding.";
+    let line5 = "Licensed to The Tetris Company.";
+    let line6 = "Tetris Game Design by Alexey Pajitnov.";
+    let line7 = "Tetris Logo Design by Roger Dean.";
+    let line8 = "All Rights Reserved.";
+    let line9 = "Controls:";
+    let line10 = "Left arrow: Move tetromino to the left.";
+    let line11 = "Right arrow: Move tetromino to the right.";
+    let line12 = "Down arrow: Move tetromino down.";
+    let line13 = "Up arrow: Rotate 90 degrees clockwise.";
+    let line14 = "Space: Hard drop.";
+    let line15 = "Press any key to start.";
+    return this;
+  }
+
+  method void dispose (){
+    do line1.dispose();
+    do line2.dispose();
+    do line3.dispose();
+    do line4.dispose();
+    do line5.dispose();
+    do line6.dispose();
+    do line7.dispose();
+    do line8.dispose();
+    do line9.dispose();
+    do line10.dispose();
+    do line11.dispose();
+    do line12.dispose();
+    do line13.dispose();
+    do line14.dispose();
+    do line15.dispose();
+    do Memory.deAlloc(this);
+    return;
+  }
+
+  method int printSplashScreen() {
+    var char key;
+    var int seed;
+
+    do Output.moveCursor(2, 0);
+    do Output.printString(line1);
+    do Output.println();
+    do Output.printString(line2);
+    do Output.println();
+    do Output.printString(line3);
+    do Output.println();
+    do Output.printString(line4);
+    do Output.println();
+    do Output.printString(line5);
+    do Output.println();
+    do Output.printString(line6);
+    do Output.println();
+    do Output.printString(line7);
+    do Output.println();
+    do Output.printString(line8);
+    do Output.println();
+    do Output.println();
+    do Output.println();
+    do Output.printString(line9);
+    do Output.println();
+    do Output.printString(line10);
+    do Output.println();
+    do Output.printString(line11);
+    do Output.println();
+    do Output.printString(line12);
+    do Output.println();
+    do Output.printString(line13);
+    do Output.println();
+    do Output.printString(line14);
+    do Output.println();
+    do Output.println();
+    do Output.println();
+    do Output.printString(line15);
+
+    // Update seed and wait for any key
+    while (key = 0) {
+      let key = Keyboard.keyPressed();
+      let seed = seed + 1;
+    }
+
+    do Screen.clearScreen();
+
+    return seed;
+  }
+
+}

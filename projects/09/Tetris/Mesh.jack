@@ -5,6 +5,7 @@
 /**
  * Class representing a mesh or a grid where elements have either state 0 or 1
  */
+
 class Mesh {
   field int cols_;  // Number of cols_ in the Mesh
   field int rows_;  // Number of rows_ in the Mesh
