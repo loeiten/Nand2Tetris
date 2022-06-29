@@ -19,12 +19,12 @@ class Statistics {
 
   /** Construct Statistics */
   constructor Statistics new() {
-    // Subtract 1 from frameStartY, and added to frameLenY
+    // Initialize the background
     let statBackground = Background.new(
-      35, // frameStartX  // FIXME: Fiddle around with numbers to look nice
+      35, // frameStartX
       22,   // frameStartY
       107, // frameLenX
-      232, // frameLenY (240 + 1 for next line + 1 for frame line)
+      232, // frameLenY
       9,  // tetrominoElementSize
       0,  // skipRows
       6,  // meshCols

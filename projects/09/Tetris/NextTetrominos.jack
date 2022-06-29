@@ -27,16 +27,14 @@ class NextTetrominos {
 
     let gameBackground_ = gameBackground;
     // Create the next background
-    // FIXME: Do proper calculations and put it to readme
-    // Subtract 1 from frameStartY, and added to frameLenY
     let nextBackground = Background.new(
-      347, // frameStartX  // 155 + 122 + 70
-      22,   // frameStartY
-      56, // frameLenX + 2 + 2
-      222, // frameLenY (209 + 1 for next line + 1 for frame line)
-      7,  // tetrominoElementSize
-      0,  // skipRows
-      6,  // meshCols
+      347, // frameStartX
+      22,  // frameStartY
+      56,  // frameLenX
+      222, // frameLenY
+      7,   // tetrominoElementSize
+      0,   // skipRows
+      6,   // meshCols
       24   // meshRows
     );
     let nextMesh = nextBackground.getBackgroundMesh();

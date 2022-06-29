@@ -2,7 +2,9 @@
 
 This is the Jack implementation of [tetris](https://tetris.com) by Alexey Pajitnov.
 
+[//]: # (Generated with `ffmpeg -ss 00:01:00.000 -i in.mov -pix_fmt monob -r 20 -s 512x256 -t 00:00:15.000 demo.gif`)
 
+![Demo of tetris](demo.gif)
 
 ## Tetris rules
 
@@ -93,37 +95,39 @@ Translated from [wall kicks](https://tetris.fandom.com/wiki/SRS#Wall_Kicks), on 
 
 (0-I, 1-J, 2-L, 3-O, 4-S, 5-T, 6-Z)
 
-Text: 23 rows of 64 characters
 Screen: 256 rows of 512 pixels
 
-### Calculation of frame size
+### Calculation of the backgrounds
 
 ### Play field
 
-Play field = 10x20
+The play field is given as `10x20`.
+As the screen is `256x512` pixels the `max(elementSize)` is constrained in the vertical direction.
 
-Largest block set by vertical/20
-Min bottom separation = 1
-Bottom line = 1
-Min top separation = 1
-Top line = 1
-Top separation line and block = 1
+#### Calculating the maximum `elementSize`
 
-Total = 5
-Each block will occupy: Blocksize + 1 (assume that +1 is for bottom)
+This means that the largest block is set by `number_of_vertical_pixels/20`.
+We also want some padding.
+We want one pixel separation between the top and bottom of the screen and the frame, and one pixel between the top and the bottom between the frame and the tetromino element.
+If we add the frame itself we will have 6 pixels in total we cannot use for tetrominos.
 
-The max is obtained when the left-over pixels are less than the size of a block
+Each element will in the vertical direction occupy: `elementSize + 1` (`+1` for padding at the bottom).
+As we don't want two paddings between the frame and the bottom element, we have 5 pixels we cannot use for tetrominos in the vertical direction.
+
+We can now calculate the max `elementSize` by demanding that the "left-over pixels" are less than the `elementSize`
 
 ```text
-256 - 5 - 20*(size + 1) > size
-251 - 20*size - 20 *1 > size
-231 > size + 20*size
-231 > 21*size
-231/21 > size
-11 > size
+256 - 5 - 20*(elementSize + 1) > elementSize
+251 - 20*elementSize - 20 *1 > elementSize
+231 > elementSize + 20*elementSize
+231 > 21*elementSize
+231/21 > elementSize
+11 > elementSize
 ```
 
-So max size is 10
+Thus `max(elementSize)=10`.
+
+#### Calculating `frameLenY`
 
 All 20 blocks will therefore occupy
 
@@ -132,119 +136,46 @@ All 20 blocks will therefore occupy
 20*(10 + 1 + 1) = 240
 ```
 
-If we pad equally top and bottom, we get
+In addition we must reserve one pixel for the top-padding between the frame and the tetromino, and one pixel for the bottom frame.
+With this we get that `frameLenY=242`.
 
-```text
-256-240 = 16
-16 - bottom line - top line =
-16 - 2 = 14
-14/2 = 7
-```
+#### Calculating `frameLenX`
 
-Thus, we get `frameStartY = 6`
-
-#### X in the middle
-
-Don't think the below is too useful
-
-Center of background is
-512/2 = 256
-Half width of background
-122/2 = 61
-StartX will therefore be
-256 - 61 = 195
-
----
-
-Have 23 lines, now used 2 => 21 lines
-
-...one line per tetromino
-
-Can draw and find that statistics need
-
-Assume 22 pixels gone to text, what is max tetromino size?
-
-The number 21 comes from stacking tetrominos in a mesh with one width spacing
-
-```text
-256 - 22 - 5 - 21*(size + 1) > size
-229 - 21*size - 21 *1 > size
-208 > size + 21*size
-208 > 22*size
-208/22 > size
-9.45... > size
-```
-
-So tetrominos of size 9 should be ok
-
-All 21 blocks will therefore occupy
+As we have 10 blocks in the x directions, we find that
 
 ```text
 [Num blocks] * (size + spacing + [1 for the start position of next block])
-21*(9 + 1 + 1) = 231
+10*(10 + 1 + 1) = 120
 ```
 
-If we pad equally top and bottom, we get
+In addition we must reserve one pixel for the left-padding between the frame and the tetromino, and one pixel for the right frame.
+With this we get that `frameLenX=122`.
+
+#### Calculating `frameStartY`
+
+Next, we would now like to calculate `frameStartY`.
+We can do this by demanding that we need equal padding at the top and the bottom.
+We find that `padding=256-242 = 14`, so that
 
 ```text
-256-22-231 = 3
-3 - bottom line - top line =
-3 - 2 = 1
-1/2 = 0
+frameStartY =
+(14 - bottom line - top line)/2 =
+(14 - 2)/2 =
+12/2 = 6
 ```
 
-No padding
+Thus, we get `frameStartY = 6`.
 
-Side: 6*(9+1+1)=66
+#### Setting `frameStartX`
 
-Characters:
-512/64 = 8... so 8 pixel/char i x dir
-8*3 = 24
-2 character spacing => 24 + 2*8 = 40 pixel extra in frameStartLenX_
+`frameStartX` is set by the screen should look visually appealing for the author.
 
-```text
-[Num blocks] * (size + spacing + [1 for the start position of next block])
-19*(9 + 1 + 1) = 209
-```
+#### Calculating the `Statistics` frame and the `Next` frame
 
+Similar calculation can be made for the the `Statistics` frame and the `Next` frame with the following constraints:
 
-### Next frame
-
-Idea:
-Could actually make a class for just drawing tetrominos where input is center pixel...or make it part of tetromino class :)
-
-We need 4*6 = 24 elements
-
-The max is obtained when the left-over pixels are less than the size of a block
-
-```text
-256 - 5 - 24*(size + 1) > size
-251 - 24*size - 24 *1 > size
-227 > size + 24*size
-227 > 25*size
-227/25 > size
-9 > size
-```
-
-So max size is 8
-
-All 24 blocks will therefore occupy
-
-```text
-[Num blocks] * (size + spacing + [1 for the start position of next block])
-24*(8 + 1 + 1) = 240
-```
-
-If we pad equally top and bottom, we get
-
-```text
-256-240 = 16
-16 - bottom line - top line =
-16 - 2 = 14
-14/2 = 7
-```
-
-Thus, we get `frameStartY = 6`
+1. The text should start on the second line (there text has `23 rows x 64 characters`)
+2. There will be padding of one cell between the top, bottom, left and right of the frames
 
 ## Helpful resources
 

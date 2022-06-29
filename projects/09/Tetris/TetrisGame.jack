@@ -43,10 +43,10 @@ class TetrisGame {
     // Initialize the background (see README.md for calculation)
     // NOTE: The mesh is 40 according to
     // https://tetris.fandom.com/wiki/Tetris_Guideline#List_of_rules_(as_of_2009)
-    let gameBackground = Background.new(185, // frameStartX  // FIXME: Fiddle around with pixels to look nice + 20
+    let gameBackground = Background.new(185, // frameStartX
                                         6,   // frameStartY
                                         122, // frameLenX
-                                        242, // frameLenY (240 + 1 for next line + 1 for frame line)
+                                        242, // frameLenY
                                         10,  // tetrominoElementSize
                                         20,  // skipRows
                                         10,  // meshCols
