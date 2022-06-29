@@ -26,11 +26,20 @@ class TetrisGame {
    * - Initialize the Score
    * - Set the initial game speed
    *
-   * \param seed The seed
+   * \param seedLevel Array where the first index is the and the second is the level
    */
-  constructor TetrisGame new(int seed) {
+  constructor TetrisGame new(Array seedLevel) {
+    var int counter;
+    var int level;
+    var int seed;
+
+    let seed = seedLevel[0];
+    let level = seedLevel[1];
+    do seedLevel.dispose();
+
     // Set seed
     do LCGRandom.setSeed(seed);
+
     // Initialize the background (see README.md for calculation)
     // NOTE: The mesh is 40 according to
     // https://tetris.fandom.com/wiki/Tetris_Guideline#List_of_rules_(as_of_2009)
@@ -49,6 +58,12 @@ class TetrisGame {
     let nextTetrominos = NextTetrominos.new(gameBackground);
     let stats = Statistics.new();
     let score = Score.new();
+
+    let counter = 1;  // As we start level counting on 1
+    while (counter < level){
+      do score.updateLevel();
+      let counter = counter + 1;
+    }
 
     // Set initial game speed
     do updateGameSpeed();

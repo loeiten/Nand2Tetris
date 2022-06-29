@@ -32,7 +32,7 @@ class SplashScreen {
     let line12 = "Down arrow: Move tetromino down.";
     let line13 = "Up arrow: Rotate 90 degrees clockwise.";
     let line14 = "Space: Hard drop.";
-    let line15 = "Press any key to start.";
+    let line15 = "Press any key to start (keypad 1-9 sets the initial level).";
     return this;
   }
 
@@ -60,11 +60,17 @@ class SplashScreen {
   /**
    * Print the splash screen and return the seed
    *
-   * \return The seed
+   * \warning The returned array must be disposed elsewhere
+   *
+   * \return Array where the first element is the seed and the second element is the start level
    */
   method int printSplashScreen() {
     var char key;
     var int seed;
+    var int level;
+    var Array seedLevel;
+
+    let seedLevel = Array.new(2);
 
     do Output.moveCursor(2, 0);
     do Output.printString(line1);
@@ -107,9 +113,22 @@ class SplashScreen {
       let seed = seed + 1;
     }
 
+    let level = 1;
+    if (key = 50){ let level = 2; }
+    if (key = 51){ let level = 3; }
+    if (key = 52){ let level = 4; }
+    if (key = 53){ let level = 5; }
+    if (key = 54){ let level = 6; }
+    if (key = 55){ let level = 7; }
+    if (key = 56){ let level = 8; }
+    if (key = 57){ let level = 9; }
+
     do Screen.clearScreen();
 
-    return seed;
+    let seedLevel[0] = seed;
+    let seedLevel[1] = level;
+
+    return seedLevel;
   }
 
 }

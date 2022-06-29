@@ -3,11 +3,11 @@ class Main {
   function void main() {
     var TetrisGame game;
     var SplashScreen splash;
-    var int seed;
+    var Array seedLevel;
 
     let splash = SplashScreen.new();
-    let seed = splash.printSplashScreen();
-    let game = TetrisGame.new(seed);
+    let seedLevel = splash.printSplashScreen();
+    let game = TetrisGame.new(seedLevel);
     do game.run();
 
     do splash.dispose();
