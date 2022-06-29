@@ -1,9 +1,5 @@
 /**
- * Implements the Tetromino class
- */
-
-/**
- * Class which deals with the tetrominos in the following way
+ * Implements the class which deals with the tetrominos in the following way
  * - Movement (side-ways, down, rotate)
  * - Checks if it can be placed in another mesh without colliding with elements
  *   or be out of bounds
@@ -18,8 +14,6 @@ class Tetromino {
 
   field int tetrominoType;  // Type of the tetromino
   field int rotationState;  // The rotation state 0 is the initial, and 1-3 is the number of rotations
-
-  static int allocs;  // Number of times this has been allocated
 
   /**
    * Construct the tetromino
@@ -45,8 +39,6 @@ class Tetromino {
     let tetrominoType = type;
     let rotationState = 0;
 
-    let allocs = allocs + 1;
-
     return this;
   }
 
@@ -58,20 +50,8 @@ class Tetromino {
    * - This
    */
   method void dispose (){
-    let allocs = allocs - 1;
-
     do tetrominoMesh_.dispose();
     do Memory.deAlloc(this);
-    return;
-  }
-
-  /** Print the number of allocs */
-  method void printAlloc (){
-    var String str;
-    let str = "Tetromino allocs: ";
-    do Output.printString(str);
-    do Output.printInt(allocs);
-    do str.dispose();
     return;
   }
 
@@ -89,10 +69,14 @@ class Tetromino {
   method int getRelativeIndY(){
     return relativeYInd_;
   }
+
   /**
    * Return the tetromino type
    *
+   * Type map:
    * 0-I, 1-J, 2-L, 3-O, 4-S, 5-T, 6-Z
+   *
+   * \return Integer corresponding to the type
    */
   method int getTetrominoType(){
     return tetrominoType;
@@ -121,152 +105,7 @@ class Tetromino {
   }
 
   /**
-   * Rotate the tetromino clockwise
-   */
-  method void rotate(){
-    var int cols;
-    var int rows;
-    var int curCol;
-    var int curRow;
-    var int originalRelX;
-    var int originalRelY;
-    var bool curState;
-    var Mesh newMesh;
-    var Array tetrominoIndices;  // Will be destroyed by the Mesh
-    var Mesh backgroundMesh;
-
-    let originalRelX = relativeXInd_;
-    let originalRelY = relativeYInd_;
-
-    let cols = tetrominoMesh_.getCols();
-    let rows = tetrominoMesh_.getRows();
-    let newMesh = Mesh.new(cols, rows);
-
-    // FIXME:
-    // do Output.moveCursor(0, 0);
-    // do Output.printString("(curRow, curCol): (");
-    // do Output.moveCursor(0, 21);
-    // do Output.printString(", ");
-    // do Output.moveCursor(0, 23);
-    // do Output.printString(")");
-
-    while(curCol < cols){
-      let curRow = 0;
-      while(curRow < rows){
-        // // FIXME:
-        // do Output.moveCursor(0, 20);
-        // do Output.printInt(curRow);
-        // do Output.moveCursor(0, 22);
-        // do Output.printInt(curCol);
-        // do Sys.wait(1000);
-
-        let curState = tetrominoMesh_.getState(curRow, curCol);
-        do newMesh.setState(curCol, ((rows - 1) - curRow), curState);
-        let curRow = curRow + 1;
-      }
-      let curCol = curCol + 1;
-    }
-
-    // See if we should do a wall kick or floor kick
-    if(canBePlaced(relativeYInd_, relativeXInd_, newMesh)){
-      // Erase the current mesh from the background
-      do background_.drawMesh(true, false, tetrominoMesh_, relativeYInd_, relativeXInd_);
-      // Dispose the old mesh
-      do tetrominoMesh_.dispose();
-      // Set the new mesh
-      let tetrominoMesh_ = newMesh;
-      do background_.drawMesh(false, false, tetrominoMesh_, relativeYInd_, relativeXInd_);
-
-      // Update the rotation state
-      let rotationState = Algorithm.mod((rotationState + 1), 4);
-    } else {
-      // NOTE: The wall-kick changes relativeXInd_ and relativeYInd_
-      if(canWallKick(newMesh)){
-        // Erase the current mesh from the background
-        do background_.drawMesh(true, false, tetrominoMesh_, originalRelY, originalRelX);
-        // Dispose the old mesh
-        do tetrominoMesh_.dispose();
-        // Set the new mesh
-        let tetrominoMesh_ = newMesh;
-        do background_.drawMesh(false, false, tetrominoMesh_, relativeYInd_, relativeXInd_);
-
-        // Update the rotation state
-        let rotationState = Algorithm.mod((rotationState + 1), 4);
-      } else {
-        // Dispose the new mesh
-        do newMesh.dispose();
-      }
-    }
-
-    return;
-  }
-
-  method bool canWallKick(Mesh newMesh){
-    // 0-I, 1-J, 2-L, 3-O, 4-S, 5-T, 6-Z
-    // FIXME: Double check table
-    if(tetrominoType = 0){
-      // Test 2
-      if(rotationState = 0){ if(tryKick(0, -2, newMesh)){ return true; } }
-      if(rotationState = 1){ if(tryKick(0, -1, newMesh)){ return true; } }
-      if(rotationState = 2){ if(tryKick(0, 2, newMesh)){ return true; } }
-      if(rotationState = 3){ if(tryKick(0, 1, newMesh)){ return true; } }
-      // Test 3
-      if(rotationState = 0){ if(tryKick(0, 1, newMesh)){ return true; } }
-      if(rotationState = 1){ if(tryKick(0, 2, newMesh)){ return true; } }
-      if(rotationState = 2){ if(tryKick(0, -1, newMesh)){ return true; } }
-      if(rotationState = 3){ if(tryKick(0, -2, newMesh)){ return true; } }
-      // Test 4
-      if(rotationState = 0){ if(tryKick(-1, -2, newMesh)){ return true; } }
-      if(rotationState = 1){ if(tryKick(2, -1, newMesh)){ return true; } }
-      if(rotationState = 2){ if(tryKick(1, 2, newMesh)){ return true; } }
-      if(rotationState = 3){ if(tryKick(-2, 1, newMesh)){ return true; } }
-      // Test 5
-      if(rotationState = 0){ if(tryKick(2, 1, newMesh)){ return true; } }
-      if(rotationState = 1){ if(tryKick(-1, 2, newMesh)){ return true; } }
-      if(rotationState = 2){ if(tryKick(-2, -1, newMesh)){ return true; } }
-      if(rotationState = 3){ if(tryKick(1, -2, newMesh)){ return true; } }
-    } else {
-      // Test 2
-      if(rotationState = 0){ if(tryKick(0, -1, newMesh)){ return true; } }
-      if(rotationState = 1){ if(tryKick(0, 1, newMesh)){ return true; } }
-      if(rotationState = 2){ if(tryKick(0, 1, newMesh)){ return true; } }
-      if(rotationState = 3){ if(tryKick(0, -1, newMesh)){ return true; } }
-      // Test 3
-      if(rotationState = 0){ if(tryKick(1, -1, newMesh)){ return true; } }
-      if(rotationState = 1){ if(tryKick(-1, 1, newMesh)){ return true; } }
-      if(rotationState = 2){ if(tryKick(1, 1, newMesh)){ return true; } }
-      if(rotationState = 3){ if(tryKick(-1, -1, newMesh)){ return true; } }
-      // Test 4
-      if(rotationState = 0){ if(tryKick(-2, 0, newMesh)){ return true; } }
-      if(rotationState = 1){ if(tryKick(2, 0, newMesh)){ return true; } }
-      if(rotationState = 2){ if(tryKick(-2, 0, newMesh)){ return true; } }
-      if(rotationState = 3){ if(tryKick(2, 0, newMesh)){ return true; } }
-      // Test 5
-      if(rotationState = 0){ if(tryKick(-2, -1, newMesh)){ return true; } }
-      if(rotationState = 1){ if(tryKick(2, 1, newMesh)){ return true; } }
-      if(rotationState = 2){ if(tryKick(-2, 1, newMesh)){ return true; } }
-      if(rotationState = 3){ if(tryKick(2, -1, newMesh)){ return true; } }
-    }
-
-    return false;
-  }
-
-  method bool tryKick(int kickY, int kickX, Mesh newMesh){
-    var int newRelativeXInd;
-    var int newRelativeYInd;
-
-    let newRelativeXInd = relativeXInd_ + kickX;
-    let newRelativeYInd = relativeYInd_ + kickY;
-    if(canBePlaced(newRelativeYInd, newRelativeXInd, newMesh)){
-      let relativeXInd_ = newRelativeXInd;
-      let relativeYInd_ = newRelativeYInd;
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Return true if it's possible to spawn the tetromino in the backgroundMesh
+   * Return true if it's possible to spawn the tetromino in the background
    *
    * \return true if it's possible to spawn the tetromino
    */
@@ -403,6 +242,148 @@ class Tetromino {
     // Draw
     do background_.drawMesh(false, false, tetrominoMesh_, relativeYInd_, relativeXInd_);
     return;
+  }
+
+  /**
+   * Rotate the tetromino clockwise with wall kick (if applicable)
+   */
+  method void rotate(){
+    var int cols;
+    var int rows;
+    var int curCol;
+    var int curRow;
+    var int originalRelX;
+    var int originalRelY;
+    var bool curState;
+    var Mesh newMesh;
+    var Array tetrominoIndices;  // Will be destroyed by the Mesh
+    var Mesh backgroundMesh;
+
+    let originalRelX = relativeXInd_;
+    let originalRelY = relativeYInd_;
+
+    let cols = tetrominoMesh_.getCols();
+    let rows = tetrominoMesh_.getRows();
+    let newMesh = Mesh.new(cols, rows);
+
+    while(curCol < cols){
+      let curRow = 0;
+      while(curRow < rows){
+        let curState = tetrominoMesh_.getState(curRow, curCol);
+        do newMesh.setState(curCol, ((rows - 1) - curRow), curState);
+        let curRow = curRow + 1;
+      }
+      let curCol = curCol + 1;
+    }
+
+    // See if we should do a wall kick or floor kick
+    if(canBePlaced(relativeYInd_, relativeXInd_, newMesh)){
+      // Erase the current mesh from the background
+      do background_.drawMesh(true, false, tetrominoMesh_, relativeYInd_, relativeXInd_);
+      // Dispose the old mesh
+      do tetrominoMesh_.dispose();
+      // Set the new mesh
+      let tetrominoMesh_ = newMesh;
+      do background_.drawMesh(false, false, tetrominoMesh_, relativeYInd_, relativeXInd_);
+
+      // Update the rotation state
+      let rotationState = Algorithm.mod((rotationState + 1), 4);
+    } else {
+      // NOTE: The wall-kick changes relativeXInd_ and relativeYInd_
+      if(canWallKick(newMesh)){
+        // Erase the current mesh from the background
+        do background_.drawMesh(true, false, tetrominoMesh_, originalRelY, originalRelX);
+        // Dispose the old mesh
+        do tetrominoMesh_.dispose();
+        // Set the new mesh
+        let tetrominoMesh_ = newMesh;
+        do background_.drawMesh(false, false, tetrominoMesh_, relativeYInd_, relativeXInd_);
+
+        // Update the rotation state
+        let rotationState = Algorithm.mod((rotationState + 1), 4);
+      } else {
+        // Dispose the new mesh
+        do newMesh.dispose();
+      }
+    }
+
+    return;
+  }
+
+  /**
+   * Check whether the tetromino can wall kick
+   *
+   * \param newMesh The mesh to check whether a wall kick can be performed with
+   * \return True if a wall kick can be performed with the new mesh
+   */
+  method bool canWallKick(Mesh newMesh){
+    // 0-I, 1-J, 2-L, 3-O, 4-S, 5-T, 6-Z
+    if(tetrominoType = 0){
+      // Test 2
+      if(rotationState = 0){ if(tryKick(0, -2, newMesh)){ return true; } }
+      if(rotationState = 1){ if(tryKick(0, -1, newMesh)){ return true; } }
+      if(rotationState = 2){ if(tryKick(0, 2, newMesh)){ return true; } }
+      if(rotationState = 3){ if(tryKick(0, 1, newMesh)){ return true; } }
+      // Test 3
+      if(rotationState = 0){ if(tryKick(0, 1, newMesh)){ return true; } }
+      if(rotationState = 1){ if(tryKick(0, 2, newMesh)){ return true; } }
+      if(rotationState = 2){ if(tryKick(0, -1, newMesh)){ return true; } }
+      if(rotationState = 3){ if(tryKick(0, -2, newMesh)){ return true; } }
+      // Test 4
+      if(rotationState = 0){ if(tryKick(-1, -2, newMesh)){ return true; } }
+      if(rotationState = 1){ if(tryKick(2, -1, newMesh)){ return true; } }
+      if(rotationState = 2){ if(tryKick(1, 2, newMesh)){ return true; } }
+      if(rotationState = 3){ if(tryKick(-2, 1, newMesh)){ return true; } }
+      // Test 5
+      if(rotationState = 0){ if(tryKick(2, 1, newMesh)){ return true; } }
+      if(rotationState = 1){ if(tryKick(-1, 2, newMesh)){ return true; } }
+      if(rotationState = 2){ if(tryKick(-2, -1, newMesh)){ return true; } }
+      if(rotationState = 3){ if(tryKick(1, -2, newMesh)){ return true; } }
+    } else {
+      // Test 2
+      if(rotationState = 0){ if(tryKick(0, -1, newMesh)){ return true; } }
+      if(rotationState = 1){ if(tryKick(0, 1, newMesh)){ return true; } }
+      if(rotationState = 2){ if(tryKick(0, 1, newMesh)){ return true; } }
+      if(rotationState = 3){ if(tryKick(0, -1, newMesh)){ return true; } }
+      // Test 3
+      if(rotationState = 0){ if(tryKick(1, -1, newMesh)){ return true; } }
+      if(rotationState = 1){ if(tryKick(-1, 1, newMesh)){ return true; } }
+      if(rotationState = 2){ if(tryKick(1, 1, newMesh)){ return true; } }
+      if(rotationState = 3){ if(tryKick(-1, -1, newMesh)){ return true; } }
+      // Test 4
+      if(rotationState = 0){ if(tryKick(-2, 0, newMesh)){ return true; } }
+      if(rotationState = 1){ if(tryKick(2, 0, newMesh)){ return true; } }
+      if(rotationState = 2){ if(tryKick(-2, 0, newMesh)){ return true; } }
+      if(rotationState = 3){ if(tryKick(2, 0, newMesh)){ return true; } }
+      // Test 5
+      if(rotationState = 0){ if(tryKick(-2, -1, newMesh)){ return true; } }
+      if(rotationState = 1){ if(tryKick(2, 1, newMesh)){ return true; } }
+      if(rotationState = 2){ if(tryKick(-2, 1, newMesh)){ return true; } }
+      if(rotationState = 3){ if(tryKick(2, -1, newMesh)){ return true; } }
+    }
+
+    return false;
+  }
+
+  /**
+   * Try a wall kick with the given parameters
+   *
+   * \param kickY The number of elements to try a kick with in the y-direction
+   * \param kickX The number of elements to try a kick with in the x-direction
+   * \return True if a wall kick can be performed with the parameters
+   */
+  method bool tryKick(int kickY, int kickX, Mesh newMesh){
+    var int newRelativeXInd;
+    var int newRelativeYInd;
+
+    let newRelativeXInd = relativeXInd_ + kickX;
+    let newRelativeYInd = relativeYInd_ + kickY;
+    if(canBePlaced(newRelativeYInd, newRelativeXInd, newMesh)){
+      let relativeXInd_ = newRelativeXInd;
+      let relativeYInd_ = newRelativeYInd;
+      return true;
+    }
+    return false;
   }
 
 }

@@ -1,8 +1,7 @@
 /**
- * Implements the Score.
+ * Implements class responsible for updating and displaying the score (including line and level count)
  */
 
-/** Class responsible for drawing updating and draw the score */
 class Score {
   field int scoreCount;
   field int lineCount;
@@ -115,6 +114,7 @@ class Score {
    * Update the level and print it.
    *
    * NOTE: We can only level up one level at the time
+   * NOTE: The game speed must be updated individually
    */
   method void updateLevel(){
     let levelCount = levelCount + 1;

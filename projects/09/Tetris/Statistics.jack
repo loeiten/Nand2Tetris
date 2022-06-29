@@ -1,8 +1,7 @@
 /**
- * Implements the Statistics.
+ * Implements the class responsible for updating and drawing the statistics.
  */
 
-/** Class responsible for drawing updating and draw the statistics */
 class Statistics {
   field Background statBackground;  // The statistics background
   field Mesh statMesh;  // The statistics mesh
@@ -109,6 +108,11 @@ class Statistics {
     return;
   }
 
+  /**
+   * Update the count of a specific tetromino
+   *
+   * \param tetrominoType The type of tetromino to update the count for
+   */
   method void updateCounter(int tetrominoType){
     if (tetrominoType = 0){
       let countI = countI + 1;

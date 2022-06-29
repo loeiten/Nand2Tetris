@@ -1,8 +1,7 @@
 /**
- * Implements the Tetris game.
+ * Implements the class responsible for updating the model of the game.
  */
 
-/** Class responsible for updating the model of the game */
 class TetrisGame {
   field int gameSpeed;  // Speed of the game
   field String gameOverString;  // String containing game over
@@ -20,8 +19,12 @@ class TetrisGame {
    *
    * The constructor will:
    * - Draw the background frame
-   * - Initialize the background
-   * FIXME: Also fix missing docstrings
+   * - Set the random seed
+   * - Initialize the Background
+   * - Initialize the NextTetrominos
+   * - Initialize the Statistics
+   * - Initialize the Score
+   * - Set the initial game speed
    *
    * \param seed The seed
    */
@@ -68,13 +71,12 @@ class TetrisGame {
   /**
    * Run the game by:
    *
-   * 1. Prepare the tetromino sequence (7-bag draw)
-   * 2. Spawning a tetromino
-   * 3. Let it fall (capturing of keystrokes happens during fall)
-   * 4. Check if a row is covered and remove the row
-   * 5. Update the score
-   * 6. Check if the game is over
-   * FIXME: More?
+   * 1. Running until game over
+   * 2. Obtain the next tetromino from nextTetrominos
+   * 3. Check if a tetromino can spawn
+   * 4. Let it fall (capturing of keystrokes happens during fall)
+   * 5. Update statistics
+   * 6. Dispose the current tetromino
    */
   method void run() {
     var bool doSpawn;  // Whether we will spawn or not
@@ -82,95 +84,9 @@ class TetrisGame {
 
     var Tetromino curTetromino;  // The current tetromino
 
-
-
-
-
-
-
-    // // FIXME: Remove
-    // var int testRow;
-    // var int testCol;
-
-    // FIXME:
-    // var Array myBag;
-    // var int i;
-    // do nextTetrominos.fillNumberBag();
-    // let myBag = nextTetrominos.getNumberBag();
-    // while(i < 7){
-    //   do Output.moveCursor(i, 0);
-    //   do Output.printInt(myBag[i]);
-    //   let i= i+1;
-    // }
-    // do Sys.wait(1000);
-
-
-
-    // let testRow = 39;
-
-    // // FIXME: TestMesh
-    // while(testRow > 28){
-    //   let testCol = 0;
-    //   while (testCol < 10){
-    //     do gameMesh.setState(testRow, testCol, true);
-    //     let testCol = testCol + 1;
-    //   }
-    //   let testRow = testRow - 1;
-    // }
-
-    // // Make holes
-    // do gameMesh.setState(39, 0, false);
-    // do gameMesh.setState(39, 2, false);
-    // do gameMesh.setState(39, 4, false);
-    // do gameMesh.setState(39, 6, false);
-    // do gameMesh.setState(39, 8, false);
-    // // 38 is due to clearing
-    // do gameMesh.setState(37, 1, false);
-    // do gameMesh.setState(37, 3, false);
-    // do gameMesh.setState(37, 5, false);
-    // do gameMesh.setState(37, 7, false);
-    // do gameMesh.setState(37, 9, false);
-    // // 36 - 35 is due to clearing
-    // do gameMesh.setState(34, 0, false);
-    // do gameMesh.setState(34, 4, false);
-    // do gameMesh.setState(34, 5, false);
-    // do gameMesh.setState(34, 9, false);
-    // // 33 - 30 is due to clearing
-    // do gameMesh.setState(29, 1, false);
-    // do gameMesh.setState(29, 8, false);
-
-    // do gameBackground.drawMesh(false, false, gameMesh, 0, 0);
-
-    // FIXME:
-    // do score.updateLine(9);
-    // FIXME:
-    // do score.updateLevel();
-    // do score.updateLevel();
-    // do score.updateLevel();
-    // do score.updateLevel();
-    // do score.updateLevel();
-    // do score.updateLevel();
-    // do score.updateLevel();
-    // do score.updateLevel();
-    // do score.updateLevel();
-    // do score.updateLevel();
-    // do score.updateLevel();
-    // do score.updateLevel();
-    // do score.updateLevel();
-    // do score.updateLevel();
-    // do score.updateLevel();
-    // do score.updateLevel();
-    // do score.updateLevel();
-    // do updateGameSpeed();
-
-
-
-
-
-
     // Run until game over
     while (~gameOver){
-      let curTetromino = nextTetrominos.getNextTetrominos();
+      let curTetromino = nextTetrominos.getNextTetromino();
       let doSpawn = curTetromino.canSpawn();
 
       if(doSpawn){
@@ -193,7 +109,11 @@ class TetrisGame {
     return;
   }
 
-  /** Let the tetromino fall and move it around while falling */
+  /**
+   * Let the tetromino fall, move it while falling and check whether to remove any lines
+   *
+   * \param curTetromino The current tetromino
+   */
   method void tetrominoFall(Tetromino curTetromino){
     var int countDown;  // Count down until next move down
     var bool falling;  // Whether or not the tetromino is still falling
@@ -307,7 +227,7 @@ class TetrisGame {
     return;
   }
 
-  /** Remove full lines */
+  /** Check if lines should be removed and remove and animate lines if that is the case */
   method void removeFullLines(){
     var Array rowsToRemove;
     var int nRowsToRemove;

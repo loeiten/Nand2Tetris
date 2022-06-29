@@ -23,6 +23,11 @@ class LCGRandom {
   static int Q;
   static int R;
 
+  /**
+   * Set the seed of the generator
+   *
+   * \param newSeed The seed to set for the generator
+   */
   function void setSeed(int newSeed) {
     let seed = newSeed;
     if(seed=0) { let seed=1; }
@@ -33,7 +38,7 @@ class LCGRandom {
     return;
   }
 
-  /* Return a random int in range 0..(M-1) inclusive */
+  /** Return a random int in range 0..(M-1) inclusive */
   function int rand() {
     var int test;
     let test=(A*(Algorithm.mod(seed,Q)))-(R*(seed/Q));
@@ -45,7 +50,12 @@ class LCGRandom {
     return seed;
   }
 
-  /* Return a random int in range low..high inclusive */
+  /**
+   * Return a random int in range low..high inclusive
+   * \param low The lowest value the random number can occupy
+   * \param highest The highest value the random number can occupy
+   * \return The random number
+   */
   function int randRange(int low, int high) {
     var int scale;
     var int rand;

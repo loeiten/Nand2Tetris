@@ -60,13 +60,10 @@ class NextTetrominos {
     do Output.printString(nextString);
     do updateNextColumn();
 
-    // FIXME:
-    // do Sys.wait(1000);
-
     return this;
   }
 
-  /** dispose this nextTetrominos object. */
+  /** Dispose this nextTetrominos object. */
   method void dispose(){
     do nextBackground.dispose();
     do currentBag.dispose();
@@ -80,13 +77,13 @@ class NextTetrominos {
   }
 
   /**
-   * Get the next tetromino
+   * Return the next tetromino
    *
    * \warning The returned tetromino must be manually destroyed
    *
    * \return The next tetromino
    */
-  method Tetromino getNextTetrominos(){
+  method Tetromino getNextTetromino(){
     var Tetromino curTetromino;
     var Mesh curTetrominoMesh;
     var int counter;
@@ -137,26 +134,18 @@ class NextTetrominos {
     return curTetromino;
   }
 
+  /** Fill the number bag with random numbers without replacement */
   method void fillNumberBag(){
     var int counter;
     var int randNumber;
     var int curHigh;
     var int curLow;
 
-    // // FIXME:
-    // var bool inArray;
-    // do Output.moveCursor(0, 0);
-    // do Output.printString("Start");
-
     // Initialize all members to -1
     while(counter < bagSize){
       let numberBag[counter] = -1;
       let counter = counter + 1;
     }
-
-    // // FIXME:
-    // do Output.moveCursor(1, 0);
-    // do Output.printString("After minus 1");
 
     // Reset the counter
     let counter = 0;
@@ -165,42 +154,18 @@ class NextTetrominos {
     let curLow = 0;
     while(counter < bagSize){
 
-    // // FIXME:
-    // do Output.moveCursor(2, 0);
-    // do Output.printString("Before inArray");
-    //  let inArray = Algorithm.intInArray(randNumber, numberBag, bagSize);
-    // do Output.moveCursor(3, 0);
-    // do Output.printString("inArray: ");
-    // do Output.printInt(inArray);
-
       while(Algorithm.intInArray(randNumber, numberBag, bagSize)){
-    // // FIXME:
-    // do Output.moveCursor(4, 0);
-    // do Output.printString("Before randNumber");
         // Update the random number
         let randNumber = LCGRandom.randRange(curLow, curHigh);
-    // // FIXME:
-    //   let inArray = Algorithm.intInArray(randNumber, numberBag, bagSize);
-    // do Output.moveCursor(3, 0);
-    // do Output.printString("After randNumber");
       }
       // Reduce the range if we've hit the extremes of the range
-      if(randNumber = curHigh){
-        let curHigh = curHigh - 1;
-      }
-      if(randNumber = curLow){
-        let curLow = curLow + 1;
-      }
+      if(randNumber = curHigh){ let curHigh = curHigh - 1; }
+      if(randNumber = curLow){ let curLow = curLow + 1; }
       let numberBag[counter] = randNumber;
       let counter = counter + 1;
     }
 
     return;
-  }
-
-  // FIXME: delme
-  method Array getNumberBag(){
-    return numberBag;
   }
 
   /**
@@ -262,12 +227,6 @@ class NextTetrominos {
     // NOTE: We only want to show the next tetrominos for bagSize - 1
     while (counter < (bagSize - 1)){
       let curTetromino = currentBag[counter];
-
-
-      // // FIXME:
-      // do Output.moveCursor(counter, 0);
-      // do Output.printInt(curTetromino.getTetrominoType());
-
       if(counter > 0){
         let tetrominoType = curTetromino.getTetrominoType();
         // In case we are dealing with a O tetromino:

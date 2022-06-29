@@ -20,6 +20,14 @@ class Algorithm {
     return modolus;
   }
 
+  /**
+   * Check if an integer is present in an array.
+   *
+   * \param number The number to check
+   * \param theArray The array to investigate
+   * \param arraySize The size of the array
+   * \return True if the integer is present
+   */
   function bool intInArray(int number, Array theArray, int arraySize){
     var bool inArray;
     var int counter;

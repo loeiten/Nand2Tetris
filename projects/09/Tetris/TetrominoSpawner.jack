@@ -1,10 +1,7 @@
 /**
- * Implements the TetrominoSpawner class
+ * Implements the class for spawning tetrominos
  */
 
-/**
- * Class for spawning tetrominos
- */
 class TetrominoSpawner {
 
   /**

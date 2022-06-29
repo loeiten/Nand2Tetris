@@ -1,4 +1,4 @@
-/** Implements the SplashScreen class */
+/** Implements the class responsible for the splash screen and seeding */
 class SplashScreen {
   field String line1;
   field String line2;
@@ -16,6 +16,7 @@ class SplashScreen {
   field String line14;
   field String line15;
 
+  /** Construct the SplashScreen */
   constructor SplashScreen new(){
     let line1 = "Tetris (c) 1985~2022 Tetris Holding.";
     let line2 = "Tetris logos, Tetris theme song and Tetriminos are trademarks";
@@ -35,6 +36,7 @@ class SplashScreen {
     return this;
   }
 
+  /** Dispose this object */
   method void dispose (){
     do line1.dispose();
     do line2.dispose();
@@ -55,6 +57,11 @@ class SplashScreen {
     return;
   }
 
+  /**
+   * Print the splash screen and return the seed
+   *
+   * \return The seed
+   */
   method int printSplashScreen() {
     var char key;
     var int seed;

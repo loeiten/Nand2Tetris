@@ -1,10 +1,7 @@
 /**
- * Implements the Background class
+ * Implements the Background which tetrominos can be drawn on
  */
 
-/**
- * The background is the location where all inactive tetrominos are drawn
- */
 class Background {
   field int frameStartX_;  // The pixel column for the start of the frame
   field int frameStartY_;  // The pixel row for the start of the frame
@@ -19,8 +16,6 @@ class Background {
   field int visibleRows;  // Number of visible rows
 
   field Mesh backgroundMesh;  // Mesh holding the state of each element
-
-  static int allocs;  // Number of times this has been allocated
 
   /**
    * Construct the Background
@@ -61,32 +56,13 @@ class Background {
 
     let backgroundMesh = Mesh.new(meshCols_, meshRows_);
 
-    let allocs = allocs + 1;
-
     return this;
   }
 
-  /**
-   * Destroy the Background
-   *
-   * Disposes:
-   * - The backgroundMesh
-   * - This
-   */
+  /** Destroy the Background */
   method void dispose (){
-    let allocs = allocs - 1;
     do backgroundMesh.dispose();
     do Memory.deAlloc(this);
-    return;
-  }
-
-  /** Print the number of allocs */
-  method void printAlloc (){
-    var String str;
-    let str = "Background allocs: ";
-    do Output.printString(str);
-    do Output.printInt(allocs);
-    do str.dispose();
     return;
   }
 
