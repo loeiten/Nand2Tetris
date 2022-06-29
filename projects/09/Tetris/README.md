@@ -241,3 +241,19 @@ Making the sprite for Tetris
 ## Helpful resources
 
 - Notes about memory management: [Ray tracer](https://blog.alexqua.ch/posts/from-nand-to-raytracer/) with [source code](https://github.com/aquach/from-nand-to-raytracer)
+
+
+I Tetromino Wall Kick Data
+     Test 2  Test 3  Test 4  Test 5
+0>>1 (0, -2, ) (0,  1, ) (-1, -2,) ( 2,  1,)
+1>>2 (0, -1, ) (0,  2, ) ( 2, -1,) (-1,  2,)
+2>>3 (0,  2, ) (0, -1, ) ( 1,  2,) (-2, -1,)
+3>>0 (0,  1, ) (0, -2, ) (-2,  1,) ( 1, -2,)
+
+
+J, L, T, S, Z Tetromino Wall Kick Data
+        Test 2	    Test 3	    Test 4      Test 5
+0>>1	(0, -1, )	( 1, -1,)	(-2, 0, )	(-2, -1,)
+1>>2	(0,  1, )	(-1,  1,)	( 2, 0, )	( 2,  1,)
+2>>3	(0,  1, )	( 1,  1,)	(-2, 0, )	(-2,  1,)
+3>>0	(0, -1, )	(-1, -1,)	( 2, 0, )	( 2, -1,)

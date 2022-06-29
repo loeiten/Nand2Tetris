@@ -207,22 +207,22 @@ class Tetromino {
     if(tetrominoType = 0){
       // Test 2
       if(rotationState = 0){ if(tryKick(0, -2, newMesh)){ return true; } }
-      if(rotationState = 1){ if(tryKick(0, 1, newMesh)){ return true; } }
+      if(rotationState = 1){ if(tryKick(0, -1, newMesh)){ return true; } }
       if(rotationState = 2){ if(tryKick(0, 2, newMesh)){ return true; } }
       if(rotationState = 3){ if(tryKick(0, 1, newMesh)){ return true; } }
       // Test 3
       if(rotationState = 0){ if(tryKick(0, 1, newMesh)){ return true; } }
-      if(rotationState = 1){ if(tryKick(0, -2, newMesh)){ return true; } }
+      if(rotationState = 1){ if(tryKick(0, 2, newMesh)){ return true; } }
       if(rotationState = 2){ if(tryKick(0, -1, newMesh)){ return true; } }
       if(rotationState = 3){ if(tryKick(0, -2, newMesh)){ return true; } }
       // Test 4
       if(rotationState = 0){ if(tryKick(-1, -2, newMesh)){ return true; } }
-      if(rotationState = 1){ if(tryKick(-2, 1, newMesh)){ return true; } }
+      if(rotationState = 1){ if(tryKick(2, -1, newMesh)){ return true; } }
       if(rotationState = 2){ if(tryKick(1, 2, newMesh)){ return true; } }
       if(rotationState = 3){ if(tryKick(-2, 1, newMesh)){ return true; } }
       // Test 5
       if(rotationState = 0){ if(tryKick(2, 1, newMesh)){ return true; } }
-      if(rotationState = 1){ if(tryKick(1, -2, newMesh)){ return true; } }
+      if(rotationState = 1){ if(tryKick(-1, 2, newMesh)){ return true; } }
       if(rotationState = 2){ if(tryKick(-2, -1, newMesh)){ return true; } }
       if(rotationState = 3){ if(tryKick(1, -2, newMesh)){ return true; } }
     } else {
