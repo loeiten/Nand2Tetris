@@ -69,7 +69,7 @@ class Parser:
         """Read the next instruction and make it the current instruction.
 
         Will populate self.current_instruction, and skip over whitespace and comments.
-        If it reaches the end of the line self.current_instruction will be set to None.
+        If it reaches the end of the line self.current_instruction will be set to "".
 
         This method should be called only if has_more_lines is true.
         """
