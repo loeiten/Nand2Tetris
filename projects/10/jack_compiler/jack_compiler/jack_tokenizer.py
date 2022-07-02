@@ -1,6 +1,8 @@
 """Module containing the JackTokenizer class."""
 
-from typing import Literal
+import re
+from io import TextIOWrapper
+from typing import Literal, get_args
 
 TOKEN = Literal[
     "KEYWORD",
@@ -60,15 +62,26 @@ SYMBOL = Literal[
 class JackTokenizer:
     """Class tokenizing .jack files."""
 
-    def __init__(self, path: str) -> None:
-        """Open input file to parse.
+    def __init__(self, in_file: TextIOWrapper) -> None:
+        """Prepare to parse input stream.
 
         Args:
-            path (str): Path to file to parse
+            in_file (TextIOWrapper): File to parse
         """
+        self.file = in_file
+        keywords = tuple(kw.lower() for kw in get_args(KEYWORD))
+        symbols = tuple(kw for kw in get_args(SYMBOL))
 
-    def __del__(self):
-        """Close the file."""
+        keywords_regex_str = "|".join(keywords)
+        symbols_regex_str = r"\\".join(symbols)
+        integer_constant_regex_str = r"\d{1,5}"
+        string_constant_regex_str = r"\"\w?\""
+        self.token_regex = re.compile(
+            rf"\s*{keywords_regex_str}|"
+            rf"{symbols_regex_str}|"
+            rf"{integer_constant_regex_str}|"
+            rf"{string_constant_regex_str}"
+        )
 
     def has_more_tokens(self) -> bool:
         """Return if the file has more tokens.
@@ -76,6 +89,21 @@ class JackTokenizer:
         Returns:
             bool: True if the file has more tokens
         """
+        found_token = False
+        cur_pos = self.file.tell()
+        # The return value of .readline() is unambiguous
+        # It will return "" only on the last line
+        # A blank line will be returned as "\n"
+        cur_line = self.file.readline()
+        while bool(cur_line):
+            if self.token_regex.match(cur_line) is not None:
+                found_token = True
+                break
+            cur_line = self.file.readline()
+
+        self.file.seek(cur_pos)
+        # Next line is empty, no more tokens
+        return found_token
 
     def advance(self) -> None:
         """Read the next token and make it the current token.

@@ -75,7 +75,7 @@ def process_file(file_to_parse: Path, code_writer: CodeWriter) -> None:
 
 
 def main(in_path: Path) -> None:
-    """Translate a Hack Virtual Machine code to symbolic Hack assembly code.
+    """Translate Hack Virtual Machine code to symbolic Hack assembly code.
 
     The input xxx.vm will be translated to xxx.asm.
 

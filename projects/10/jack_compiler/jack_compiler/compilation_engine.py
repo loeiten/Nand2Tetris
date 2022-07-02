@@ -10,12 +10,9 @@ class CompilationEngine:
         """Create a new compilation engine with the given input and output.
 
         Args:
-            in_path (Path): Path of the input file
-            out_path (Path): Path of the output file
+            in_file (TextIOWrapper): Path of the input file
+            out_file (TextIOWrapper): Path of the output file
         """
-
-    def __del__(self) -> None:
-        """Close the files."""
 
     def compile_class(self) -> None:
         """Compile a complete class."""
