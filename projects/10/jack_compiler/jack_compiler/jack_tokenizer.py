@@ -69,18 +69,27 @@ class JackTokenizer:
             in_file (TextIOWrapper): File to parse
         """
         self.file = in_file
+        self.cur_token = ""
+        self.cur_line = self.file.readline()
+
         keywords = tuple(kw.lower() for kw in get_args(KEYWORD))
         symbols = tuple(kw for kw in get_args(SYMBOL))
 
         keywords_regex_str = "|".join(keywords)
-        symbols_regex_str = r"\\".join(symbols)
+        # NOTE: Ned dummy {''} to join with backslash as this is an escape character
+        symbols_regex_str = rf"{'|'}\{''}".join(symbols)
         integer_constant_regex_str = r"\d{1,5}"
-        string_constant_regex_str = r"\"\w?\""
+        string_constant_regex_str = r"\"\w+\""
+        identifier_regex_str = r"\w+"
+        self.line_comment_regex = re.compile(r"\s*//")
+        self.block_comment_start_regex = re.compile(r"\s*/\*")
+        self.block_comment_end_regex = re.compile(r"\s*\*/")
         self.token_regex = re.compile(
             rf"\s*{keywords_regex_str}|"
-            rf"{symbols_regex_str}|"
-            rf"{integer_constant_regex_str}|"
-            rf"{string_constant_regex_str}"
+            rf"\{''}{symbols_regex_str}|"
+            f"{integer_constant_regex_str}|"
+            f"{string_constant_regex_str}|"
+            f"{identifier_regex_str}"
         )
 
     def has_more_tokens(self) -> bool:
@@ -94,16 +103,59 @@ class JackTokenizer:
         # The return value of .readline() is unambiguous
         # It will return "" only on the last line
         # A blank line will be returned as "\n"
-        cur_line = self.file.readline()
-        while bool(cur_line):
-            if self.token_regex.match(cur_line) is not None:
+        while bool(self.cur_line):
+            if self.next_is_comment():
+                continue
+
+            token_match = self.token_regex.match(self.cur_line)
+            if token_match is not None:
                 found_token = True
                 break
-            cur_line = self.file.readline()
+            self.cur_line = self.file.readline()
 
         self.file.seek(cur_pos)
         # Next line is empty, no more tokens
         return found_token
+
+    def next_is_comment(self) -> bool:
+        """
+        Check if the next part of the current line is a comment, advance the line.
+
+        Returns:
+            bool: True
+        """
+        # Check for line commands
+        line_comment_match = self.line_comment_regex.match(self.cur_line)
+        if line_comment_match is not None:
+            self.cur_line = self.file.readline()
+            return True
+
+        # Check for block commands
+        block_comment_start_match = self.block_comment_start_regex.match(self.cur_line)
+        if block_comment_start_match is not None:
+            # Advance until */
+            found_end = False
+            while not found_end:
+                # NOTE: We search as the */ may not be in the start
+                block_comment_end_match = self.block_comment_end_regex.search(
+                    self.cur_line
+                )
+                if block_comment_end_match is not None:
+                    found_end = True
+                    self.eat(block_comment_end_match.span()[1])
+                else:
+                    self.cur_line = self.file.readline()
+            return True
+
+        return False
+
+    def eat(self, char_number: int) -> None:
+        """Eat the first characters of the current line.
+
+        Args:
+            char_number (int): Number of characters to eat
+        """
+        self.cur_line = self.cur_line[char_number:]
 
     def advance(self) -> None:
         """Read the next token and make it the current token.

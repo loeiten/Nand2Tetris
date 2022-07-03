@@ -33,7 +33,7 @@ def process_file(in_path: Path) -> None:
         file_to_parse (Path): File to parse
     """
     print(f"Processing {in_path}...", end="\r")
-    out_path = in_path.with_suffix(".vm")
+    out_path = in_path.with_suffix(".xml")
 
     with in_path.open("r", encoding="utf-8") as in_file, out_path.open(
         "w", encoding="utf-8"

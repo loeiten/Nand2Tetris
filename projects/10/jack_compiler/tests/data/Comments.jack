@@ -1,0 +1,22 @@
+// Start with
+// two comments
+
+/* Followed by a block comment */
+/*
+ * Followed by a block comment
+ * spanning several lines
+ */
+
+/** Followed by a docstring */
+class Comments {
+  // Which has some static variables
+  static int dummy;  // Which has a line comment
+  static int dummy2;  /* Which has a block comment **/
+  static int dummy3;  /*
+  * Which has a block comment
+  * Spanning several lines
+  */
+  static int /* even inline comments */ dummy4;
+
+  function void noFunc(){ return; }
+}
