@@ -8,7 +8,7 @@ TOKEN = Literal[
     "KEYWORD",
     "SYMBOL",
     "IDENTIFIER",
-    "INT_CONT",
+    "INT_CONST",
     "STRING_CONST",
 ]
 
@@ -69,6 +69,7 @@ class JackTokenizer:
             in_file (TextIOWrapper): File to parse
         """
         self.file = in_file
+        self.token_match = ""
         self.cur_token = ""
         self.cur_line = self.file.readline()
 
@@ -84,13 +85,20 @@ class JackTokenizer:
         self.line_comment_regex = re.compile(r"\s*//")
         self.block_comment_start_regex = re.compile(r"\s*/\*")
         self.block_comment_end_regex = re.compile(r"\s*\*/")
-        self.token_regex = re.compile(
-            rf"\s*{keywords_regex_str}|"
-            rf"\{''}{symbols_regex_str}|"
-            f"{integer_constant_regex_str}|"
-            f"{string_constant_regex_str}|"
-            f"{identifier_regex_str}"
-        )
+        self.compiled_regexes = {
+            "all": re.compile(
+                rf"\s*{keywords_regex_str}|"
+                rf"\{''}{symbols_regex_str}|"
+                f"{integer_constant_regex_str}|"
+                f"{string_constant_regex_str}|"
+                f"{identifier_regex_str}"
+            ),
+            "keywords": re.compile(keywords_regex_str),
+            "symbols": re.compile(symbols_regex_str),
+            "integer_constant": re.compile(integer_constant_regex_str),
+            "string_constant": re.compile(string_constant_regex_str),
+            "identifier": re.compile(identifier_regex_str),
+        }
 
     def has_more_tokens(self) -> bool:
         """Return if the file has more tokens.
@@ -104,11 +112,11 @@ class JackTokenizer:
         # It will return "" only on the last line
         # A blank line will be returned as "\n"
         while bool(self.cur_line):
-            if self.next_is_comment():
+            if self._next_is_comment():
                 continue
 
-            token_match = self.token_regex.match(self.cur_line)
-            if token_match is not None:
+            self.token_match = self.compiled_regexes["all"].match(self.cur_line)
+            if self.token_match is not None:
                 found_token = True
                 break
             self.cur_line = self.file.readline()
@@ -117,7 +125,7 @@ class JackTokenizer:
         # Next line is empty, no more tokens
         return found_token
 
-    def next_is_comment(self) -> bool:
+    def _next_is_comment(self) -> bool:
         """
         Check if the next part of the current line is a comment, advance the line.
 
@@ -142,14 +150,15 @@ class JackTokenizer:
                 )
                 if block_comment_end_match is not None:
                     found_end = True
-                    self.eat(block_comment_end_match.span()[1])
+                    # NOTE: span() returns the (match.start(group), match.end(group))
+                    self._eat(block_comment_end_match.span()[1])
                 else:
                     self.cur_line = self.file.readline()
             return True
 
         return False
 
-    def eat(self, char_number: int) -> None:
+    def _eat(self, char_number: int) -> None:
         """Eat the first characters of the current line.
 
         Args:
@@ -165,6 +174,9 @@ class JackTokenizer:
 
         This method should be called only if has_more_lines is true.
         """
+        # NOTE: group(1) is the first group matched
+        self.cur_token = self.token_match.group(1).replace(" ", "")
+        self._eat(self.cur_token)
 
     def token_type(self) -> TOKEN:
         """Return the current token type.
@@ -174,6 +186,16 @@ class JackTokenizer:
         Returns:
             TOKEN: The token type
         """
+        if self.compiled_regexes["keywords"].match(self.cur_line) is not None:
+            return "KEYWORD"
+        elif self.compiled_regexes["symbols"].match(self.cur_line) is not None:
+            return "SYMBOL"
+        elif self.compiled_regexes["identifier"].match(self.cur_line) is not None:
+            return "IDENTIFIER"
+        elif self.compiled_regexes["integer_constant"].match(self.cur_line) is not None:
+            return "INT_CONST"
+        elif self.compiled_regexes["string_constant"].match(self.cur_line) is not None:
+            return "STRING_CONST"
 
     def keyword(self) -> KEYWORD:
         """Return the keyword which is the current token.
@@ -183,6 +205,7 @@ class JackTokenizer:
         Returns:
             KEYWORD: The keyword
         """
+        return self.cur_token
 
     def symbol(self) -> SYMBOL:
         """Return the character which is the current token.
@@ -192,6 +215,7 @@ class JackTokenizer:
         Returns:
             SYMBOL: The symbol
         """
+        return self.cur_token
 
     def identifier(self) -> str:
         """Return the identifier which is the current token.
@@ -201,6 +225,7 @@ class JackTokenizer:
         Returns:
             str: The identifier
         """
+        return self.cur_token
 
     def int_val(self) -> int:
         """Return the integer value which is the current token.
@@ -210,6 +235,7 @@ class JackTokenizer:
         Returns:
             int: The integer
         """
+        return self.cur_token
 
     def string_val(self) -> str:
         """Return the string value which is the current token.
@@ -221,3 +247,4 @@ class JackTokenizer:
         Returns:
             str: The string
         """
+        return self.cur_token
