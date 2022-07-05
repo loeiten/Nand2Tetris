@@ -76,6 +76,7 @@ class JackTokenizer:
         keywords = tuple(kw.lower() for kw in get_args(KEYWORD))
         symbols = tuple(kw for kw in get_args(SYMBOL))
 
+        # FIXME: Use named groups (?P<myName>...) and match.lastgroup to find what group it was
         keywords_regex_str = "|".join(keywords)
         # NOTE: Ned dummy {''} to join with backslash as this is an escape character
         symbols_regex_str = rf"{'|'}\{''}".join(symbols)
@@ -186,6 +187,7 @@ class JackTokenizer:
         Returns:
             TOKEN: The token type
         """
+        # FIXME: Use named groups
         if self.compiled_regexes["keywords"].match(self.cur_line) is not None:
             return "KEYWORD"
         elif self.compiled_regexes["symbols"].match(self.cur_line) is not None:
