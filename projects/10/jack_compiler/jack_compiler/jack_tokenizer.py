@@ -77,15 +77,16 @@ class JackTokenizer:
         symbols = tuple(kw for kw in get_args(SYMBOL))
 
         # FIXME: Use named groups (?P<myName>...) and match.lastgroup to find what group it was
-        keywords_regex_str = "|".join(keywords)
-        # NOTE: Ned dummy {''} to join with backslash as this is an escape character
-        symbols_regex_str = rf"{'|'}\{''}".join(symbols)
-        integer_constant_regex_str = r"\d{1,5}"
-        string_constant_regex_str = r"\"\w+\""
-        identifier_regex_str = r"\w+"
-        self.line_comment_regex = re.compile(r"\s*//")
-        self.block_comment_start_regex = re.compile(r"\s*/\*")
-        self.block_comment_end_regex = re.compile(r"\s*\*/")
+        backslash = "\\"  # f-string expression part cannot include a backslash
+        regex_str = "..."
+        keywords_regex_str = f"(?P<KEYWORD>{'|'.join(keywords)}"
+        symbols_regex_str = rf"(?P<SYMBOL>{f'|{backslash}'.join(symbols)})"
+        integer_constant_regex_str = r"(?P<INT_CONST>\d{1,5})"
+        string_constant_regex_str = r"(?P<STR_CONST>\"\w+\")"
+        identifier_regex_str = r"(?P<IDENTIFIER>\w+)"
+        self.line_comment_regex = re.compile(r"(?P<LINE_COMMENT>\s*//)")
+        self.block_comment_start_regex = re.compile(r"(?P<COMMENT_START>\s*/\*)")
+        self.block_comment_end_regex = re.compile(r"(?P<COMMENT_END>\s*\*/)")
         self.compiled_regexes = {
             "all": re.compile(
                 rf"\s*{keywords_regex_str}|"
