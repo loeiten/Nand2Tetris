@@ -5,11 +5,7 @@ from io import TextIOWrapper
 from typing import Literal, get_args
 
 TOKEN = Literal[
-    "KEYWORD",
-    "SYMBOL",
-    "IDENTIFIER",
-    "INT_CONST",
-    "STRING_CONST",
+    "KEYWORD", "SYMBOL", "IDENTIFIER", "INT_CONST", "STRING_CONST",
 ]
 
 KEYWORD = Literal[
@@ -69,7 +65,7 @@ class JackTokenizer:
             in_file (TextIOWrapper): File to parse
         """
         self.file = in_file
-        self.token_match = ""
+        self.match = None
         self.cur_token = ""
         self.cur_line = self.file.readline()
 
@@ -78,29 +74,19 @@ class JackTokenizer:
 
         # FIXME: Use named groups (?P<myName>...) and match.lastgroup to find what group it was
         backslash = "\\"  # f-string expression part cannot include a backslash
-        regex_str = "..."
-        keywords_regex_str = f"(?P<KEYWORD>{'|'.join(keywords)}"
-        symbols_regex_str = rf"(?P<SYMBOL>{f'|{backslash}'.join(symbols)})"
-        integer_constant_regex_str = r"(?P<INT_CONST>\d{1,5})"
-        string_constant_regex_str = r"(?P<STR_CONST>\"\w+\")"
-        identifier_regex_str = r"(?P<IDENTIFIER>\w+)"
-        self.line_comment_regex = re.compile(r"(?P<LINE_COMMENT>\s*//)")
-        self.block_comment_start_regex = re.compile(r"(?P<COMMENT_START>\s*/\*)")
-        self.block_comment_end_regex = re.compile(r"(?P<COMMENT_END>\s*\*/)")
-        self.compiled_regexes = {
-            "all": re.compile(
-                rf"\s*{keywords_regex_str}|"
-                rf"\{''}{symbols_regex_str}|"
-                f"{integer_constant_regex_str}|"
-                f"{string_constant_regex_str}|"
-                f"{identifier_regex_str}"
-            ),
-            "keywords": re.compile(keywords_regex_str),
-            "symbols": re.compile(symbols_regex_str),
-            "integer_constant": re.compile(integer_constant_regex_str),
-            "string_constant": re.compile(string_constant_regex_str),
-            "identifier": re.compile(identifier_regex_str),
-        }
+        # As we do greedy capture, we must have the comment first in order not 
+        # to classify as a SYMBOL
+        regex_str = (
+            r"(?P<LINE_COMMENT>\s*//)|"
+            r"(?P<BLOCK_COMMENT_START>\s*/\*)|"
+            r"(?P<BLOCK_COMMENT_END>\s*\*/)"
+            f"(?P<KEYWORD>{'|'.join(keywords)})|"
+            rf"(?P<SYMBOL>{backslash}{f'|{backslash}'.join(symbols)})|"
+            r"(?P<INT_CONST>\d{1,5})|"
+            r"(?P<STR_CONST>\"\w+\")|"
+            r"(?P<IDENTIFIER>\w+)|"
+        )
+        self.compiled_regex = re.compile(regex_str)
 
     def has_more_tokens(self) -> bool:
         """Return if the file has more tokens.
@@ -114,6 +100,13 @@ class JackTokenizer:
         # It will return "" only on the last line
         # A blank line will be returned as "\n"
         while bool(self.cur_line):
+            self.match = self.compiled_regex.match(self.cur_line)
+
+
+            # FIXME:
+            print(match.lastgroup)
+            print(match.groupdict())
+            import pdb; pdb.set_trace()
             if self._next_is_comment():
                 continue
 
@@ -134,18 +127,22 @@ class JackTokenizer:
         Returns:
             bool: True
         """
+        # FIXME:
+        self.match = self.compiled_regex.match(self.cur_line)
+        print(self.match.lastgroup)
+        print(self.match.groupdict())
+        import pdb; pdb.set_trace()
         # Check for line commands
-        line_comment_match = self.line_comment_regex.match(self.cur_line)
-        if line_comment_match is not None:
+        if self.match.lastgroup == "LINE_COMMENT":
             self.cur_line = self.file.readline()
             return True
 
         # Check for block commands
-        block_comment_start_match = self.block_comment_start_regex.match(self.cur_line)
-        if block_comment_start_match is not None:
+        if self.match.lastgroup == "BLOCK_COMMENT_START":
             # Advance until */
             found_end = False
             while not found_end:
+                # FIXME: YOU ARE HERE
                 # NOTE: We search as the */ may not be in the start
                 block_comment_end_match = self.block_comment_end_regex.search(
                     self.cur_line
