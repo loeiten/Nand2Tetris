@@ -72,21 +72,20 @@ class JackTokenizer:
         keywords = tuple(kw.lower() for kw in get_args(KEYWORD))
         symbols = tuple(kw for kw in get_args(SYMBOL))
 
-        # FIXME: Use named groups (?P<myName>...) and match.lastgroup to find what group it was
         backslash = "\\"  # f-string expression part cannot include a backslash
         # As we do greedy capture, we must have the comment first in order not 
         # to classify as a SYMBOL
         regex_str = (
-            r"(?P<LINE_COMMENT>\s*//)|"
-            r"(?P<BLOCK_COMMENT_START>\s*/\*)|"
-            r"(?P<BLOCK_COMMENT_END>\s*\*/)"
-            f"(?P<KEYWORD>{'|'.join(keywords)})|"
-            rf"(?P<SYMBOL>{backslash}{f'|{backslash}'.join(symbols)})|"
-            r"(?P<INT_CONST>\d{1,5})|"
-            r"(?P<STR_CONST>\"\w+\")|"
-            r"(?P<IDENTIFIER>\w+)|"
+            r"\s*(?P<LINE_COMMENT>//)|"
+            r"\s*(?P<BLOCK_COMMENT_START>/\*)|"
+            f"\s*(?P<KEYWORD>{'|'.join(keywords)})|"
+            rf"\s*(?P<SYMBOL>{backslash}{f'|{backslash}'.join(symbols)})|"
+            r"\s*(?P<INT_CONST>\d{1,5})|"
+            r"\s*(?P<STR_CONST>\"\w+\")|"
+            r"\s*(?P<IDENTIFIER>\w+)"
         )
         self.compiled_regex = re.compile(regex_str)
+        self.block_comment_end_regex = re.compile(r"\s*\*/")
 
     def has_more_tokens(self) -> bool:
         """Return if the file has more tokens.
@@ -102,19 +101,19 @@ class JackTokenizer:
         while bool(self.cur_line):
             self.match = self.compiled_regex.match(self.cur_line)
 
+            # On newlines there will be no match
+            if self.match is None:
+                self.cur_line = self.file.readline()
+                continue
 
-            # FIXME:
-            print(match.lastgroup)
-            print(match.groupdict())
-            import pdb; pdb.set_trace()
             if self._next_is_comment():
                 continue
 
-            self.token_match = self.compiled_regexes["all"].match(self.cur_line)
-            if self.token_match is not None:
-                found_token = True
-                break
-            self.cur_line = self.file.readline()
+            # Since we have a match we can read the current token
+            # NOTE: match[0] is the first group matched
+            self.token_match = self.match[0]
+            found_token = True
+            break
 
         self.file.seek(cur_pos)
         # Next line is empty, no more tokens
@@ -127,11 +126,9 @@ class JackTokenizer:
         Returns:
             bool: True
         """
-        # FIXME:
-        self.match = self.compiled_regex.match(self.cur_line)
-        print(self.match.lastgroup)
-        print(self.match.groupdict())
-        import pdb; pdb.set_trace()
+        if self.match is None:
+            return False
+
         # Check for line commands
         if self.match.lastgroup == "LINE_COMMENT":
             self.cur_line = self.file.readline()
@@ -142,7 +139,6 @@ class JackTokenizer:
             # Advance until */
             found_end = False
             while not found_end:
-                # FIXME: YOU ARE HERE
                 # NOTE: We search as the */ may not be in the start
                 block_comment_end_match = self.block_comment_end_regex.search(
                     self.cur_line
@@ -173,8 +169,7 @@ class JackTokenizer:
 
         This method should be called only if has_more_lines is true.
         """
-        # NOTE: group(1) is the first group matched
-        self.cur_token = self.token_match.group(1).replace(" ", "")
+        self.cur_token = self.token_match
         self._eat(self.cur_token)
 
     def token_type(self) -> TOKEN:
@@ -185,17 +180,11 @@ class JackTokenizer:
         Returns:
             TOKEN: The token type
         """
-        # FIXME: Use named groups
-        if self.compiled_regexes["keywords"].match(self.cur_line) is not None:
-            return "KEYWORD"
-        elif self.compiled_regexes["symbols"].match(self.cur_line) is not None:
-            return "SYMBOL"
-        elif self.compiled_regexes["identifier"].match(self.cur_line) is not None:
-            return "IDENTIFIER"
-        elif self.compiled_regexes["integer_constant"].match(self.cur_line) is not None:
-            return "INT_CONST"
-        elif self.compiled_regexes["string_constant"].match(self.cur_line) is not None:
-            return "STRING_CONST"
+        if self.match is None:
+            raise RuntimeError("No match found")
+        if self.match.lastgroup not in TOKEN:
+            raise RuntimeError(f"{self.match.lastgroup} not in {TOKEN}")
+        return self.match.lastgroup
 
     def keyword(self) -> KEYWORD:
         """Return the keyword which is the current token.
@@ -235,7 +224,7 @@ class JackTokenizer:
         Returns:
             int: The integer
         """
-        return self.cur_token
+        return int(self.cur_token)
 
     def string_val(self) -> str:
         """Return the string value which is the current token.
