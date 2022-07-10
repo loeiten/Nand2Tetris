@@ -2,10 +2,14 @@
 
 import re
 from io import TextIOWrapper
-from typing import Literal, get_args
+from typing import Literal, Optional, get_args
 
 TOKEN = Literal[
-    "KEYWORD", "SYMBOL", "IDENTIFIER", "INT_CONST", "STRING_CONST",
+    "KEYWORD",
+    "SYMBOL",
+    "IDENTIFIER",
+    "INT_CONST",
+    "STRING_CONST",
 ]
 
 KEYWORD = Literal[
@@ -65,7 +69,7 @@ class JackTokenizer:
             in_file (TextIOWrapper): File to parse
         """
         self.file = in_file
-        self.match = None
+        self.match: Optional[re.Match[str]] = None
         self.cur_token = ""
         self.cur_line = self.file.readline()
 
@@ -73,7 +77,7 @@ class JackTokenizer:
         symbols = tuple(kw for kw in get_args(SYMBOL))
 
         backslash = "\\"  # f-string expression part cannot include a backslash
-        # As we do greedy capture, we must have the comment first in order not 
+        # As we do greedy capture, we must have the comment first in order not
         # to classify as a SYMBOL
         regex_str = (
             r"\s*(?P<LINE_COMMENT>//)|"
@@ -164,13 +168,15 @@ class JackTokenizer:
     def advance(self) -> None:
         """Read the next token and make it the current token.
 
-        Will populate self.current_token, and skip over whitespace and comments.
+        Will populate self.cur_token, and skip over whitespace and comments.
         If it reaches the end of the tokens, self.current_token will be set to "".
 
         This method should be called only if has_more_lines is true.
         """
-        self.cur_token = self.token_match
-        self._eat(self.cur_token)
+        if self.match is None:
+            raise RuntimeError("Could not set cur_token as no matches were found")
+        self.cur_token = self.match[0]
+        self._eat(len(self.cur_token))
 
     def token_type(self) -> TOKEN:
         """Return the current token type.
@@ -182,9 +188,11 @@ class JackTokenizer:
         """
         if self.match is None:
             raise RuntimeError("No match found")
-        if self.match.lastgroup not in TOKEN:
-            raise RuntimeError(f"{self.match.lastgroup} not in {TOKEN}")
-        return self.match.lastgroup
+        if self.match.lastgroup not in get_args(TOKEN):
+            raise RuntimeError(f"{self.match.lastgroup} not in {get_args(TOKEN)}")
+        # We're checking if self.match.lastgroup is in TOKEN
+        # hence we ignore mypy error
+        return self.match.lastgroup  # type: ignore
 
     def keyword(self) -> KEYWORD:
         """Return the keyword which is the current token.
@@ -194,7 +202,13 @@ class JackTokenizer:
         Returns:
             KEYWORD: The keyword
         """
-        return self.cur_token
+        if self.match is None:
+            raise RuntimeError("No match found")
+        if self.match.lastgroup not in get_args(KEYWORD):
+            raise RuntimeError(f"{self.cur_line} not in {get_args(KEYWORD)}")
+        # We're checking if self.match.lastgroup is in KEYWORD
+        # hence we ignore mypy error
+        return self.cur_token  # type: ignore
 
     def symbol(self) -> SYMBOL:
         """Return the character which is the current token.
@@ -204,7 +218,13 @@ class JackTokenizer:
         Returns:
             SYMBOL: The symbol
         """
-        return self.cur_token
+        if self.match is None:
+            raise RuntimeError("No match found")
+        if self.match.lastgroup not in get_args(SYMBOL):
+            raise RuntimeError(f"{self.cur_line} not in {get_args(SYMBOL)}")
+        # We're checking if self.match.lastgroup is in SYMBOL
+        # hence we ignore mypy error
+        return self.cur_token  # type: ignore
 
     def identifier(self) -> str:
         """Return the identifier which is the current token.
