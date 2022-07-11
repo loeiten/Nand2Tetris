@@ -69,6 +69,8 @@ class JackTokenizer:
             in_file (TextIOWrapper): File to parse
         """
         self.file = in_file
+        # Pylint claims that re.Match is unsubscriptable
+        # pylint: disable=unsubscriptable-object
         self.match: Optional[re.Match[str]] = None
         self.cur_token = ""
         self.cur_line = self.file.readline()
@@ -82,7 +84,7 @@ class JackTokenizer:
         regex_str = (
             r"\s*(?P<LINE_COMMENT>//)|"
             r"\s*(?P<BLOCK_COMMENT_START>/\*)|"
-            f"\s*(?P<KEYWORD>{'|'.join(keywords)})|"
+            rf"\s*(?P<KEYWORD>{'|'.join(keywords)})|"
             rf"\s*(?P<SYMBOL>{backslash}{f'|{backslash}'.join(symbols)})|"
             r"\s*(?P<INT_CONST>\d{1,5})|"
             r"\s*(?P<STR_CONST>\"\w+\")|"
@@ -114,8 +116,6 @@ class JackTokenizer:
                 continue
 
             # Since we have a match we can read the current token
-            # NOTE: match[0] is the first group matched
-            self.token_match = self.match[0]
             found_token = True
             break
 
@@ -175,6 +175,8 @@ class JackTokenizer:
         """
         if self.match is None:
             raise RuntimeError("Could not set cur_token as no matches were found")
+
+        # NOTE: match[0] is the first group matched
         self.cur_token = self.match[0]
         self._eat(len(self.cur_token))
 

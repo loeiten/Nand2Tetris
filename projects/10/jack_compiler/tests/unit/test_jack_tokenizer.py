@@ -11,7 +11,7 @@ def test__next_is_comment(data_path: Path) -> None:
     Args:
         data_path (Path): Path to the data path
     """
-    # pylint: disable=too-many-statements
+    # pylint: disable=too-many-statements,protected-access
     with data_path.joinpath("Comments.jack").open(encoding="utf-8") as file:
         jack_tokenizer = JackTokenizer(file)
         assert jack_tokenizer.cur_line == "// Start with\n"
