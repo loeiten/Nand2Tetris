@@ -1,8 +1,23 @@
 """Module containing test for the JackTokenizer."""
 
+import io
 from pathlib import Path
 
 from jack_compiler.jack_tokenizer import JackTokenizer
+
+
+def test_has_more_tokens(data_path: Path) -> None:
+    """Test that has_more_tokens return correct boolean.
+
+    Args:
+        data_path (Path): Path to the data path
+    """
+    with data_path.joinpath("Comments.jack").open(encoding="utf-8") as file:
+        jack_tokenizer = JackTokenizer(file)
+        assert jack_tokenizer.has_more_tokens()
+        _ = jack_tokenizer.file.readlines()
+        jack_tokenizer.cur_line = jack_tokenizer.file.readline()
+        assert not jack_tokenizer.has_more_tokens()
 
 
 def test__next_is_comment(data_path: Path) -> None:
@@ -182,16 +197,17 @@ def test__next_is_comment(data_path: Path) -> None:
         assert not jack_tokenizer.has_more_tokens()
 
 
-def test_has_more_tokens(data_path: Path) -> None:
-    """Test that comments can be properly parsed.
-
-    Args:
-        data_path (Path): Path to the data path
-    """
-    # pylint: disable=too-many-statements
-    with data_path.joinpath("Comments.jack").open(encoding="utf-8") as file:
-        jack_tokenizer = JackTokenizer(file)
-        assert jack_tokenizer.has_more_tokens()
-        _ = jack_tokenizer.file.readlines()
-        jack_tokenizer.cur_line = jack_tokenizer.file.readline()
-        assert not jack_tokenizer.has_more_tokens()
+def test__eat() -> None:
+    """Test that __eat eats correctly."""
+    # pylint: disable=protected-access
+    file = io.StringIO("Hello, world!")
+    jack_tokenizer = JackTokenizer(file)
+    assert jack_tokenizer.cur_line == "Hello, world!"
+    jack_tokenizer._eat(len("Hello"))
+    assert jack_tokenizer.cur_line == ", world!"
+    jack_tokenizer._eat(len(", "))
+    assert jack_tokenizer.cur_line == "world!"
+    jack_tokenizer._eat(len("wo"))
+    assert jack_tokenizer.cur_line == "rld!"
+    jack_tokenizer._eat(len("rld!"))
+    assert jack_tokenizer.cur_line == ""
