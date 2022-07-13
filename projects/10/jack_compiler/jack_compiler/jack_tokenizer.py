@@ -173,12 +173,14 @@ class JackTokenizer:
 
         This method should be called only if has_more_lines is true.
         """
-        if self.match is None:
-            raise RuntimeError("Could not set cur_token as no matches were found")
+        if (self.match is None) or (self.match.lastgroup is None):
+            raise RuntimeError(
+                "Could not set cur_token as no matches were found, "
+                "did you run has_more_lines first?"
+            )
 
-        # NOTE: match[0] is the first group matched
-        self.cur_token = self.match[0]
-        self._eat(len(self.cur_token))
+        self.cur_token = self.match.group(self.match.lastgroup)
+        self._eat(self.match.span()[1])
 
     def token_type(self) -> TOKEN:
         """Return the current token type.

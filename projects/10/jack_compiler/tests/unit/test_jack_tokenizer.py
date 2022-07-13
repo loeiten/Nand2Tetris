@@ -3,6 +3,7 @@
 import io
 from pathlib import Path
 
+import pytest
 from jack_compiler.jack_tokenizer import JackTokenizer
 
 
@@ -211,3 +212,50 @@ def test__eat() -> None:
     assert jack_tokenizer.cur_line == "rld!"
     jack_tokenizer._eat(len("rld!"))
     assert jack_tokenizer.cur_line == ""
+
+
+def test_advance() -> None:
+    """Test that advance advances."""
+    file = io.StringIO("   Hello, world!")
+    jack_tokenizer = JackTokenizer(file)
+    with pytest.raises(Exception) as e_info:
+        jack_tokenizer.advance()
+    assert (
+        e_info.value.args[0]
+        == "Could not set cur_token as no matches were found, did you run has_more_lines first?"
+    )
+    assert jack_tokenizer.cur_line == "   Hello, world!"
+
+    assert jack_tokenizer.has_more_tokens()
+    assert jack_tokenizer.match.group(jack_tokenizer.match.lastgroup) == "Hello"  # type: ignore
+    jack_tokenizer.advance()
+    assert jack_tokenizer.cur_line == ", world!"
+
+    assert jack_tokenizer.has_more_tokens()
+    assert jack_tokenizer.match.group(jack_tokenizer.match.lastgroup) == ","  # type: ignore
+    jack_tokenizer.advance()
+    assert jack_tokenizer.cur_line == " world!"
+
+    assert jack_tokenizer.has_more_tokens()
+    assert jack_tokenizer.match.group(jack_tokenizer.match.lastgroup) == "world"  # type: ignore
+    jack_tokenizer.advance()
+    assert jack_tokenizer.cur_line == "!"
+
+    # NOTE: "!" is not a valid token
+    assert not jack_tokenizer.has_more_tokens()
+    assert jack_tokenizer.match is None
+    with pytest.raises(Exception) as e_info:
+        jack_tokenizer.advance()
+    assert (
+        e_info.value.args[0]
+        == "Could not set cur_token as no matches were found, did you run has_more_lines first?"
+    )
+    assert jack_tokenizer.cur_line == ""
+
+
+# def test_token_type() -> None:
+#     "KEYWORD",
+#     "SYMBOL",
+#     "IDENTIFIER",
+#     "INT_CONST",
+#     "STRING_CONST",
