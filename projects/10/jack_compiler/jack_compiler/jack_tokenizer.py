@@ -81,14 +81,15 @@ class JackTokenizer:
         backslash = "\\"  # f-string expression part cannot include a backslash
         # As we do greedy capture, we must have the comment first in order not
         # to classify as a SYMBOL
+        # We also have STRING_CONST last as it matches everything
         regex_str = (
             r"\s*(?P<LINE_COMMENT>//)|"
             r"\s*(?P<BLOCK_COMMENT_START>/\*)|"
             rf"\s*(?P<KEYWORD>{'|'.join(keywords)})|"
             rf"\s*(?P<SYMBOL>{backslash}{f'|{backslash}'.join(symbols)})|"
             r"\s*(?P<INT_CONST>\d{1,5})|"
-            r"\s*(?P<STR_CONST>\"\w+\")|"
-            r"\s*(?P<IDENTIFIER>\w+)"
+            r"\s*(?P<IDENTIFIER>\w+)|"
+            r"\s*(?P<STRING_CONST>\".*\")"
         )
         self.compiled_regex = re.compile(regex_str)
         self.block_comment_end_regex = re.compile(r"\s*\*/")

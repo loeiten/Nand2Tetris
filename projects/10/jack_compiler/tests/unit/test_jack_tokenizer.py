@@ -253,9 +253,31 @@ def test_advance() -> None:
     assert jack_tokenizer.cur_line == ""
 
 
-# def test_token_type() -> None:
-#     "KEYWORD",
-#     "SYMBOL",
-#     "IDENTIFIER",
-#     "INT_CONST",
-#     "STRING_CONST",
+def test_token_type() -> None:
+    """Test that token_type identifies the correct types."""
+    file = io.StringIO('  class = world 5234 "This is a string"')
+    jack_tokenizer = JackTokenizer(file)
+    assert jack_tokenizer.cur_line == '  class = world 5234 "This is a string"'
+    assert jack_tokenizer.has_more_tokens()
+    assert jack_tokenizer.token_type() == "KEYWORD"
+
+    jack_tokenizer.advance()
+    assert jack_tokenizer.cur_line == ' = world 5234 "This is a string"'
+    assert jack_tokenizer.has_more_tokens()
+    assert jack_tokenizer.token_type() == "SYMBOL"
+
+    jack_tokenizer.advance()
+    assert jack_tokenizer.cur_line == ' world 5234 "This is a string"'
+    assert jack_tokenizer.has_more_tokens()
+    assert jack_tokenizer.token_type() == "IDENTIFIER"
+
+    jack_tokenizer.advance()
+    assert jack_tokenizer.cur_line == ' 5234 "This is a string"'
+    assert jack_tokenizer.has_more_tokens()
+    assert jack_tokenizer.token_type() == "INT_CONST"
+
+    jack_tokenizer.advance()
+    assert jack_tokenizer.cur_line == ' "This is a string"'
+
+    assert jack_tokenizer.has_more_tokens()
+    assert jack_tokenizer.token_type() == "STRING_CONST"
