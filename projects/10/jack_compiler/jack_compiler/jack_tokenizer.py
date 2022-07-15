@@ -2,7 +2,7 @@
 
 import re
 from io import TextIOWrapper
-from typing import Literal, Optional, get_args
+from typing import Literal, Optional, cast, get_args
 
 TOKEN = Literal[
     "KEYWORD",
@@ -62,6 +62,9 @@ SYMBOL = Literal[
 class JackTokenizer:
     """Class tokenizing .jack files."""
 
+    keywords = tuple(kw.lower() for kw in get_args(KEYWORD))
+    symbols = tuple(kw for kw in get_args(SYMBOL))
+
     def __init__(self, in_file: TextIOWrapper) -> None:
         """Prepare to parse input stream.
 
@@ -75,9 +78,6 @@ class JackTokenizer:
         self.cur_token = ""
         self.cur_line = self.file.readline()
 
-        keywords = tuple(kw.lower() for kw in get_args(KEYWORD))
-        symbols = tuple(kw for kw in get_args(SYMBOL))
-
         backslash = "\\"  # f-string expression part cannot include a backslash
         # As we do greedy capture, we must have the comment first in order not
         # to classify as a SYMBOL
@@ -85,8 +85,8 @@ class JackTokenizer:
         regex_str = (
             r"\s*(?P<LINE_COMMENT>//)|"
             r"\s*(?P<BLOCK_COMMENT_START>/\*)|"
-            rf"\s*(?P<KEYWORD>{'|'.join(keywords)})|"
-            rf"\s*(?P<SYMBOL>{backslash}{f'|{backslash}'.join(symbols)})|"
+            rf"\s*(?P<KEYWORD>{'|'.join(self.keywords)})|"
+            rf"\s*(?P<SYMBOL>{backslash}{f'|{backslash}'.join(self.symbols)})|"
             r"\s*(?P<INT_CONST>\d{1,5})|"
             r"\s*(?P<IDENTIFIER>\w+)|"
             r"\s*(?P<STRING_CONST>\".*\")"
@@ -195,9 +195,7 @@ class JackTokenizer:
             raise RuntimeError("No match found")
         if self.match.lastgroup not in get_args(TOKEN):
             raise RuntimeError(f"{self.match.lastgroup} not in {get_args(TOKEN)}")
-        # We're checking if self.match.lastgroup is in TOKEN
-        # hence we ignore mypy error
-        return self.match.lastgroup  # type: ignore
+        return cast(TOKEN, self.match.lastgroup)
 
     def keyword(self) -> KEYWORD:
         """Return the keyword which is the current token.
@@ -207,13 +205,12 @@ class JackTokenizer:
         Returns:
             KEYWORD: The keyword
         """
+        token = self.cur_token.upper()
         if self.match is None:
             raise RuntimeError("No match found")
-        if self.match.lastgroup not in get_args(KEYWORD):
-            raise RuntimeError(f"{self.cur_line} not in {get_args(KEYWORD)}")
-        # We're checking if self.match.lastgroup is in KEYWORD
-        # hence we ignore mypy error
-        return self.cur_token  # type: ignore
+        if token not in get_args(KEYWORD):
+            raise RuntimeError(f"{token} not in {get_args(KEYWORD)}")
+        return cast(KEYWORD, token)
 
     def symbol(self) -> SYMBOL:
         """Return the character which is the current token.

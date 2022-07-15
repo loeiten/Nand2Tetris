@@ -281,3 +281,17 @@ def test_token_type() -> None:
 
     assert jack_tokenizer.has_more_tokens()
     assert jack_tokenizer.token_type() == "STRING_CONST"
+
+
+def test_keyword() -> None:
+    """Test that all keywords work."""
+    keywords = JackTokenizer.keywords
+    keywords_str = " ".join(keywords)
+    file = io.StringIO(keywords_str)
+    jack_tokenizer = JackTokenizer(file)
+
+    for keyword in keywords:
+        assert jack_tokenizer.has_more_tokens()
+        jack_tokenizer.advance()
+        assert jack_tokenizer.token_type() == "KEYWORD"
+        assert jack_tokenizer.keyword() == keyword.upper()
