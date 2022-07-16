@@ -220,13 +220,12 @@ class JackTokenizer:
         Returns:
             SYMBOL: The symbol
         """
+        token = self.cur_token.upper()
         if self.match is None:
             raise RuntimeError("No match found")
-        if self.match.lastgroup not in get_args(SYMBOL):
-            raise RuntimeError(f"{self.cur_line} not in {get_args(SYMBOL)}")
-        # We're checking if self.match.lastgroup is in SYMBOL
-        # hence we ignore mypy error
-        return self.cur_token  # type: ignore
+        if token not in get_args(SYMBOL):
+            raise RuntimeError(f"{token} not in {get_args(SYMBOL)}")
+        return cast(SYMBOL, token)
 
     def identifier(self) -> str:
         """Return the identifier which is the current token.

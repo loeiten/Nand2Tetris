@@ -295,3 +295,17 @@ def test_keyword() -> None:
         jack_tokenizer.advance()
         assert jack_tokenizer.token_type() == "KEYWORD"
         assert jack_tokenizer.keyword() == keyword.upper()
+
+
+def test_symbol() -> None:
+    """Test that all symbols work."""
+    symbols = JackTokenizer.symbols
+    symbols_str = " ".join(symbols)
+    file = io.StringIO(symbols_str)
+    jack_tokenizer = JackTokenizer(file)
+
+    for symbol in symbols:
+        assert jack_tokenizer.has_more_tokens()
+        jack_tokenizer.advance()
+        assert jack_tokenizer.token_type() == "SYMBOL"
+        assert jack_tokenizer.symbol() == symbol.upper()
