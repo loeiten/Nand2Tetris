@@ -309,3 +309,17 @@ def test_symbol() -> None:
         jack_tokenizer.advance()
         assert jack_tokenizer.token_type() == "SYMBOL"
         assert jack_tokenizer.symbol() == symbol.upper()
+
+
+def test_identifier() -> None:
+    """Test that identifier work."""
+    identifiers = ("foo", "bar", "baz")
+    identifiers_str = " ".join(identifiers)
+    file = io.StringIO(identifiers_str)
+    jack_tokenizer = JackTokenizer(file)
+
+    for identifier in identifiers:
+        assert jack_tokenizer.has_more_tokens()
+        jack_tokenizer.advance()
+        assert jack_tokenizer.token_type() == "IDENTIFIER"
+        assert jack_tokenizer.identifier() == identifier
