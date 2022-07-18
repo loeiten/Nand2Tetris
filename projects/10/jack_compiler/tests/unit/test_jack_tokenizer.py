@@ -214,8 +214,8 @@ def test__eat() -> None:
     assert jack_tokenizer.cur_line == ""
 
 
-def test_advance() -> None:
-    """Test that advance advances."""
+def test_single_line_advance() -> None:
+    """Test that advance advances over a single line."""
     file = io.StringIO("   Hello, world!")
     jack_tokenizer = JackTokenizer(file)
     with pytest.raises(Exception) as e_info:
@@ -251,6 +251,39 @@ def test_advance() -> None:
         == "Could not set cur_token as no matches were found, did you run has_more_lines first?"
     )
     assert jack_tokenizer.cur_line == ""
+
+
+def test_multi_line_advance() -> None:
+    """Test that advance advances over a multiple lines."""
+    tokens = (
+        "Hello",
+        ",",
+        "world",
+        "foo",
+        "=",
+        "42",
+        "bar",
+        "=",
+        "shoot",
+        "DONE",
+    )
+    file = io.StringIO(
+        f"   {tokens[0]}{tokens[1]} {tokens[2]}!\n"
+        f"{tokens[3]} {tokens[4]} {tokens[5]} // My comment\n"
+        "\n"
+        f'{tokens[6]}{tokens[7]}"{tokens[8]}"\n'
+        "/* Multi line\n"
+        " * comment\n"
+        " */\n"
+        "\n"
+        "\n"
+        f"{tokens[9]}\n"
+    )
+    jack_tokenizer = JackTokenizer(file)
+    for token in tokens:
+        assert jack_tokenizer.has_more_tokens()
+        jack_tokenizer.advance()
+        assert jack_tokenizer.cur_token == token
 
 
 def test_token_type() -> None:
@@ -349,35 +382,19 @@ def test_int_val() -> None:
 def test_string_val() -> None:
     """Test that string_val work."""
     string_vals = (
-        '"foo"\n', 
-        '"bar"\n', 
-        '"baz"\n')
+        '"foo"',
+        '"bar"\n',
+        '"baz"\n',
+        '"My super long string with symbols and class *(&=|"\n',
+    )
     string_vals_str = " ".join(string_vals)
-    print("\n")
-    print(repr(string_vals_str))
     file = io.StringIO(string_vals_str)
     jack_tokenizer = JackTokenizer(file)
 
     for string_val in string_vals:
         assert jack_tokenizer.has_more_tokens()
-        print("\n"*2)
-        print(f"cur_line: {repr(jack_tokenizer.cur_line)}")
-        print(f"string_val: {repr(string_val)}")
         jack_tokenizer.advance()
-        print(f"cur_token: {repr(jack_tokenizer.cur_token)}")
-        print("\n"*2)
         assert jack_tokenizer.token_type() == "STRING_CONST"
-        assert jack_tokenizer.string_val() == string_val.replace("\n", "")
-
-
-
-def test_string_file(data_path: Path) -> None:
-    with data_path.joinpath("Strings.jack").open(encoding="utf-8") as file:
-        jack_tokenizer = JackTokenizer(file)
-        counter = 0
-        while jack_tokenizer.has_more_tokens():
-            jack_tokenizer.advance()
-            print(f"jack_tokenizer.cur_token={jack_tokenizer.cur_token}")
-            counter += 1
-            if counter == 5:
-                break
+        assert jack_tokenizer.string_val() == string_val.replace('"', "").replace(
+            "\n", ""
+        )
