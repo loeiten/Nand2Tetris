@@ -323,3 +323,61 @@ def test_identifier() -> None:
         jack_tokenizer.advance()
         assert jack_tokenizer.token_type() == "IDENTIFIER"
         assert jack_tokenizer.identifier() == identifier
+
+
+def test_int_val() -> None:
+    """Test that int_val work."""
+    int_vals = (1, 20, 99999, 9999999)
+    int_val_str = " ".join([str(integer) for integer in int_vals])
+    file = io.StringIO(int_val_str)
+    jack_tokenizer = JackTokenizer(file)
+
+    for int_val in int_vals[:-1]:
+        assert jack_tokenizer.has_more_tokens()
+        jack_tokenizer.advance()
+        assert jack_tokenizer.token_type() == "INT_CONST"
+        assert jack_tokenizer.int_val() == int_val
+
+    # We only capture 5 digits, hence the last digit will not be captured
+    int_val = int_vals[-1]
+    assert jack_tokenizer.has_more_tokens()
+    jack_tokenizer.advance()
+    assert jack_tokenizer.token_type() == "INT_CONST"
+    assert jack_tokenizer.int_val() != int_val
+
+
+def test_string_val() -> None:
+    """Test that string_val work."""
+    string_vals = (
+        '"foo"\n', 
+        '"bar"\n', 
+        '"baz"\n')
+    string_vals_str = " ".join(string_vals)
+    print("\n")
+    print(repr(string_vals_str))
+    file = io.StringIO(string_vals_str)
+    jack_tokenizer = JackTokenizer(file)
+
+    for string_val in string_vals:
+        assert jack_tokenizer.has_more_tokens()
+        print("\n"*2)
+        print(f"cur_line: {repr(jack_tokenizer.cur_line)}")
+        print(f"string_val: {repr(string_val)}")
+        jack_tokenizer.advance()
+        print(f"cur_token: {repr(jack_tokenizer.cur_token)}")
+        print("\n"*2)
+        assert jack_tokenizer.token_type() == "STRING_CONST"
+        assert jack_tokenizer.string_val() == string_val.replace("\n", "")
+
+
+
+def test_string_file(data_path: Path) -> None:
+    with data_path.joinpath("Strings.jack").open(encoding="utf-8") as file:
+        jack_tokenizer = JackTokenizer(file)
+        counter = 0
+        while jack_tokenizer.has_more_tokens():
+            jack_tokenizer.advance()
+            print(f"jack_tokenizer.cur_token={jack_tokenizer.cur_token}")
+            counter += 1
+            if counter == 5:
+                break

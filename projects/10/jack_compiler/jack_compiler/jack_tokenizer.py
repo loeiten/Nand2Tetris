@@ -77,6 +77,7 @@ class JackTokenizer:
         self.match: Optional[re.Match[str]] = None
         self.cur_token = ""
         self.cur_line = self.file.readline()
+        self.next_pos = 0
 
         backslash = "\\"  # f-string expression part cannot include a backslash
         # As we do greedy capture, we must have the comment first in order not
@@ -102,15 +103,23 @@ class JackTokenizer:
         """
         found_token = False
         cur_pos = self.file.tell()
+        # FIXME:
+        print(f"cur_pos = {cur_pos}")
         # The return value of .readline() is unambiguous
         # It will return "" only on the last line
         # A blank line will be returned as "\n"
         while bool(self.cur_line):
             self.match = self.compiled_regex.match(self.cur_line)
 
+            # FIXME:
+            print(f"self.match = {self.match}")
+            print(f"inside self.cur_line = {repr(self.cur_line)}")
             # On newlines there will be no match
             if self.match is None:
                 self.cur_line = self.file.readline()
+                # FIXME: YOU ARE HERE: YOU DO NOT UPDATE cur_pos
+                # FIXME: NOT HERE, NOR IN NEXT_IS_COMMENT
+                print(f"new_cur_pos = {self.file.tell()}")
                 continue
 
             if self._next_is_comment():
@@ -120,6 +129,7 @@ class JackTokenizer:
             found_token = True
             break
 
+        self.next_pos = self.file.tell()
         self.file.seek(cur_pos)
         # Next line is empty, no more tokens
         return found_token
@@ -181,7 +191,14 @@ class JackTokenizer:
             )
 
         self.cur_token = self.match.group(self.match.lastgroup)
+        # FIXME: 
+        print(f"self.cur_line before: {repr(self.cur_line)}")
+
         self._eat(self.match.span()[1])
+        # FIXME: 
+        print(f"self.cur_line after: {repr(self.cur_line)}")
+
+        self.file.seek(self.next_pos)
 
     def token_type(self) -> TOKEN:
         """Return the current token type.
@@ -257,4 +274,5 @@ class JackTokenizer:
         Returns:
             str: The string
         """
+        # FIXME: Drop the embracing quotes
         return self.cur_token
