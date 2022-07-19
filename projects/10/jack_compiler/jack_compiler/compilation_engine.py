@@ -1,6 +1,29 @@
 """Module containing the CompilationEngine class."""
 
 from io import TextIOWrapper
+from typing import Literal
+
+TerminalElement = Literal[
+    "keyword", "symbol", "integerConstant", "stringConstant", "identifier"
+]
+
+NonTerminalElement = Literal[
+    "class",
+    "classVarDec",
+    "subroutineDec",
+    "parameterList",
+    "subroutineBody",
+    "varDec",
+    "statements",
+    "LetStatement",
+    "ifStatement",
+    "whileStatement",
+    "doStatement",
+    "returnStatement",
+    "expression",
+    "term",
+    "expressionList",
+]
 
 
 class CompilationEngine:
@@ -13,6 +36,49 @@ class CompilationEngine:
             in_file (TextIOWrapper): Path of the input file
             out_file (TextIOWrapper): Path of the output file
         """
+        self.in_file = in_file
+        self.out_file = out_file
+        self.indentation = 0
+
+    def write_token(self, token_type: TerminalElement, token: str) -> None:
+        """Write the token or grammar wrapped by the xml type to the out_file.
+
+        Args:
+            token_type (TERMINAL_ELEMENT): The type to use as a tag
+            token (str): The body inside the tag.
+                <, >, ", and & are outputted as &lt;, &gt;, &quot;, and &amp;
+        """
+        if token == "<":
+            token = "&lt;"
+        if token == ">":
+            token = "&gt;"
+        if token == '"':
+            token = "&quot;"
+        if token == "&":
+            token = "&amp;"
+        self.out_file.write(
+            f"{' '*self.indentation}<{token_type}> {token} </{token_type}>\n"
+        )
+
+    def open_grammar(self, grammar_type: NonTerminalElement) -> None:
+        """Open a grammar body.
+
+        Args:
+            grammar_type (NON_TERMINAL_ELEMENT): The grammar tag
+        """
+        self.out_file.write(f"{' '*self.indentation}<{grammar_type}>")
+        # Increase the current indentation
+        self.indentation += 2
+
+    def close_grammar(self, grammar_type: NonTerminalElement) -> None:
+        """Close the grammar body.
+
+        Args:
+            grammar_type (NON_TERMINAL_ELEMENT): The grammar tag
+        """
+        # Decrease the current indentation
+        self.indentation = max(0, self.indentation - 2)
+        self.out_file.write(f"{' '*self.indentation}</{grammar_type}>")
 
     def compile_class(self) -> None:
         """Compile a complete class."""

@@ -4,9 +4,18 @@
 
 import argparse
 from pathlib import Path
+from typing import Optional, cast, get_args
 
-from jack_compiler.compilation_engine import CompilationEngine
+from jack_compiler.compilation_engine import CompilationEngine, TerminalElement
 from jack_compiler.jack_tokenizer import JackTokenizer
+
+TOKEN_MAP = {
+    "KEYWORD": {"text": "keyword", "function_name": "keyword"},
+    "SYMBOL": {"text": "symbol", "function_name": "symbol"},
+    "IDENTIFIER": {"text": "identifier", "function_name": "identifier"},
+    "INT_CONST": {"text": "integerConstant", "function_name": "int_val"},
+    "STRING_CONST": {"text": "stringConstant", "function_name": "string_val"},
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -26,14 +35,19 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def process_file(in_path: Path) -> None:
+def process_file(
+    in_path: Path, tokens_only: bool = False, out_path: Optional[Path] = None
+) -> None:
     """Process a single file.
 
     Args:
         file_to_parse (Path): File to parse
+        tokens_only (bool, optional): Whether or not to only parse tokens. Defaults to False.
+        out_path (Optional[Path], optional): The out path. Defaults to None.
     """
     print(f"Processing {in_path}...", end="\r")
-    out_path = in_path.with_suffix(".xml")
+    if out_path is None:
+        out_path = in_path.with_suffix(".xml")
 
     with in_path.open("r", encoding="utf-8") as in_file, out_path.open(
         "w", encoding="utf-8"
@@ -41,11 +55,25 @@ def process_file(in_path: Path) -> None:
         jack_tokenizer = JackTokenizer(in_file)
         compilation_engine = CompilationEngine(in_file=in_file, out_file=out_file)
 
-        print(out_file)
-        print(compilation_engine)
-
         while jack_tokenizer.has_more_tokens():
             jack_tokenizer.advance()
+            token_type = jack_tokenizer.token_type()
+            func = getattr(jack_tokenizer, TOKEN_MAP[token_type]["function_name"])
+            token = func()
+            compilation_token_type = TOKEN_MAP[token_type]["text"]
+            if compilation_token_type not in get_args(compilation_token_type):
+                raise RuntimeError(
+                    f"{compilation_token_type} not in {get_args(TerminalElement)}"
+                )
+            cast(TerminalElement, compilation_token_type)
+            # Type ignore as mypy doesn't detect that we are ensuring the
+            # correct input type for token_type
+            compilation_engine.write_token(
+                token_type=compilation_token_type, token=token  # type: ignore
+            )
+            if not tokens_only:
+                # Process the grammar
+                pass
 
     print(f"Processing {in_path}...{out_path} written")
 
