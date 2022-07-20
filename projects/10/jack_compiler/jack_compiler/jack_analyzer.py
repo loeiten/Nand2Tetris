@@ -61,7 +61,9 @@ def process_file(
             func = getattr(jack_tokenizer, TOKEN_MAP[token_type]["function_name"])
             token = func()
             compilation_token_type = TOKEN_MAP[token_type]["text"]
-            if compilation_token_type not in get_args(compilation_token_type):
+            if token_type == "KEYWORD":
+                token = token.lower()
+            if compilation_token_type not in get_args(TerminalElement):
                 raise RuntimeError(
                     f"{compilation_token_type} not in {get_args(TerminalElement)}"
                 )
