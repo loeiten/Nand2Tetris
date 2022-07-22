@@ -87,7 +87,7 @@ def fixture_get_paths(
     return _get_paths
 
 
-@pytest.mark.parametrize("name", ("array_test",))
+@pytest.mark.parametrize("name", ("array_test", "expression_less_square", "square"))
 def test_array_test(
     get_paths: Tuple[Dict[str, Path], ...],
     name: Literal["array_test", "expression_less_square", "square"],
