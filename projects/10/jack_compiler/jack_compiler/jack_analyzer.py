@@ -6,16 +6,8 @@ import argparse
 from pathlib import Path
 from typing import Optional, cast, get_args
 
-from jack_compiler.compilation_engine import CompilationEngine, TerminalElement
+from jack_compiler.compilation_engine import CompilationEngine
 from jack_compiler.jack_tokenizer import JackTokenizer
-
-TOKEN_MAP = {
-    "KEYWORD": {"text": "keyword", "function_name": "keyword"},
-    "SYMBOL": {"text": "symbol", "function_name": "symbol"},
-    "IDENTIFIER": {"text": "identifier", "function_name": "identifier"},
-    "INT_CONST": {"text": "integerConstant", "function_name": "int_val"},
-    "STRING_CONST": {"text": "stringConstant", "function_name": "string_val"},
-}
 
 
 def parse_args() -> argparse.Namespace:
@@ -53,31 +45,18 @@ def process_file(
         "w", encoding="utf-8"
     ) as out_file:
         jack_tokenizer = JackTokenizer(in_file)
-        compilation_engine = CompilationEngine(in_file=in_file, out_file=out_file)
+        compilation_engine = CompilationEngine(
+            jack_tokenizer=jack_tokenizer, out_file=out_file
+        )
 
-        while jack_tokenizer.has_more_tokens():
-            jack_tokenizer.advance()
-            token_type = jack_tokenizer.token_type()
-            func = getattr(jack_tokenizer, TOKEN_MAP[token_type]["function_name"])
-            token = func()
-            compilation_token_type = TOKEN_MAP[token_type]["text"]
-            if token_type == "KEYWORD":
-                token = token.lower()
-            if compilation_token_type not in get_args(TerminalElement):
-                raise RuntimeError(
-                    f"{compilation_token_type} not in {get_args(TerminalElement)}"
-                )
-            cast(TerminalElement, compilation_token_type)
-            # Type ignore as mypy doesn't detect that we are ensuring the
-            # correct input type for token_type
-            compilation_engine.write_token(
-                token_type=compilation_token_type, token=token  # type: ignore
-            )
-            if not tokens_only:
-                # Process the grammar
-                pass
+        if tokens_only:
+            compilation_engine.compile_tokens_only()
+        else:
+            compilation_engine.compile_class()
 
-    print(f"Processing {in_path}...{out_path} written")
+    print(
+        f"Processing {in_path}...{out_path} written{'' if not tokens_only else ' in tokens only mode'}"
+    )
 
 
 def main(in_path: Path) -> None:
