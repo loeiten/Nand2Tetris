@@ -1,10 +1,13 @@
 """Test tokenization."""
 
 from pathlib import Path
-from typing import Callable, Dict, Literal, Tuple
+from typing import Callable, Dict, Literal, Tuple, get_args
 
 import pytest
 from jack_compiler.jack_analyzer import process_file
+
+TestNames = Literal["array_test", "expression_less_square", "square"]
+TestFiles = Literal["in_path", "expected_path", "out_path"]
 
 
 @pytest.fixture(scope="function", name="get_paths")
@@ -13,18 +16,20 @@ def fixture_get_paths(
     array_test_path: Path,
     expression_less_square_path: Path,
     square_path: Path,
-) -> Callable[[str], Tuple[Dict[str, Path], ...]]:
+) -> Callable[[TestNames], Tuple[Dict[TestFiles, Path], ...]]:
     """Return the get paths function.
 
     Args:
+        tmp_path (Path): Path to temporary directory
         array_test_path (Path): Path to the ArrayTest directory
         expression_less_square_path (Path): Path to the ExpressionLessSquare directory
         square_path (Path): Path to the Square directory
 
     Returns:
-        Callable[[str], Tuple[Dict[str, Path]], ...]: Function which returns the paths
+        Callable[[TestNames], Tuple[Dict[TestFiles, Path], ...]]:
+            Function which returns the paths
     """
-    name_map = {
+    name_map: Dict[TestNames, Tuple[Dict[TestFiles, Path], ...]] = {
         "array_test": (
             {
                 "in_path": array_test_path.joinpath("Main.jack"),
@@ -70,33 +75,34 @@ def fixture_get_paths(
         ),
     }
 
-    def _get_paths(
-        name: Literal["array_test", "expression_less_square", "square"]
-    ) -> Tuple[Dict[str, Path], ...]:
+    def _get_paths(name: TestNames) -> Tuple[Dict[TestFiles, Path], ...]:
         """Return the paths corresponding to input.
 
         Args:
-            name (Literal["array_test", "expression_less_square", "square"]): Name of the paths to return
+            name (TestNames):
+                Name of the paths to return
 
         Returns:
-            Tuple[Dict[str, Path], ...]: The Paths corresponding to the name
+            Tuple[Dict[TestFiles, Path], ...]:
+                The Paths corresponding to the name
         """
-
         return name_map[name]
 
     return _get_paths
 
 
-@pytest.mark.parametrize("name", ("array_test", "expression_less_square", "square"))
+@pytest.mark.parametrize("name", get_args(TestNames))
 def test_array_test(
-    get_paths: Tuple[Dict[str, Path], ...],
-    name: Literal["array_test", "expression_less_square", "square"],
+    get_paths: Callable[[TestNames], Tuple[Dict[TestFiles, Path], ...]],
+    name: TestNames,
 ) -> None:
     """Test that the output of the jack compiler matches that of ArrayTest.
 
     Args:
-        tmp_path (Path): Path to temporary directory
-        data_path (Path): Path to the ArrayTest directory
+        get_paths (Callable[[TestNames], Tuple[Dict[TestFiles, Path], ...]]):
+            Paths to the input, temp-files and expected output files
+        name (TestNames):
+            Name of the paths to return
     """
     test_path_groups = get_paths(name)
     for test_path_group in test_path_groups:
