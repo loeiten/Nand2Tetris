@@ -41,7 +41,7 @@ def process_file(
     if out_path is None:
         out_path = in_path.with_suffix(".xml")
 
-    with in_path.open("r", encoding="utf-8") as in_file, out_path.open(
+    with in_path.open("rb") as in_file, out_path.open(
         "w", encoding="utf-8"
     ) as out_file:
         jack_tokenizer = JackTokenizer(in_file)

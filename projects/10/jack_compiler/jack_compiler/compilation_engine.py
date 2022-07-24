@@ -64,10 +64,12 @@ class CompilationEngine:
 
         token_type = self.jack_tokenizer.token_type()
         func = getattr(self.jack_tokenizer, self.token_map[token_type]["function_name"])
-        token = func()
+        self.token = func()
         self.token_type = self.token_map[token_type]["text"]
         if token_type == "KEYWORD":
-            self.token = token.lower()
+            self.token = self.token.lower()
+
+        import pdb; pdb.set_trace()
 
     def compile_tokens_only(self) -> None:
         """Only compile tokens."""

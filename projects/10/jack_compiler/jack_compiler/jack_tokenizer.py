@@ -76,7 +76,7 @@ class JackTokenizer:
         # pylint: disable=unsubscriptable-object
         self.match: Optional[re.Match[str]] = None
         self.cur_token = ""
-        self.cur_line = self.file.readline()
+        self.cur_line = self.file.readline().decode("utf-8")
         self.next_pos = 0
 
         backslash = "\\"  # f-string expression part cannot include a backslash
@@ -110,8 +110,14 @@ class JackTokenizer:
         while bool(self.cur_line):
             self.match = self.compiled_regex.match(self.cur_line)
             # On newlines there will be no match
+            # FIXME:
+            print(f"self.match: {self.match}")
+            print(f"self.cur_line: {repr(self.cur_line)}")
+            print(f"self.cur_token: {self.cur_token}")
+            print(f"self.file.tell(): {self.file.tell()}\n")
+            # import pdb; pdb.set_trace()
             if self.match is None:
-                self.cur_line = self.file.readline()
+                self.cur_line = self.file.readline().decode("utf-8")
                 continue
 
             if self._next_is_comment():
@@ -138,7 +144,7 @@ class JackTokenizer:
 
         # Check for line commands
         if self.match.lastgroup == "LINE_COMMENT":
-            self.cur_line = self.file.readline()
+            self.cur_line = self.file.readline().decode("utf-8")
             return True
 
         # Check for block commands
@@ -155,7 +161,7 @@ class JackTokenizer:
                     # NOTE: span() returns the (match.start(group), match.end(group))
                     self._eat(block_comment_end_match.span()[1])
                 else:
-                    self.cur_line = self.file.readline()
+                    self.cur_line = self.file.readline().decode("utf-8")
             return True
 
         return False
