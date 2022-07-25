@@ -57,6 +57,11 @@ class CompilationEngine:
             raise RuntimeError(
                 f"Running tokenizer on empty file {jack_tokenizer.file.name}"
             )
+        # Above we use the file to check whether we have more tokens
+        # This alters the file pointer of the file
+        # Hence we must reset the pointer:
+        self.jack_tokenizer.next_pos = 0
+        self.jack_tokenizer.cur_line = "\n"
 
     def _advance(self) -> None:
         """Advance the tokenizer."""
@@ -69,7 +74,8 @@ class CompilationEngine:
         if token_type == "KEYWORD":
             self.token = self.token.lower()
 
-        import pdb; pdb.set_trace()
+        # FIXME:
+        # import pdb; pdb.set_trace()
 
     def compile_tokens_only(self) -> None:
         """Only compile tokens."""

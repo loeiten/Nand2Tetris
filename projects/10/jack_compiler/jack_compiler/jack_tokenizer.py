@@ -76,7 +76,7 @@ class JackTokenizer:
         # pylint: disable=unsubscriptable-object
         self.match: Optional[re.Match[str]] = None
         self.cur_token = ""
-        self.cur_line = self.file.readline().decode("utf-8")
+        self.cur_line = self.file.readline()
         self.next_pos = 0
 
         backslash = "\\"  # f-string expression part cannot include a backslash
@@ -117,7 +117,7 @@ class JackTokenizer:
             print(f"self.file.tell(): {self.file.tell()}\n")
             # import pdb; pdb.set_trace()
             if self.match is None:
-                self.cur_line = self.file.readline().decode("utf-8")
+                self.cur_line = self.file.readline()
                 continue
 
             if self._next_is_comment():
@@ -144,7 +144,7 @@ class JackTokenizer:
 
         # Check for line commands
         if self.match.lastgroup == "LINE_COMMENT":
-            self.cur_line = self.file.readline().decode("utf-8")
+            self.cur_line = self.file.readline()
             return True
 
         # Check for block commands
@@ -161,7 +161,7 @@ class JackTokenizer:
                     # NOTE: span() returns the (match.start(group), match.end(group))
                     self._eat(block_comment_end_match.span()[1])
                 else:
-                    self.cur_line = self.file.readline().decode("utf-8")
+                    self.cur_line = self.file.readline()
             return True
 
         return False
