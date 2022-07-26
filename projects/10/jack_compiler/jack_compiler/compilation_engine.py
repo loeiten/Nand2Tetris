@@ -45,6 +45,9 @@ class CompilationEngine:
         Args:
             jack_tokenizer (JackTokenizer): The tokenizer
             out_file (TextIOWrapper): Path of the output file
+
+        Raises:
+            RuntimeError: If the file does not contain any tokens
         """
         self.jack_tokenizer = jack_tokenizer
         self.out_file = out_file
@@ -60,8 +63,7 @@ class CompilationEngine:
         # Above we use the file to check whether we have more tokens
         # This alters the file pointer of the file
         # Hence we must reset the pointer:
-        self.jack_tokenizer.next_pos = 0
-        self.jack_tokenizer.cur_line = "\n"
+        self.jack_tokenizer.reset()
 
     def _advance(self) -> None:
         """Advance the tokenizer."""
@@ -74,14 +76,15 @@ class CompilationEngine:
         if token_type == "KEYWORD":
             self.token = self.token.lower()
 
-        # FIXME:
-        # import pdb; pdb.set_trace()
-
     def compile_tokens_only(self) -> None:
         """Only compile tokens."""
         while self.jack_tokenizer.has_more_tokens():
             self._advance()
-            self.write_token(token_type=self.token_type, token=self.token)
+            # Type ignore as mypy doesn't detect that we are ensuring the
+            # correct input type for token_type
+            self.write_token(
+                token_type=self.token_type, token=self.token  # type: ignore
+            )
 
     def write_token(self, token_type: TerminalElement, token: str) -> None:
         """Write the token or grammar wrapped by the xml type to the out_file.
@@ -138,8 +141,7 @@ class CompilationEngine:
         """Compile a complete method, function or constructor."""
 
     def compile_parameter_list(self) -> None:
-        """
-        Compile a (possibly empty) parameter list.
+        """Compile a (possibly empty) parameter list.
 
         Does not handle the enclosing "()"
         """
@@ -151,8 +153,7 @@ class CompilationEngine:
         """Compile a var declaration."""
 
     def compile_statements(self) -> None:
-        """
-        Compile a sequence of statements.
+        """Compile a sequence of statements.
 
         Does not handle the enclosing "{}"
         """

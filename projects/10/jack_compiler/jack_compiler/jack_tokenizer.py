@@ -76,6 +76,7 @@ class JackTokenizer:
         # pylint: disable=unsubscriptable-object
         self.match: Optional[re.Match[str]] = None
         self.cur_token = ""
+        self.file.seek(0)
         self.cur_line = self.file.readline()
         self.next_pos = 0
 
@@ -96,6 +97,14 @@ class JackTokenizer:
         self.compiled_regex = re.compile(regex_str)
         self.block_comment_end_regex = re.compile(r"\s*\*/")
 
+    def reset(self) -> None:
+        """Reset the tokenizer."""
+        self.match = None
+        self.cur_token = ""
+        self.file.seek(0)
+        self.cur_line = self.file.readline()
+        self.next_pos = 0
+
     def has_more_tokens(self) -> bool:
         """Return if the file has more tokens.
 
@@ -110,12 +119,6 @@ class JackTokenizer:
         while bool(self.cur_line):
             self.match = self.compiled_regex.match(self.cur_line)
             # On newlines there will be no match
-            # FIXME:
-            print(f"self.match: {self.match}")
-            print(f"self.cur_line: {repr(self.cur_line)}")
-            print(f"self.cur_token: {self.cur_token}")
-            print(f"self.file.tell(): {self.file.tell()}\n")
-            # import pdb; pdb.set_trace()
             if self.match is None:
                 self.cur_line = self.file.readline()
                 continue
@@ -133,8 +136,7 @@ class JackTokenizer:
         return found_token
 
     def _next_is_comment(self) -> bool:
-        """
-        Check if the next part of the current line is a comment, advance the line.
+        """Check if the next part of the current line is a comment, advance the line.
 
         Returns:
             bool: True
@@ -199,6 +201,10 @@ class JackTokenizer:
 
         This method should only be called if `has_more_tokens` is True
 
+        Raises:
+            RuntimeError: If no match has been found
+            RuntimeError: If the found token is not a valid token
+
         Returns:
             TOKEN: The token type
         """
@@ -212,6 +218,10 @@ class JackTokenizer:
         """Return the keyword which is the current token.
 
         This method should be called only if `tokenType` is `KEYWORD`
+
+        Raises:
+            RuntimeError: If no match has been found
+            RuntimeError: If the found token is not a valid token
 
         Returns:
             KEYWORD: The keyword
@@ -227,6 +237,10 @@ class JackTokenizer:
         """Return the character which is the current token.
 
         This method should be called only if `tokenType` is `SYMBOL`
+
+        Raises:
+            RuntimeError: If no match has been found
+            RuntimeError: If the found token is not a valid token
 
         Returns:
             SYMBOL: The symbol
