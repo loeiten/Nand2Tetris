@@ -133,9 +133,58 @@ class CompilationEngine:
             raise RuntimeError(
                 f"{self.jack_tokenizer.file.name} did not start with a definition of 'class'"
             )
+        # Write class
+        self.open_grammar("class")
+        self.write_token(self.token_type, self.token)
+
+        # Class name
+        self._advance()
+        self.write_token(self.token_type, self.token)
+
+        # The { symbol
+        self._advance()
+        self.write_token(self.token_type, self.token)
+
+        # Zero or more classVarDec
+        self._advance()
+        while self.token in ("static", "field"):
+            self.compile_class_var_dec()
+            self._advance()
+
+        self.close_grammar("class")
 
     def compile_class_var_dec(self) -> None:
         """Compile a static variable declaration or a field variable declaration."""
+        self.open_grammar("classVarDec")
+
+        # static | field
+        self.write_token(self.token_type, self.token)
+
+        # type
+        self._advance()
+        self.write_token(self.token_type, self.token)
+
+        # varName
+        self._advance()
+        self.write_token(self.token_type, self.token)
+
+        self._advance()
+
+        # (, varName)*
+        while self.token == ",":
+            # The , symbol
+            self.write_token(self.token_type, self.token)
+
+            # varName
+            self._advance()
+            self.write_token(self.token_type, self.token)
+
+            self._advance()
+
+        # The ; symbol
+        self.write_token(self.token_type, self.token)
+
+        self.close_grammar("classVarDec")
 
     def compile_subroutine_dec(self) -> None:
         """Compile a complete method, function or constructor."""
