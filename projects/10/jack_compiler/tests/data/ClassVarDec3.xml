@@ -1,0 +1,18 @@
+<classVarDec>
+  <keyword> field </keyword>
+  <keyword> SillyClass4 </keyword>
+  <identifier> dummy1 </identifier>
+  <symbol> , </symbol>
+  <identifier> dummy2 </identifier>
+  <symbol> ; </symbol>
+</classVarDec>
+<classVarDec>
+  <keyword> static </keyword>
+  <keyword> float </keyword>
+  <identifier> dummy3 </identifier>
+  <symbol> , </symbol>
+  <identifier> dummy4 </identifier>
+  <symbol> , </symbol>
+  <identifier> dummy5 </identifier>
+  <symbol> ; </symbol>
+</classVarDec>

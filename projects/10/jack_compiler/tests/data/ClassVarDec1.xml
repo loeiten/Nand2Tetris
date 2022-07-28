@@ -1,0 +1,6 @@
+<classVarDec>
+  <keyword> static </keyword>
+  <keyword> int </keyword>
+  <identifier> dummy </identifier>
+  <symbol> ; </symbol>
+</classVarDec>

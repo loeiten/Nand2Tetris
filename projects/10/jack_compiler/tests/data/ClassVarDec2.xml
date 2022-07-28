@@ -1,0 +1,12 @@
+<classVarDec>
+  <keyword> field </keyword>
+  <keyword> SillyClass </keyword>
+  <identifier> dummy </identifier>
+  <symbol> ; </symbol>
+</classVarDec>
+<classVarDec>
+  <keyword> static </keyword>
+  <keyword> boolean </keyword>
+  <identifier> dummy2 </identifier>
+  <symbol> ; </symbol>
+</classVarDec>

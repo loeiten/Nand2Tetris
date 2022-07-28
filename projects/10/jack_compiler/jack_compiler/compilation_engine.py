@@ -112,7 +112,7 @@ class CompilationEngine:
         Args:
             grammar_type (NON_TERMINAL_ELEMENT): The grammar tag
         """
-        self.out_file.write(f"{' '*self.indentation}<{grammar_type}>")
+        self.out_file.write(f"{' '*self.indentation}<{grammar_type}>\n")
         # Increase the current indentation
         self.indentation += 2
 
@@ -124,10 +124,11 @@ class CompilationEngine:
         """
         # Decrease the current indentation
         self.indentation = max(0, self.indentation - 2)
-        self.out_file.write(f"{' '*self.indentation}</{grammar_type}>")
+        self.out_file.write(f"{' '*self.indentation}</{grammar_type}>\n")
 
     def compile_class(self) -> None:
         """Compile a complete class."""
+        assert self.jack_tokenizer.has_more_tokens()
         self._advance()
         if self.token != "class":
             raise RuntimeError(
@@ -135,20 +136,26 @@ class CompilationEngine:
             )
         # Write class
         self.open_grammar("class")
-        self.write_token(self.token_type, self.token)
+        # Type ignore as mypy doesn't detect that we are ensuring the
+        # correct input type for token_type
+        self.write_token(self.token_type, self.token)  # type: ignore
 
         # Class name
+        assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)
+        self.write_token(self.token_type, self.token)  # type: ignore
 
         # The { symbol
+        assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)
+        self.write_token(self.token_type, self.token)  # type: ignore
 
         # Zero or more classVarDec
+        assert self.jack_tokenizer.has_more_tokens()
         self._advance()
         while self.token in ("static", "field"):
             self.compile_class_var_dec()
+            assert self.jack_tokenizer.has_more_tokens()
             self._advance()
 
         self.close_grammar("class")
@@ -158,31 +165,36 @@ class CompilationEngine:
         self.open_grammar("classVarDec")
 
         # static | field
-        self.write_token(self.token_type, self.token)
+        self.write_token(self.token_type, self.token)  # type: ignore
 
         # type
+        assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)
+        self.write_token(self.token_type, self.token)  # type: ignore
 
         # varName
+        assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)
+        self.write_token(self.token_type, self.token)  # type: ignore
 
+        assert self.jack_tokenizer.has_more_tokens()
         self._advance()
 
         # (, varName)*
         while self.token == ",":
             # The , symbol
-            self.write_token(self.token_type, self.token)
+            self.write_token(self.token_type, self.token)  # type: ignore
 
             # varName
+            assert self.jack_tokenizer.has_more_tokens()
             self._advance()
-            self.write_token(self.token_type, self.token)
+            self.write_token(self.token_type, self.token)  # type: ignore
 
+            assert self.jack_tokenizer.has_more_tokens()
             self._advance()
 
         # The ; symbol
-        self.write_token(self.token_type, self.token)
+        self.write_token(self.token_type, self.token)  # type: ignore
 
         self.close_grammar("classVarDec")
 
