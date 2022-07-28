@@ -1,6 +1,6 @@
 <classVarDec>
   <keyword> field </keyword>
-  <keyword> SillyClass </keyword>
+  <identifier> SillyClass </identifier>
   <identifier> dummy </identifier>
   <symbol> ; </symbol>
 </classVarDec>

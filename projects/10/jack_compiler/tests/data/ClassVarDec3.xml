@@ -1,6 +1,6 @@
 <classVarDec>
   <keyword> field </keyword>
-  <keyword> SillyClass4 </keyword>
+  <identifier> SillyClass4 </identifier>
   <identifier> dummy1 </identifier>
   <symbol> , </symbol>
   <identifier> dummy2 </identifier>
@@ -8,7 +8,7 @@
 </classVarDec>
 <classVarDec>
   <keyword> static </keyword>
-  <keyword> float </keyword>
+  <keyword> char </keyword>
   <identifier> dummy3 </identifier>
   <symbol> , </symbol>
   <identifier> dummy4 </identifier>

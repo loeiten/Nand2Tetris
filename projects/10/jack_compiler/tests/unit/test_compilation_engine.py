@@ -1,4 +1,5 @@
 """Module containing test for the CompilationEngine."""
+# pylint: disable=protected-access
 
 from pathlib import Path
 
@@ -7,7 +8,7 @@ from jack_compiler.compilation_engine import CompilationEngine
 from jack_compiler.jack_tokenizer import JackTokenizer
 
 
-@pytest.mark.parametrize("test_name", ("ClassVarDec1",))
+@pytest.mark.parametrize("test_name", ("ClassVarDec1", "ClassVarDec2", "ClassVarDec3"))
 def test_class_var_dec(tmp_path: Path, data_path: Path, test_name: str) -> None:
     """Test the class_var_dec function.
 
@@ -25,9 +26,12 @@ def test_class_var_dec(tmp_path: Path, data_path: Path, test_name: str) -> None:
             )
             # The compilation engine assumes that we have advanced
             assert jack_tokenizer.has_more_tokens()
-            compilation_engine._advance()  # pylint: disable=protected-access
-
+            compilation_engine._advance()
             compilation_engine.compile_class_var_dec()
+
+            if jack_tokenizer.has_more_tokens():
+                compilation_engine._advance()
+                compilation_engine.compile_class_var_dec()
 
     with data_path.joinpath(f"{test_name}.xml").open(encoding="utf-8") as expected_file:
         expected = expected_file.readlines()
