@@ -158,6 +158,14 @@ class CompilationEngine:
             assert self.jack_tokenizer.has_more_tokens()
             self._advance()
 
+        # Zero or more subroutineDec
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
+        while self.token in ("constructor", "function", "method"):
+            self.compile_subroutine_dec()
+            assert self.jack_tokenizer.has_more_tokens()
+            self._advance()
+
         self.close_grammar("class")
 
     def compile_class_var_dec(self) -> None:
@@ -200,18 +208,85 @@ class CompilationEngine:
 
     def compile_subroutine_dec(self) -> None:
         """Compile a complete method, function or constructor."""
+        self.open_grammar("subroutineDec")
+
+        # constructor | function | method
+        self.write_token(self.token_type, self.token)  # type: ignore
+
+        # void | type
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
+        self.write_token(self.token_type, self.token)  # type: ignore
+
+        # subroutineName
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
+        self.write_token(self.token_type, self.token)  # type: ignore
+
+        # The ( symbol
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
+        self.write_token(self.token_type, self.token)  # type: ignore
+
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
+
+        # parameterList
+        self.compile_parameter_list()
+
+        # The ) symbol
+        self.write_token(self.token_type, self.token)  # type: ignore
+
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
+
+        # subRoutine body
+        self.compile_subroutine_body()
+
+        self.close_grammar("subroutineDec")
 
     def compile_parameter_list(self) -> None:
         """Compile a (possibly empty) parameter list.
 
         Does not handle the enclosing "()"
         """
+        self.open_grammar("parameterList")
+
+        while self.token != ")":
+            # type | varName | the symbol ,
+            self.write_token(self.token_type, self.token)  # type: ignore
+            assert self.jack_tokenizer.has_more_tokens()
+            self._advance()
+
+        self.close_grammar("parameterList")
 
     def compile_subroutine_body(self) -> None:
         """Compile a subroutine's body."""
+        self.open_grammar("subroutineBody")
+
+        # The { symbol
+        self.write_token(self.token_type, self.token)  # type: ignore
+
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
+
+        # varDec
+        while self.token == "var":
+            self.compile_var_dec()
+
+        # The } symbol
+        self.write_token(self.token_type, self.token)  # type: ignore
+
+        self.close_grammar("subroutineBody")
 
     def compile_var_dec(self) -> None:
         """Compile a var declaration."""
+        self.open_grammar("varDec")
+
+        # var
+        self.write_token(self.token_type, self.token)  # type: ignore
+
+        self.close_grammar("varDec")
 
     def compile_statements(self) -> None:
         """Compile a sequence of statements.
