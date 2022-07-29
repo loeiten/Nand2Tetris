@@ -40,3 +40,9 @@ def test_class_var_dec(tmp_path: Path, data_path: Path, test_name: str) -> None:
         result = result_file.readlines()
 
     assert expected == result
+
+
+# FIXME: Start testing from terminal statements
+# FIXME: Add recursive testing
+# FIXME: Do not start grammar if starred expression (see classVarDec of ArrayTest as an example)
+# FIXME: Make a test of this

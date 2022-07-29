@@ -17,7 +17,7 @@ NonTerminalElement = Literal[
     "subroutineBody",
     "varDec",
     "statements",
-    "LetStatement",
+    "letStatement",
     "ifStatement",
     "whileStatement",
     "doStatement",
@@ -274,6 +274,13 @@ class CompilationEngine:
         while self.token == "var":
             self.compile_var_dec()
 
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
+
+        # statements
+        if self.token != "}":
+            self.compile_statements()
+
         # The } symbol
         self.write_token(self.token_type, self.token)  # type: ignore
 
@@ -286,6 +293,35 @@ class CompilationEngine:
         # var
         self.write_token(self.token_type, self.token)  # type: ignore
 
+        # type
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
+        self.write_token(self.token_type, self.token)  # type: ignore
+
+        # varName
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
+        self.write_token(self.token_type, self.token)  # type: ignore
+
+        # (, varName)*
+        while self.token == ",":
+            # The , symbol
+            self.write_token(self.token_type, self.token)  # type: ignore
+
+            # varName
+            assert self.jack_tokenizer.has_more_tokens()
+            self._advance()
+            self.write_token(self.token_type, self.token)  # type: ignore
+
+            assert self.jack_tokenizer.has_more_tokens()
+            self._advance()
+
+        # The symbol ;
+        self.write_token(self.token_type, self.token)  # type: ignore
+
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
+
         self.close_grammar("varDec")
 
     def compile_statements(self) -> None:
@@ -293,21 +329,93 @@ class CompilationEngine:
 
         Does not handle the enclosing "{}"
         """
+        self.open_grammar("statements")
+
+        while self.token in ("let", "if", "while", "do", "return"):
+            if self.token == "let":
+                self.compile_let()
+            elif self.token == "if":
+                self.compile_if()
+            elif self.token == "while":
+                self.compile_while()
+            elif self.token == "do":
+                self.compile_do()
+            elif self.token == "return":
+                self.compile_return()
+
+        self.close_grammar("statements")
 
     def compile_let(self) -> None:
         """Compile a `let` statement."""
+        self.open_grammar("letStatement")
+
+        # let
+        self.write_token(self.token_type, self.token)  # type: ignore
+
+        # varName
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
+        self.write_token(self.token_type, self.token)  # type: ignore
+
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
+
+        # [expression]
+        while self.token != "=":
+            # The symbol [
+            self.write_token(self.token_type, self.token)  # type: ignore
+
+            # expression
+            assert self.jack_tokenizer.has_more_tokens()
+            self._advance()
+            self.compile_expression()
+
+            # The symbol ]
+            assert self.jack_tokenizer.has_more_tokens()
+            self._advance()
+            self.write_token(self.token_type, self.token)  # type: ignore
+
+            assert self.jack_tokenizer.has_more_tokens()
+            self._advance()
+
+        # The symbol =
+        self.write_token(self.token_type, self.token)  # type: ignore
+
+        # expression
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
+        self.compile_expression()
+
+        # The ; symbol
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
+        self.write_token(self.token_type, self.token)  # type: ignore
+
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
+
+        self.close_grammar("letStatement")
 
     def compile_if(self) -> None:
         """Compile an `if` statement, possibly with a trailing else clause."""
+        self.open_grammar("ifStatement")
+        # FIXME: YOU ARE HERE
+        self.close_grammar("ifStatement")
 
     def compile_while(self) -> None:
         """Compile a `while` statement."""
+        self.open_grammar("whileStatement")
+        self.close_grammar("whileStatement")
 
     def compile_do(self) -> None:
         """Compile a `do` statement."""
+        self.open_grammar("doStatement")
+        self.close_grammar("doStatement")
 
     def compile_return(self) -> None:
         """Compile a `return` statement."""
+        self.open_grammar("returnStatement")
+        self.close_grammar("returnStatement")
 
     def compile_expression(self) -> None:
         """Compile an `expression` statement."""
