@@ -176,6 +176,20 @@ class JackTokenizer:
         """
         self.cur_line = self.cur_line[char_number:]
 
+    def look_ahead(self) -> str:
+        """Read the next token.
+
+        Raises:
+            RuntimeError: If match or lastgroup is None
+
+        Returns:
+            str: The next token
+        """
+        assert self.has_more_tokens()
+        if (self.match is None) or (self.match.lastgroup is None):
+            raise RuntimeError("Could not look ahead as no matches were found.")
+        return self.match.group(self.match.lastgroup)
+
     def advance(self) -> None:
         """Read the next token and make it the current token.
 
@@ -184,12 +198,15 @@ class JackTokenizer:
         - Eat the match on the current line
         - Move the file pointer
 
-        This method should be called only if has_more_lines is true.
+        This method should be called only if has_more_tokens is true.
+
+        Raises:
+            RuntimeError: If match or lastgroup is None
         """
         if (self.match is None) or (self.match.lastgroup is None):
             raise RuntimeError(
                 "Could not set cur_token as no matches were found, "
-                "did you run has_more_lines first?"
+                "did you run has_more_tokens first?"
             )
 
         self.cur_token = self.match.group(self.match.lastgroup)

@@ -1,7 +1,7 @@
 """Module containing the CompilationEngine class."""
 
 from io import TextIOWrapper
-from typing import Literal
+from typing import Literal, get_args
 
 from jack_compiler.jack_tokenizer import JackTokenizer
 
@@ -26,6 +26,8 @@ NonTerminalElement = Literal[
     "term",
     "expressionList",
 ]
+
+Op = Literal["+", "-", "*", "/", "&", "|", "<", ">", "="]
 
 
 class CompilationEngine:
@@ -544,12 +546,32 @@ class CompilationEngine:
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
 
-
         self._close_grammar("returnStatement")
 
     def compile_expression(self) -> None:
         """Compile an `expression` statement."""
-        # FIXME: Add look-ahead and implement for varName (identifier - see slide 91)
+        self._open_grammar("expression")
+
+        # term
+        self.compile_term()
+
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
+
+        # (op term)*
+        while self.token in get_args(Op):
+            # op
+            self.write_token(self.token_type, self.token)  # type: ignore
+
+            # term
+            assert self.jack_tokenizer.has_more_tokens()
+            self._advance()
+            self.compile_term()
+
+            assert self.jack_tokenizer.has_more_tokens()
+            self._advance()
+
+        self._close_grammar("expression")
 
     def compile_term(self) -> None:
         """Compile a term.
@@ -560,6 +582,82 @@ class CompilationEngine:
         to distinguish between the possibilities.
         Any other token is not part of this term will not be advanced over.
         """
+        self._open_grammar("term")
+
+        if self.token_type in ("integerConstant", "stringConstant", "keyword"):
+            # integerConstant | stringConstant | keywordConstant | unaryOp
+            self.write_token(self.token_type, self.token)  # type: ignore
+        elif self.token == "(":
+            # '('expression')'
+
+            # '('
+            self.write_token(self.token_type, self.token)  # type: ignore
+
+            # expression
+            assert self.jack_tokenizer.has_more_tokens()
+            self._advance()
+            self.compile_expression()
+
+            # ')'
+            assert self.jack_tokenizer.has_more_tokens()
+            self._advance()
+            self.write_token(self.token_type, self.token)  # type: ignore
+        else:
+            # varName | varName'['expression']' | subroutineCall
+            next_token = self.jack_tokenizer.look_ahead()
+
+            if next_token == "[":
+                # varName'['expression']'
+
+                # varName
+                self.write_token(self.token_type, self.token)  # type: ignore
+
+                # The [ symbol
+                assert self.jack_tokenizer.has_more_tokens()
+                self._advance()
+                self.write_token(self.token_type, self.token)  # type: ignore
+
+                # expression
+                assert self.jack_tokenizer.has_more_tokens()
+                self._advance()
+                self.compile_expression()
+
+                # The ] symbol
+                assert self.jack_tokenizer.has_more_tokens()
+                self._advance()
+                self.write_token(self.token_type, self.token)  # type: ignore
+            elif next_token in ("(", "."):
+                self._write_subroutine_call()
+            else:
+                # varName
+                self.write_token(self.token_type, self.token)  # type: ignore
+
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
+
+        self._close_grammar("term")
 
     def compile_expression_list(self) -> None:
         """Compile a (possibly empty) comma-separated list of expressions."""
+        self._open_grammar("expressionList")
+
+        # expression
+        self.compile_expression()
+
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
+
+        # (',' expression)*
+        while self.token == ",":
+            # The , symbol
+            self.write_token(self.token_type, self.token)  # type: ignore
+
+            # expression
+            assert self.jack_tokenizer.has_more_tokens()
+            self._advance()
+            self.compile_expression()
+
+            assert self.jack_tokenizer.has_more_tokens()
+            self._advance()
+
+        self._close_grammar("expressionList")
