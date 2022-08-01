@@ -1,0 +1,12 @@
+12345
+"I'm beautiful & string. 123 < 99;"
+true
+false
+null
+this
+myVarName
+myVarName[15]
+myVarName()
+myVarName.subroutineName()
+- 99
+~ myVarName

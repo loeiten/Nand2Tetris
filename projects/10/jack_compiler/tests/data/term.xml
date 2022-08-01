@@ -1,0 +1,55 @@
+<term>
+  <integerConstant> 12345 </integerConstant>
+</term>
+<term>
+  <symbol> &quot; </symbol>
+  <stringConstant> I'm beatiful &amp; string. 123 &lt; 99 </string>
+  <symbol> &quot; </symbol>
+</term>
+<term>
+  <keyword> true </keyword>
+</term>
+<term>
+  <keyword> false </keyword>
+</term>
+<term>
+  <keyword> null </keyword>
+</term>
+<term>
+  <keyword> this </keyword>
+</term>
+<term>
+  <identifier> myVarName </identifier>
+</term>
+<term>
+  <identifier> myVarName </identifier>
+  <symbol> [ </symbol>
+    <expression>
+      <integerConstant> 15 </integerConstant>
+    </expression>
+  <symbol> ] </symbol>
+</term>
+<term>
+  <identifier> myVarName </identifier>
+  <symbol> ( </symbol>
+    <parameterList>
+    </parameterList>
+  <symbol> ) </symbol>
+</term>
+<term>
+  <identifier> myVarName </identifier>
+  <symbol> . </symbol>
+  <identifier> subroutineName </identifier>
+  <symbol> ( </symbol>
+    <parameterList>
+    </parameterList>
+  <symbol> ) </symbol>
+</term>
+<term>
+  <symbol> - </symbol>
+  <integerConstant> 99 </integerConstant>
+</term>
+<term>
+  <symbol> ~ </symbol>
+  <identifier> myVarName </identifier>
+</term>
