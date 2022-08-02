@@ -96,7 +96,6 @@ class CompilationEngine:
             token (Union[str, int]): The body inside the tag.
                 <, >, ", and & are outputted as &lt;, &gt;, &quot;, and &amp;
         """
-        # FIXME: When adding a new identifier: Goes amok :(
         token = (
             str(token)
             .replace("&", "&amp;")
@@ -613,8 +612,6 @@ class CompilationEngine:
                 # varName
                 self.write_token(self.token_type, self.token)  # type: ignore
         elif self.token == "(":
-            # FIXME: This is NOT a subroutine call
-            # FIXME: Add (123) to the stuff
             # '('expression')'
 
             # '('
@@ -650,13 +647,13 @@ class CompilationEngine:
         """Compile a (possibly empty) comma-separated list of expressions."""
         self._open_grammar("expressionList")
 
-        while self.token != ")":
+        if self.token != ")":
             # expression
             self.compile_expression()
 
             next_token = self.jack_tokenizer.look_ahead()
             # (',' expression)*
-            while next_token == ",":
+            while next_token != ")":
                 # The , symbol
                 assert self.jack_tokenizer.has_more_tokens()
                 self._advance()
@@ -669,7 +666,9 @@ class CompilationEngine:
                 next_token = self.jack_tokenizer.look_ahead()
 
                 if next_token == ")":
-                    # Advance at the end of the list, so that self.token is the same irrespective of whether the expression list was empty or not
+                    # Advance at the end of the list, so that self.token is
+                    # the same irrespective of whether the expression list
+                    # was empty or not
                     assert self.jack_tokenizer.has_more_tokens()
                     self._advance()
 
