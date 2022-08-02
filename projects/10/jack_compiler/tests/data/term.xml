@@ -2,9 +2,7 @@
   <integerConstant> 12345 </integerConstant>
 </term>
 <term>
-  <symbol> &quot; </symbol>
-  <stringConstant> I'm beatiful &amp; string. 123 &lt; 99 </string>
-  <symbol> &quot; </symbol>
+  <stringConstant> I'm beautiful &amp; string. 123 &lt; 99; </stringConstant>
 </term>
 <term>
   <keyword> true </keyword>
@@ -24,16 +22,18 @@
 <term>
   <identifier> myVarName </identifier>
   <symbol> [ </symbol>
-    <expression>
+  <expression>
+    <term>
       <integerConstant> 15 </integerConstant>
-    </expression>
+    </term>
+  </expression>
   <symbol> ] </symbol>
 </term>
 <term>
   <identifier> myVarName </identifier>
   <symbol> ( </symbol>
-    <parameterList>
-    </parameterList>
+  <expressionList>
+  </expressionList>
   <symbol> ) </symbol>
 </term>
 <term>
@@ -41,15 +41,19 @@
   <symbol> . </symbol>
   <identifier> subroutineName </identifier>
   <symbol> ( </symbol>
-    <parameterList>
-    </parameterList>
+  <expressionList>
+  </expressionList>
   <symbol> ) </symbol>
 </term>
 <term>
   <symbol> - </symbol>
-  <integerConstant> 99 </integerConstant>
+  <term>
+    <integerConstant> 99 </integerConstant>
+  </term>
 </term>
 <term>
   <symbol> ~ </symbol>
-  <identifier> myVarName </identifier>
+  <term>
+    <identifier> myVarName </identifier>
+  </term>
 </term>

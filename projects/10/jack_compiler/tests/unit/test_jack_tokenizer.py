@@ -222,7 +222,7 @@ def test_single_line_advance() -> None:
         jack_tokenizer.advance()
     assert (
         e_info.value.args[0]
-        == "Could not set cur_token as no matches were found, did you run has_more_lines first?"
+        == "Could not set cur_token as no matches were found, did you run has_more_tokens first?"
     )
     assert jack_tokenizer.cur_line == "   Hello, world!"
 
@@ -248,7 +248,7 @@ def test_single_line_advance() -> None:
         jack_tokenizer.advance()
     assert (
         e_info.value.args[0]
-        == "Could not set cur_token as no matches were found, did you run has_more_lines first?"
+        == "Could not set cur_token as no matches were found, did you run has_more_tokens first?"
     )
     assert jack_tokenizer.cur_line == ""
 
