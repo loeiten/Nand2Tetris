@@ -69,14 +69,7 @@ class CompilationEngine:
 
     def _advance(self) -> None:
         """Advance the tokenizer."""
-        # FIXME:
-        print("CALL TO ADVANCE:")
-        print(f"self.jack_tokenizer.cur_line: {repr(self.jack_tokenizer.cur_line)}")
-        print(f"self.jack_tokenizer.file.tell(): {self.jack_tokenizer.file.tell()}")
         self.jack_tokenizer.advance()
-        print("After advance:")
-        print(f"self.jack_tokenizer.cur_line: {repr(self.jack_tokenizer.cur_line)}")
-        print(f"self.jack_tokenizer.file.tell(): {self.jack_tokenizer.file.tell()}")
 
         token_type = self.jack_tokenizer.token_type()
         func = getattr(self.jack_tokenizer, self.token_map[token_type]["function_name"])
@@ -104,8 +97,6 @@ class CompilationEngine:
                 <, >, ", and & are outputted as &lt;, &gt;, &quot;, and &amp;
         """
         # FIXME: When adding a new identifier: Goes amok :(
-        # FIXME:
-        # print(f"{token}")
         token = (
             str(token)
             .replace("&", "&amp;")
@@ -113,11 +104,6 @@ class CompilationEngine:
             .replace(">", "&gt;")
             .replace('"', "&quot;")
         )
-        # FIXME:
-        # import pdb; pdb.set_trace()
-        print(repr(f"{' '*self.indentation}<{token_type}> {token} </{token_type}>\n"))
-        # if "stringConstant" in str(self.token_type):
-        #      import pdb; pdb.set_trace()
         self.out_file.write(
             f"{' '*self.indentation}<{token_type}> {token} </{token_type}>\n"
         )
@@ -493,8 +479,6 @@ class CompilationEngine:
     def _write_subroutine_call(self):
         """Write the subroutine call."""
         # subroutineName | varName | className
-        # FIXME:
-        # import pdb; pdb.set_trace()
         self.write_token(self.token_type, self.token)  # type: ignore
 
         next_token = self.jack_tokenizer.look_ahead()
@@ -601,14 +585,7 @@ class CompilationEngine:
             self.write_token(self.token_type, self.token)  # type: ignore
         elif self.token_type == "identifier":
             # varName | varName'['expression']' | subroutineCall
-            # FIXME:
-            # print(f"self.jack_tokenizer.cur_line = {repr(self.jack_tokenizer.cur_line)}")
-            # print(f"self.token = {repr(self.token)}")
-            # print(f"BBB self.jack_tokenizer.next_pos = {self.jack_tokenizer.next_pos}")
             next_token = self.jack_tokenizer.look_ahead()
-            # print(f"AAA self.jack_tokenizer.next_pos = {self.jack_tokenizer.next_pos}")
-            # print(f"next_token = {repr(next_token)}")
-            # import pdb; pdb.set_trace()
 
             if next_token == "[":
                 # varName'['expression']'
@@ -617,13 +594,7 @@ class CompilationEngine:
                 self.write_token(self.token_type, self.token)  # type: ignore
 
                 # The [ symbol
-                print(
-                    f"B222 self.jack_tokenizer.next_pos = {self.jack_tokenizer.next_pos}"
-                )
                 assert self.jack_tokenizer.has_more_tokens()
-                print(
-                    f"A222 self.jack_tokenizer.next_pos = {self.jack_tokenizer.next_pos}"
-                )
                 self._advance()
                 self.write_token(self.token_type, self.token)  # type: ignore
 
@@ -634,13 +605,7 @@ class CompilationEngine:
 
                 # The ] symbol
                 assert self.jack_tokenizer.has_more_tokens()
-                print(
-                    f"INSIDE BEFORE adv self.jack_tokenizer.cur_line: {repr(self.jack_tokenizer.cur_line)}"
-                )
                 self._advance()
-                print(
-                    f"INSIDE AFTER adv self.jack_tokenizer.cur_line: {repr(self.jack_tokenizer.cur_line)}"
-                )
                 self.write_token(self.token_type, self.token)  # type: ignore
             elif next_token in ("(", "."):
                 self._write_subroutine_call()

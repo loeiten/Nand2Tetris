@@ -46,6 +46,15 @@
   <symbol> ) </symbol>
 </term>
 <term>
+  <symbol> ( </symbol>
+  <expression>
+    <term>
+      <integerConstant> 1988 </integerConstant>
+    </term>
+  </expression>
+  <symbol> ) </symbol>
+</term>
+<term>
   <symbol> - </symbol>
   <term>
     <integerConstant> 99 </integerConstant>

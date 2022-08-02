@@ -116,16 +116,8 @@ class JackTokenizer:
         # The return value of .readline() is unambiguous
         # It will return "" only on the last line
         # A blank line will be returned as "\n"
-        # FIXME:
-        # print(f"INSIDE HAS MORE TOKENS:")
-        # print(f"self.cur_line: {repr(self.cur_line)}")
-        # print(f"self.next_pos: {self.next_pos}")
-        # print(f"cur_pos: {cur_pos}")
         while bool(self.cur_line):
             self.match = self.compiled_regex.match(self.cur_line)
-            # FIXME:
-            # print(f"self.file.tell(): {self.file.tell()}")
-            # print(f"self.match: {self.match}")
             # On newlines there will be no match
             if self.match is None:
                 self.cur_line = self.file.readline()
@@ -139,8 +131,6 @@ class JackTokenizer:
             break
 
         self.next_pos = self.file.tell()
-        # FIXME:
-        # print(f"self.next_pos: {self.next_pos}")
         self.file.seek(cur_pos)
         # Next line is empty, no more tokens
         return found_token
@@ -195,8 +185,6 @@ class JackTokenizer:
         Returns:
             Optional[str]: The next token
         """
-        # FIXME:
-        # print(f"BEFORE: self.next_pos = {self.next_pos}")
         original_next_pos = self.next_pos
         original_cur_line = self.cur_line
         more_tokens = self.has_more_tokens()
@@ -205,8 +193,6 @@ class JackTokenizer:
         self.cur_line = original_cur_line
         if not more_tokens:
             return None
-        # self.next_pos = original_next_pos
-        print(f"AFTER: self.next_pos = {self.next_pos}")
         if (self.match is None) or (self.match.lastgroup is None):
             raise RuntimeError("Could not look ahead as no matches were found.")
         return self.match.group(self.match.lastgroup)
@@ -231,8 +217,6 @@ class JackTokenizer:
             )
 
         self.cur_token = self.match.group(self.match.lastgroup)
-        # FIXME:
-        # import pdb; pdb.set_trace()
         self._eat(self.match.span()[1])
         self.file.seek(self.next_pos)
 

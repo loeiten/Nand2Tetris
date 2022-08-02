@@ -55,22 +55,9 @@ def test_term(tmp_path: Path, data_path: Path, test_name: str) -> None:
             compilation_engine = CompilationEngine(
                 jack_tokenizer=jack_tokenizer, out_file=out_file
             )
-            # FIXME:
-            print("\nFROM HERE STARTS THE PROGRAM UNDER TESTING")
             while jack_tokenizer.has_more_tokens():
                 # The compilation engine assumes that we have advanced
-                print(
-                    f"BEFORE adv jack_tokenizer.cur_line: {repr(jack_tokenizer.cur_line)}"
-                )
                 compilation_engine._advance()
-                # compilation_engine._advance()
-                # FIXME:
-                print(
-                    f"AFTER adv jack_tokenizer.cur_line: {repr(jack_tokenizer.cur_line)}"
-                )
-                # print(f"{compilation_engine.token}")
-                # if "stringConstant" in str(compilation_engine.token):
-                #      import pdb; pdb.set_trace()
                 compilation_engine.compile_term()
 
     with data_path.joinpath(f"{test_name}.xml").open(encoding="utf-8") as expected_file:
