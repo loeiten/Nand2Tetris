@@ -1,0 +1,20 @@
+class myClass {
+    field SillyClass4 dummy1, dummy2;
+    field char dummy3, dummy4, dummy5;
+
+    constructor myClass foo(int a, char b, boolean c, myClass d){
+      var boolean foo;
+      var boolean fooBar, qux;
+
+      let b=2;
+      if (true){
+        let c=3;
+      }
+      while(true){
+        let d=4;
+      }
+      do bar();
+      return;
+    }
+    function void bar(){}
+}

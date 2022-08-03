@@ -1,0 +1,117 @@
+<subroutineDec>
+  <keyword> constructor </keyword>
+  <keyword> void </keyword>
+  <identifier> foo </identifier>
+  <symbol> ( </symbol>
+  <parameterList>
+  </parameterList>
+  <symbol> ) </symbol>
+  <subroutineBody>
+    <symbol> { </symbol>
+    <symbol> } </symbol>
+  </subroutineBody>
+</subroutineDec>
+<subroutineDec>
+  <keyword> constructor </keyword>
+  <keyword> int </keyword>
+  <identifier> foo </identifier>
+  <symbol> ( </symbol>
+  <parameterList>
+  </parameterList>
+  <symbol> ) </symbol>
+  <subroutineBody>
+    <symbol> { </symbol>
+    <symbol> } </symbol>
+  </subroutineBody>
+</subroutineDec>
+<subroutineDec>
+  <keyword> constructor </keyword>
+  <identifier> myClass </identifier>
+  <identifier> foo </identifier>
+  <symbol> ( </symbol>
+  <parameterList>
+  </parameterList>
+  <symbol> ) </symbol>
+  <subroutineBody>
+    <symbol> { </symbol>
+    <symbol> } </symbol>
+  </subroutineBody>
+</subroutineDec>
+<subroutineDec>
+  <keyword> method </keyword>
+  <keyword> void </keyword>
+  <identifier> bar </identifier>
+  <symbol> ( </symbol>
+  <parameterList>
+  </parameterList>
+  <symbol> ) </symbol>
+  <subroutineBody>
+    <symbol> { </symbol>
+    <symbol> } </symbol>
+  </subroutineBody>
+</subroutineDec>
+<subroutineDec>
+  <keyword> method </keyword>
+  <keyword> int </keyword>
+  <identifier> bar </identifier>
+  <symbol> ( </symbol>
+  <parameterList>
+  </parameterList>
+  <symbol> ) </symbol>
+  <subroutineBody>
+    <symbol> { </symbol>
+    <symbol> } </symbol>
+  </subroutineBody>
+</subroutineDec>
+<subroutineDec>
+  <keyword> method </keyword>
+  <identifier> myClass </identifier>
+  <identifier> bar </identifier>
+  <symbol> ( </symbol>
+  <parameterList>
+  </parameterList>
+  <symbol> ) </symbol>
+  <subroutineBody>
+    <symbol> { </symbol>
+    <symbol> } </symbol>
+  </subroutineBody>
+</subroutineDec>
+<subroutineDec>
+  <keyword> function </keyword>
+  <keyword> void </keyword>
+  <identifier> baz </identifier>
+  <symbol> ( </symbol>
+  <parameterList>
+  </parameterList>
+  <symbol> ) </symbol>
+  <subroutineBody>
+    <symbol> { </symbol>
+    <symbol> } </symbol>
+  </subroutineBody>
+</subroutineDec>
+<subroutineDec>
+  <keyword> function </keyword>
+  <keyword> int </keyword>
+  <identifier> baz </identifier>
+  <symbol> ( </symbol>
+  <parameterList>
+  </parameterList>
+  <symbol> ) </symbol>
+  <subroutineBody>
+    <symbol> { </symbol>
+    <symbol> } </symbol>
+  </subroutineBody>
+</subroutineDec>
+<subroutineDec>
+  <keyword> function </keyword>
+  <identifier> myClass </identifier>
+  <identifier> baz </identifier>
+  <symbol> ( </symbol>
+  <parameterList>
+  </parameterList>
+  <symbol> ) </symbol>
+  <subroutineBody>
+    <symbol> { </symbol>
+    <symbol> } </symbol>
+  </subroutineBody>
+</subroutineDec>

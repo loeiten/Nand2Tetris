@@ -1,0 +1,5 @@
+class myClass {
+    static int foo;
+
+    function void bar(){}
+}

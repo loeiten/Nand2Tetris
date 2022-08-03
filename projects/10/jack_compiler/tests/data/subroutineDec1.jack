@@ -1,0 +1,11 @@
+constructor void foo(){}
+constructor int foo(){}
+constructor myClass foo(){}
+
+method void bar(){}
+method int bar(){}
+method myClass bar(){}
+
+function void baz(){}
+function int baz(){}
+function myClass baz(){}

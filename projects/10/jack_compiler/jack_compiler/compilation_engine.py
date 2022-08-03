@@ -152,20 +152,25 @@ class CompilationEngine:
         self.write_token(self.token_type, self.token)  # type: ignore
 
         # Zero or more classVarDec
-        assert self.jack_tokenizer.has_more_tokens()
-        self._advance()
-        while self.token in ("static", "field"):
-            self.compile_class_var_dec()
+        next_token = self.jack_tokenizer.look_ahead()
+        while next_token in ("static", "field"):
             assert self.jack_tokenizer.has_more_tokens()
             self._advance()
+            self.compile_class_var_dec()
+            next_token = self.jack_tokenizer.look_ahead()
 
         # Zero or more subroutineDec
-        assert self.jack_tokenizer.has_more_tokens()
-        self._advance()
-        while self.token in ("constructor", "function", "method"):
-            self.compile_subroutine_dec()
+        next_token = self.jack_tokenizer.look_ahead()
+        while next_token in ("constructor", "function", "method"):
             assert self.jack_tokenizer.has_more_tokens()
             self._advance()
+            self.compile_subroutine_dec()
+            next_token = self.jack_tokenizer.look_ahead()
+
+        # The } symbol
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
+        self.write_token(self.token_type, self.token)  # type: ignore
 
         self._close_grammar("class")
 
@@ -229,19 +234,24 @@ class CompilationEngine:
         self._advance()
         self.write_token(self.token_type, self.token)  # type: ignore
 
-        assert self.jack_tokenizer.has_more_tokens()
-        self._advance()
-
         # parameterList
-        self.compile_parameter_list()
+        next_token = self.jack_tokenizer.look_ahead()
+        if next_token != ")":
+            assert self.jack_tokenizer.has_more_tokens()
+            self._advance()
+            self.compile_parameter_list()
+        else:
+            self._open_grammar("parameterList")
+            self._close_grammar("parameterList")
 
         # The ) symbol
-        self.write_token(self.token_type, self.token)  # type: ignore
-
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
+        self.write_token(self.token_type, self.token)  # type: ignore
 
         # subRoutine body
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
         self.compile_subroutine_body()
 
         self._close_grammar("subroutineDec")
@@ -253,24 +263,9 @@ class CompilationEngine:
         """
         self._open_grammar("parameterList")
 
-        # type
-        self.write_token(self.token_type, self.token)  # type: ignore
-
-        # varName
-        assert self.jack_tokenizer.has_more_tokens()
-        self._advance()
-        self.write_token(self.token_type, self.token)  # type: ignore
-
         next_token = self.jack_tokenizer.look_ahead()
-        while next_token == ",":
-            # ,
-            assert self.jack_tokenizer.has_more_tokens()
-            self._advance()
-            self.write_token(self.token_type, self.token)  # type: ignore
-
+        if next_token != ")":
             # type
-            assert self.jack_tokenizer.has_more_tokens()
-            self._advance()
             self.write_token(self.token_type, self.token)  # type: ignore
 
             # varName
@@ -279,6 +274,23 @@ class CompilationEngine:
             self.write_token(self.token_type, self.token)  # type: ignore
 
             next_token = self.jack_tokenizer.look_ahead()
+            while next_token == ",":
+                # ,
+                assert self.jack_tokenizer.has_more_tokens()
+                self._advance()
+                self.write_token(self.token_type, self.token)  # type: ignore
+
+                # type
+                assert self.jack_tokenizer.has_more_tokens()
+                self._advance()
+                self.write_token(self.token_type, self.token)  # type: ignore
+
+                # varName
+                assert self.jack_tokenizer.has_more_tokens()
+                self._advance()
+                self.write_token(self.token_type, self.token)  # type: ignore
+
+                next_token = self.jack_tokenizer.look_ahead()
 
         self._close_grammar("parameterList")
 
