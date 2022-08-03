@@ -1,0 +1,3 @@
+// NOTE: Expression lists are without the embracing parantheses
+//       However the function looks for a ending ), hence the trailing )
+foo)

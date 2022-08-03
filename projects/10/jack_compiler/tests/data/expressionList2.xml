@@ -1,0 +1,72 @@
+<expressionList>
+  <expression>
+    <term>
+      <identifier> foo </identifier>
+    </term>
+  </expression>
+  <symbol> , </symbol>
+  <expression>
+    <term>
+      <stringConstant> bar </stringConstant>
+    </term>
+  </expression>
+  <symbol> , </symbol>
+  <expression>
+    <term>
+      <integerConstant> 32 </integerConstant>
+    </term>
+  </expression>
+  <symbol> , </symbol>
+  <expression>
+    <term>
+      <identifier> baz </identifier>
+      <symbol> [ </symbol>
+      <expression>
+        <term>
+          <integerConstant> 99 </integerConstant>
+        </term>
+      </expression>
+      <symbol> ] </symbol>
+    </term>
+  </expression>
+  <symbol> , </symbol>
+  <expression>
+    <term>
+      <symbol> ( </symbol>
+      <expression>
+        <term>
+          <integerConstant> 92 </integerConstant>
+        </term>
+      </expression>
+      <symbol> ) </symbol>
+    </term>
+  </expression>
+  <symbol> , </symbol>
+  <expression>
+    <term>
+      <symbol> ~ </symbol>
+      <term>
+        <identifier> fooBar </identifier>
+      </term>
+    </term>
+  </expression>
+</expressionList>
+<expressionList>
+  <expression>
+    <term>
+      <integerConstant> 42 </integerConstant>
+    </term>
+  </expression>
+  <symbol> , </symbol>
+  <expression>
+    <term>
+      <stringConstant> Hello, there </stringConstant>
+    </term>
+  </expression>
+  <symbol> , </symbol>
+  <expression>
+    <term>
+      <identifier> bye </identifier>
+    </term>
+  </expression>
+</expressionList>

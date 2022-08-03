@@ -25,12 +25,17 @@ def merge_tuple(
 
 
 CLASS_VAR_DEC = merge_tuple(
-    ("ClassVarDec1", "ClassVarDec2", "ClassVarDec3"), "compile_class_var_dec"
+    ("classVarDec1", "classVarDec2", "classVarDec3"), "compile_class_var_dec"
 )
 TERM = merge_tuple(("term",), "compile_term")
+EXPRESSION_LIST = merge_tuple(
+    ("expressionList1", "expressionList2"), "compile_expression_list"
+)
 
 
-@pytest.mark.parametrize("test_name, function_name", CLASS_VAR_DEC + TERM)
+@pytest.mark.parametrize(
+    "test_name, function_name", CLASS_VAR_DEC + TERM + EXPRESSION_LIST
+)
 def test_compile_functions(
     tmp_path: Path, data_path: Path, test_name: str, function_name: str
 ) -> None:

@@ -652,6 +652,13 @@ class CompilationEngine:
             self.compile_expression()
 
             next_token = self.jack_tokenizer.look_ahead()
+            if next_token == ")":
+                # Advance at the end of the list, so that self.token is
+                # the same irrespective of whether the expression list
+                # was empty or not
+                assert self.jack_tokenizer.has_more_tokens()
+                self._advance()
+
             # (',' expression)*
             while next_token != ")":
                 # The , symbol

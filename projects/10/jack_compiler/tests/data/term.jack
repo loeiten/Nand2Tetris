@@ -8,6 +8,8 @@ myVarName
 myVarName[15]
 myVarName()
 myVarName.subroutineName()
+// NOTE: This cannot come after a identifier as it will be interpreted as a
+//       subroutine call
 (1988)
 - 99
 ~ myVarName

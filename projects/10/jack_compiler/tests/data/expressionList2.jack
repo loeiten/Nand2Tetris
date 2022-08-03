@@ -1,0 +1,4 @@
+// NOTE: Expression lists are without the embracing parantheses
+//       However the function looks for a ending ), hence the trailing )
+foo, "bar", 32, baz[99], (92), ~fooBar)
+42, "Hello, there", bye)
