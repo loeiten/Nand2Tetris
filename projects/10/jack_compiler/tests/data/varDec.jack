@@ -1,0 +1,6 @@
+var int foo;
+var char bar;
+var boolean baz;
+var myClass fooBar;
+var yourClass qux, quux;
+var ourClass corge, waldo, fred;

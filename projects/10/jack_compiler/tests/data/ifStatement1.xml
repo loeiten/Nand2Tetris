@@ -1,0 +1,57 @@
+<ifStatement>
+  <keyword> if </keyword>
+  <symbol> ( </symbol>
+  <expression>
+    <term>
+      <keyword> true </keyword>
+    </term>
+  </expression>
+  <symbol> ) </symbol>
+  <symbol> { </symbol>
+  <symbol> } </symbol>
+</ifStatement>
+<ifStatement>
+  <keyword> if </keyword>
+  <symbol> ( </symbol>
+  <expression>
+    <term>
+      <keyword> true </keyword>
+    </term>
+  </expression>
+  <symbol> ) </symbol>
+  <symbol> { </symbol>
+  <statements>
+    <returnStatement>
+      <keyword> return </keyword>
+      <symbol> ; </symbol>
+    </returnStatement>
+  </statements>
+  <symbol> } </symbol>
+</ifStatement>
+<ifStatement>
+  <keyword> if </keyword>
+  <symbol> ( </symbol>
+  <expression>
+    <term>
+      <keyword> true </keyword>
+    </term>
+  </expression>
+  <symbol> ) </symbol>
+  <symbol> { </symbol>
+  <statements>
+    <returnStatement>
+      <keyword> return </keyword>
+      <symbol> ; </symbol>
+    </returnStatement>
+  </statements>
+  <symbol> } </symbol>
+  <keyword> else </keyword>
+  <symbol> { </symbol>
+  <statements>
+    <returnStatement>
+      <keyword> return </keyword>
+      <symbol> ; </symbol>
+    </returnStatement>
+  </statements>
+  <symbol> } </symbol>
+</ifStatement>

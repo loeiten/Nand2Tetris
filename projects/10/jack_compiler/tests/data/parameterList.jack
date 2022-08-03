@@ -1,0 +1,5 @@
+int a
+char b
+boolean c
+myClass d
+int a, char b, boolean c, myClass d

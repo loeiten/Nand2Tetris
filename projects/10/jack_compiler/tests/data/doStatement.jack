@@ -1,0 +1,4 @@
+do foo();
+do bar(32);
+do fooBar(132, "yes);");
+do baz(a/b);

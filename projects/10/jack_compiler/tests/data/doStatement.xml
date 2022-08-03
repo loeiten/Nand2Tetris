@@ -1,0 +1,61 @@
+<doStatement>
+  <keyword> do </keyword>
+  <identifier> foo </identifier>
+  <symbol> ( </symbol>
+  <expressionList>
+  </expressionList>
+  <symbol> ) </symbol>
+  <symbol> ; </symbol>
+</doStatement>
+<doStatement>
+  <keyword> do </keyword>
+  <identifier> bar </identifier>
+  <symbol> ( </symbol>
+  <expressionList>
+    <expression>
+      <term>
+        <integerConstant> 32 </integerConstant>
+      </term>
+    </expression>
+  </expressionList>
+  <symbol> ) </symbol>
+  <symbol> ; </symbol>
+</doStatement>
+<doStatement>
+  <keyword> do </keyword>
+  <identifier> fooBar </identifier>
+  <symbol> ( </symbol>
+  <expressionList>
+    <expression>
+      <term>
+        <integerConstant> 132 </integerConstant>
+      </term>
+    </expression>
+    <symbol> , </symbol>
+    <expression>
+      <term>
+        <stringConstant> yes); </stringConstant>
+      </term>
+    </expression>
+  </expressionList>
+  <symbol> ) </symbol>
+  <symbol> ; </symbol>
+</doStatement>
+<doStatement>
+  <keyword> do </keyword>
+  <identifier> baz </identifier>
+  <symbol> ( </symbol>
+  <expressionList>
+    <expression>
+      <term>
+        <identifier> a </identifier>
+      </term>
+      <symbol> / </symbol>
+      <term>
+        <identifier> b </identifier>
+      </term>
+    </expression>
+  </expressionList>
+  <symbol> ) </symbol>
+  <symbol> ; </symbol>
+</doStatement>

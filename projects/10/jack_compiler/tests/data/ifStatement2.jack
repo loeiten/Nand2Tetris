@@ -1,0 +1,12 @@
+if(~foo){
+  let a = 2;
+  return a;
+}
+if(a+b>3){
+  if(1|2){
+    do foo();
+  }
+  else{
+    do bar();
+  }
+}

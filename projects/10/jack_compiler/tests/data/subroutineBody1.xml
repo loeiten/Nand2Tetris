@@ -1,0 +1,31 @@
+<subroutineBody>
+  <symbol> { </symbol>
+  <symbol> } </symbol>
+</subroutineBody>
+<subroutineBody>
+  <symbol> { </symbol>
+  <varDec>
+    <keyword> var </keyword>
+    <keyword> int </keyword>
+    <identifier> a </identifier>
+    <symbol> ; </symbol>
+  </varDec>
+  <symbol> } </symbol>
+</subroutineBody>
+<subroutineBody>
+  <symbol> { </symbol>
+  <statements>
+    <letStatement>
+      <keyword> let </keyword>
+      <identifier> a </identifier>
+      <symbol> = </symbol>
+      <expression>
+        <term>
+          <integerConstant> 1 </integerConstant>
+        </term>
+      </expression>
+      <symbol> ; </symbol>
+    </letStatement>
+  </statements>
+  <symbol> } </symbol>
+</subroutineBody>

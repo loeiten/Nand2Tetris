@@ -253,11 +253,32 @@ class CompilationEngine:
         """
         self._open_grammar("parameterList")
 
-        while self.token != ")":
-            # type | varName | the symbol ,
-            self.write_token(self.token_type, self.token)  # type: ignore
+        # type
+        self.write_token(self.token_type, self.token)  # type: ignore
+
+        # varName
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
+        self.write_token(self.token_type, self.token)  # type: ignore
+
+        next_token = self.jack_tokenizer.look_ahead()
+        while next_token == ",":
+            # ,
             assert self.jack_tokenizer.has_more_tokens()
             self._advance()
+            self.write_token(self.token_type, self.token)  # type: ignore
+
+            # type
+            assert self.jack_tokenizer.has_more_tokens()
+            self._advance()
+            self.write_token(self.token_type, self.token)  # type: ignore
+
+            # varName
+            assert self.jack_tokenizer.has_more_tokens()
+            self._advance()
+            self.write_token(self.token_type, self.token)  # type: ignore
+
+            next_token = self.jack_tokenizer.look_ahead()
 
         self._close_grammar("parameterList")
 
@@ -268,21 +289,24 @@ class CompilationEngine:
         # The { symbol
         self.write_token(self.token_type, self.token)  # type: ignore
 
-        assert self.jack_tokenizer.has_more_tokens()
-        self._advance()
-
         # varDec
-        while self.token == "var":
+        next_token = self.jack_tokenizer.look_ahead()
+        while next_token == "var":
+            assert self.jack_tokenizer.has_more_tokens()
+            self._advance()
             self.compile_var_dec()
-
-        assert self.jack_tokenizer.has_more_tokens()
-        self._advance()
+            next_token = self.jack_tokenizer.look_ahead()
 
         # statements
-        if self.token != "}":
+        next_token = self.jack_tokenizer.look_ahead()
+        if next_token != "}":
+            assert self.jack_tokenizer.has_more_tokens()
+            self._advance()
             self.compile_statements()
 
         # The } symbol
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
         self.write_token(self.token_type, self.token)  # type: ignore
 
         self._close_grammar("subroutineBody")
@@ -305,8 +329,11 @@ class CompilationEngine:
         self.write_token(self.token_type, self.token)  # type: ignore
 
         # (, varName)*
-        while self.token == ",":
+        next_token = self.jack_tokenizer.look_ahead()
+        while next_token == ",":
             # The , symbol
+            assert self.jack_tokenizer.has_more_tokens()
+            self._advance()
             self.write_token(self.token_type, self.token)  # type: ignore
 
             # varName
@@ -314,14 +341,12 @@ class CompilationEngine:
             self._advance()
             self.write_token(self.token_type, self.token)  # type: ignore
 
-            assert self.jack_tokenizer.has_more_tokens()
-            self._advance()
+            next_token = self.jack_tokenizer.look_ahead()
 
         # The symbol ;
-        self.write_token(self.token_type, self.token)  # type: ignore
-
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
+        self.write_token(self.token_type, self.token)  # type: ignore
 
         self._close_grammar("varDec")
 
@@ -343,6 +368,10 @@ class CompilationEngine:
                 self.compile_do()
             elif self.token == "return":
                 self.compile_return()
+            next_token = self.jack_tokenizer.look_ahead()
+            if next_token in ("let", "if", "while", "do", "return"):
+                assert self.jack_tokenizer.has_more_tokens()
+                self._advance()
 
         self._close_grammar("statements")
 
@@ -358,12 +387,12 @@ class CompilationEngine:
         self._advance()
         self.write_token(self.token_type, self.token)  # type: ignore
 
-        assert self.jack_tokenizer.has_more_tokens()
-        self._advance()
-
         # [expression]
-        while self.token != "=":
+        next_token = self.jack_tokenizer.look_ahead()
+        if next_token == "[":
             # The symbol [
+            assert self.jack_tokenizer.has_more_tokens()
+            self._advance()
             self.write_token(self.token_type, self.token)  # type: ignore
 
             # expression
@@ -376,10 +405,9 @@ class CompilationEngine:
             self._advance()
             self.write_token(self.token_type, self.token)  # type: ignore
 
-            assert self.jack_tokenizer.has_more_tokens()
-            self._advance()
-
         # The symbol =
+        assert self.jack_tokenizer.has_more_tokens()
+        self._advance()
         self.write_token(self.token_type, self.token)  # type: ignore
 
         # expression
@@ -391,9 +419,6 @@ class CompilationEngine:
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
         self.write_token(self.token_type, self.token)  # type: ignore
-
-        assert self.jack_tokenizer.has_more_tokens()
-        self._advance()
 
         self._close_grammar("letStatement")
 
@@ -412,15 +437,22 @@ class CompilationEngine:
         self._advance()
         self.write_token(self.token_type, self.token)  # type: ignore
 
-        # The { symbol
+        # '{statements}'
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
+        self._write_body()
+
+    def _write_body(self) -> None:
+        """Write '{statements}'."""
+        # The { symbol
         self.write_token(self.token_type, self.token)  # type: ignore
 
         # statements
-        assert self.jack_tokenizer.has_more_tokens()
-        self._advance()
-        self.compile_statements()
+        next_token = self.jack_tokenizer.look_ahead()
+        if next_token != "}":
+            assert self.jack_tokenizer.has_more_tokens()
+            self._advance()
+            self.compile_statements()
 
         # The } symbol
         assert self.jack_tokenizer.has_more_tokens()
@@ -434,26 +466,21 @@ class CompilationEngine:
         # if
         self.write_token(self.token_type, self.token)  # type: ignore
 
+        # '('expression')''{statements}'
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-
-        # '('expression')''{statements}'
         self._write_expression_body()
 
-        assert self.jack_tokenizer.has_more_tokens()
-        self._advance()
-
-        if self.token == "else":
+        next_token = self.jack_tokenizer.look_ahead()
+        if next_token == "else":
+            assert self.jack_tokenizer.has_more_tokens()
+            self._advance()
             self.write_token(self.token_type, self.token)  # type: ignore
 
+            # '{statements}'
             assert self.jack_tokenizer.has_more_tokens()
             self._advance()
-
-            # '('expression')''{statements}'
-            self._write_expression_body()
-
-            assert self.jack_tokenizer.has_more_tokens()
-            self._advance()
+            self._write_body()
 
         self._close_grammar("ifStatement")
 
@@ -464,14 +491,10 @@ class CompilationEngine:
         # while
         self.write_token(self.token_type, self.token)  # type: ignore
 
-        assert self.jack_tokenizer.has_more_tokens()
-        self._advance()
-
         # '('expression')''{statements}'
-        self._write_expression_body()
-
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
+        self._write_expression_body()
 
         self._close_grammar("whileStatement")
 
@@ -515,11 +538,12 @@ class CompilationEngine:
 
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-
         self._write_subroutine_call()
 
+        # The ; symbol
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
+        self.write_token(self.token_type, self.token)  # type: ignore
 
         self._close_grammar("doStatement")
 
@@ -530,17 +554,16 @@ class CompilationEngine:
         # return
         self.write_token(self.token_type, self.token)  # type: ignore
 
-        assert self.jack_tokenizer.has_more_tokens()
-        self._advance()
-
-        if self.token != ";":
+        next_token = self.jack_tokenizer.look_ahead()
+        if next_token != ";":
+            assert self.jack_tokenizer.has_more_tokens()
+            self._advance()
             self.compile_expression()
 
         # The ; symbol
-        self.write_token(self.token_type, self.token)  # type: ignore
-
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
+        self.write_token(self.token_type, self.token)  # type: ignore
 
         self._close_grammar("returnStatement")
 

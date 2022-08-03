@@ -1,0 +1,26 @@
+<returnStatement>
+  <keyword> return </keyword>
+  <symbol> ; </symbol>
+</returnStatement>
+<returnStatement>
+  <keyword> return </keyword>
+  <expression>
+    <term>
+      <integerConstant> 42 </integerConstant>
+    </term>
+  </expression>
+  <symbol> ; </symbol>
+</returnStatement>
+<returnStatement>
+  <keyword> return </keyword>
+  <expression>
+    <term>
+      <identifier> a </identifier>
+    </term>
+    <symbol> + </symbol>
+    <term>
+      <identifier> b </identifier>
+    </term>
+  </expression>
+  <symbol> ; </symbol>
+</returnStatement>

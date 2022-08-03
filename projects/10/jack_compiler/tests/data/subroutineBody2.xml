@@ -1,0 +1,94 @@
+<subroutineBody>
+  <symbol> { </symbol>
+  <varDec>
+    <keyword> var </keyword>
+    <keyword> boolean </keyword>
+    <identifier> foo </identifier>
+    <symbol> ; </symbol>
+  </varDec>
+  <varDec>
+    <keyword> var </keyword>
+    <keyword> boolean </keyword>
+    <identifier> fooBar </identifier>
+    <symbol> , </symbol>
+    <identifier> qux </identifier>
+    <symbol> ; </symbol>
+  </varDec>
+  <statements>
+    <letStatement>
+      <keyword> let </keyword>
+      <identifier> b </identifier>
+      <symbol> = </symbol>
+      <expression>
+        <term>
+          <integerConstant> 2 </integerConstant>
+        </term>
+      </expression>
+      <symbol> ; </symbol>
+    </letStatement>
+    <ifStatement>
+      <keyword> if </keyword>
+      <symbol> ( </symbol>
+      <expression>
+        <term>
+          <keyword> true </keyword>
+        </term>
+      </expression>
+      <symbol> ) </symbol>
+      <symbol> { </symbol>
+      <statements>
+        <letStatement>
+          <keyword> let </keyword>
+          <identifier> c </identifier>
+          <symbol> = </symbol>
+          <expression>
+            <term>
+              <integerConstant> 3 </integerConstant>
+            </term>
+          </expression>
+          <symbol> ; </symbol>
+        </letStatement>
+      </statements>
+      <symbol> } </symbol>
+    </ifStatement>
+    <whileStatement>
+      <keyword> while </keyword>
+      <symbol> ( </symbol>
+      <expression>
+        <term>
+          <keyword> true </keyword>
+        </term>
+      </expression>
+      <symbol> ) </symbol>
+      <symbol> { </symbol>
+      <statements>
+        <letStatement>
+          <keyword> let </keyword>
+          <identifier> d </identifier>
+          <symbol> = </symbol>
+          <expression>
+            <term>
+              <integerConstant> 4 </integerConstant>
+            </term>
+          </expression>
+          <symbol> ; </symbol>
+        </letStatement>
+      </statements>
+      <symbol> } </symbol>
+    </whileStatement>
+    <doStatement>
+      <keyword> do </keyword>
+      <identifier> bar </identifier>
+      <symbol> ( </symbol>
+      <expressionList>
+      </expressionList>
+      <symbol> ) </symbol>
+      <symbol> ; </symbol>
+    </doStatement>
+    <returnStatement>
+      <keyword> return </keyword>
+      <symbol> ; </symbol>
+    </returnStatement>
+  </statements>
+  <symbol> } </symbol>
+</subroutineBody>

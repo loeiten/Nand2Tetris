@@ -1,0 +1,44 @@
+<letStatement>
+  <keyword> let </keyword>
+  <identifier> foo </identifier>
+  <symbol> = </symbol>
+  <expression>
+    <term>
+      <integerConstant> 2 </integerConstant>
+    </term>
+  </expression>
+  <symbol> ; </symbol>
+</letStatement>
+<letStatement>
+  <keyword> let </keyword>
+  <identifier> bar </identifier>
+  <symbol> [ </symbol>
+  <expression>
+    <term>
+      <identifier> hello </identifier>
+      <symbol> . </symbol>
+      <identifier> world </identifier>
+      <symbol> ( </symbol>
+      <expressionList>
+        <expression>
+          <term>
+            <stringConstant> bar </stringConstant>
+          </term>
+        </expression>
+      </expressionList>
+      <symbol> ) </symbol>
+    </term>
+    <symbol> / </symbol>
+    <term>
+      <integerConstant> 3 </integerConstant>
+    </term>
+  </expression>
+  <symbol> ] </symbol>
+  <symbol> = </symbol>
+  <expression>
+    <term>
+      <integerConstant> 72 </integerConstant>
+    </term>
+  </expression>
+  <symbol> ; </symbol>
+</letStatement>

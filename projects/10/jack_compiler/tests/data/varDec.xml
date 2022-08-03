@@ -1,0 +1,42 @@
+<varDec>
+  <keyword> var </keyword>
+  <keyword> int </keyword>
+  <identifier> foo </identifier>
+  <symbol> ; </symbol>
+</varDec>
+<varDec>
+  <keyword> var </keyword>
+  <keyword> char </keyword>
+  <identifier> bar </identifier>
+  <symbol> ; </symbol>
+</varDec>
+<varDec>
+  <keyword> var </keyword>
+  <keyword> boolean </keyword>
+  <identifier> baz </identifier>
+  <symbol> ; </symbol>
+</varDec>
+<varDec>
+  <keyword> var </keyword>
+  <identifier> myClass </identifier>
+  <identifier> fooBar </identifier>
+  <symbol> ; </symbol>
+</varDec>
+<varDec>
+  <keyword> var </keyword>
+  <identifier> yourClass </identifier>
+  <identifier> qux </identifier>
+  <symbol> , </symbol>
+  <identifier> quux </identifier>
+  <symbol> ; </symbol>
+</varDec>
+<varDec>
+  <keyword> var </keyword>
+  <identifier> ourClass </identifier>
+  <identifier> corge </identifier>
+  <symbol> , </symbol>
+  <identifier> waldo </identifier>
+  <symbol> , </symbol>
+  <identifier> fred </identifier>
+  <symbol> ; </symbol>
+</varDec>

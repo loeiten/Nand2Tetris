@@ -24,18 +24,40 @@ def merge_tuple(
     return tuple((name, function_name) for name in names)
 
 
-CLASS_VAR_DEC = merge_tuple(
-    ("classVarDec1", "classVarDec2", "classVarDec3"), "compile_class_var_dec"
-)
 TERM = merge_tuple(("term",), "compile_term")
 EXPRESSION_LIST = merge_tuple(
     ("expressionList1", "expressionList2"), "compile_expression_list"
 )
 EXPRESSION = merge_tuple(("expression1", "expression2"), "compile_expression")
+RETURN_STATEMENT = merge_tuple(("returnStatement",), "compile_return")
+DO_STATEMENT = merge_tuple(("doStatement",), "compile_do")
+WHILE_STATEMENT = merge_tuple(("whileStatement1", "whileStatement2"), "compile_while")
+IF_STATEMENT = merge_tuple(("ifStatement1", "ifStatement2"), "compile_if")
+LET_STATEMENT = merge_tuple(("letStatement",), "compile_let")
+VAR_DEC = merge_tuple(("varDec",), "compile_var_dec")
+SUBROUTINE_BODY = merge_tuple(
+    ("subroutineBody1", "subroutineBody2"), "compile_subroutine_body"
+)
+PARAMETER_LIST = merge_tuple(("parameterList",), "compile_parameter_list")
+CLASS_VAR_DEC = merge_tuple(
+    ("classVarDec1", "classVarDec2", "classVarDec3"), "compile_class_var_dec"
+)
 
 
 @pytest.mark.parametrize(
-    "test_name, function_name", CLASS_VAR_DEC + TERM + EXPRESSION_LIST + EXPRESSION
+    "test_name, function_name",
+    TERM
+    + EXPRESSION_LIST
+    + EXPRESSION
+    + RETURN_STATEMENT
+    + DO_STATEMENT
+    + WHILE_STATEMENT
+    + IF_STATEMENT
+    + LET_STATEMENT
+    + VAR_DEC
+    + SUBROUTINE_BODY
+    + PARAMETER_LIST
+    + CLASS_VAR_DEC,
 )
 def test_compile_functions(
     tmp_path: Path, data_path: Path, test_name: str, function_name: str
@@ -72,11 +94,3 @@ def test_compile_functions(
         result = result_file.readlines()
 
     assert expected == result
-
-
-# FIXME: pytest -xsvv --ff
-# FIXME: YOU ARE HERE: Next up: expression, expressionList, statements, program structure
-# FIXME: Start testing from terminal statements
-# FIXME: Add recursive testing
-# FIXME: Do not start grammar if starred expression (see classVarDec of ArrayTest as an example)
-# FIXME: Make a test of this

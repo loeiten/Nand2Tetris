@@ -1,0 +1,9 @@
+while(~foo){
+  let a = 2;
+  return a;
+}
+while(a+b>3){
+  while(1|2){
+    do foo();
+  }
+}

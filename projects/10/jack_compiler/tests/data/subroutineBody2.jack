@@ -1,0 +1,14 @@
+{
+  var boolean foo;
+  var boolean fooBar, qux;
+
+  let b=2;
+  if (true){
+    let c=3;
+  }
+  while(true){
+    let d=4;
+  }
+  do bar();
+  return;
+}
