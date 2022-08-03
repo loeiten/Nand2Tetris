@@ -1,0 +1,54 @@
+<expression>
+  <term>
+    <integerConstant> 1 </integerConstant>
+  </term>
+  <symbol> + </symbol>
+  <term>
+    <integerConstant> 2 </integerConstant>
+  </term>
+  <symbol> - </symbol>
+  <term>
+    <integerConstant> 3 </integerConstant>
+  </term>
+  <symbol> * </symbol>
+  <term>
+    <integerConstant> 4 </integerConstant>
+  </term>
+  <symbol> / </symbol>
+  <term>
+    <integerConstant> 5 </integerConstant>
+  </term>
+  <symbol> &amp; </symbol>
+  <term>
+    <identifier> foo </identifier>
+  </term>
+  <symbol> | </symbol>
+  <term>
+    <identifier> bar </identifier>
+  </term>
+  <symbol> &lt; </symbol>
+  <term>
+    <stringConstant> string+strung </stringConstant>
+  </term>
+  <symbol> &gt; </symbol>
+  <term>
+    <identifier> myCall </identifier>
+    <symbol> ( </symbol>
+    <expressionList>
+      <expression>
+        <term>
+          <integerConstant> 2 </integerConstant>
+        </term>
+        <symbol> - </symbol>
+        <term>
+          <integerConstant> 22 </integerConstant>
+        </term>
+      </expression>
+    </expressionList>
+    <symbol> ) </symbol>
+  </term>
+  <symbol> = </symbol>
+  <term>
+    <keyword> true </keyword>
+  </term>
+</expression>

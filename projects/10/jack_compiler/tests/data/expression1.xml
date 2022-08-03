@@ -1,0 +1,81 @@
+<expression>
+  <term>
+    <integerConstant> 1 </integerConstant>
+  </term>
+  <symbol> + </symbol>
+  <term>
+    <integerConstant> 2 </integerConstant>
+  </term>
+</expression>
+<expression>
+  <term>
+    <integerConstant> 3 </integerConstant>
+  </term>
+  <symbol> - </symbol>
+  <term>
+    <integerConstant> 4 </integerConstant>
+  </term>
+</expression>
+<expression>
+  <term>
+    <integerConstant> 5 </integerConstant>
+  </term>
+  <symbol> * </symbol>
+  <term>
+    <integerConstant> 6 </integerConstant>
+  </term>
+</expression>
+<expression>
+  <term>
+    <integerConstant> 7 </integerConstant>
+  </term>
+  <symbol> / </symbol>
+  <term>
+    <integerConstant> 8 </integerConstant>
+  </term>
+</expression>
+<expression>
+  <term>
+    <identifier> foo </identifier>
+  </term>
+  <symbol> &amp; </symbol>
+  <term>
+    <identifier> bar </identifier>
+  </term>
+</expression>
+<expression>
+  <term>
+    <identifier> fooBar </identifier>
+  </term>
+  <symbol> | </symbol>
+  <term>
+    <identifier> baz </identifier>
+  </term>
+</expression>
+<expression>
+  <term>
+    <integerConstant> 9 </integerConstant>
+  </term>
+  <symbol> &lt; </symbol>
+  <term>
+    <integerConstant> 10 </integerConstant>
+  </term>
+</expression>
+<expression>
+  <term>
+    <integerConstant> 11 </integerConstant>
+  </term>
+  <symbol> &gt; </symbol>
+  <term>
+    <integerConstant> 12 </integerConstant>
+  </term>
+</expression>
+<expression>
+  <term>
+    <integerConstant> 13 </integerConstant>
+  </term>
+  <symbol> = </symbol>
+  <term>
+    <integerConstant> 14 </integerConstant>
+  </term>
+</expression>

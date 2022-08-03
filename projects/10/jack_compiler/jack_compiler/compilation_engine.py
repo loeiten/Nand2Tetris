@@ -551,8 +551,10 @@ class CompilationEngine:
         # term
         self.compile_term()
 
+        next_token = self.jack_tokenizer.look_ahead()
+
         # (op term)*
-        while self.token in get_args(Op):
+        while next_token in get_args(Op):
             # op
             assert self.jack_tokenizer.has_more_tokens()
             self._advance()
@@ -562,6 +564,8 @@ class CompilationEngine:
             assert self.jack_tokenizer.has_more_tokens()
             self._advance()
             self.compile_term()
+
+            next_token = self.jack_tokenizer.look_ahead()
 
         self._close_grammar("expression")
 

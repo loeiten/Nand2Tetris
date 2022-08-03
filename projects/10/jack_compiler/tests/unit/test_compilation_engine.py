@@ -31,10 +31,11 @@ TERM = merge_tuple(("term",), "compile_term")
 EXPRESSION_LIST = merge_tuple(
     ("expressionList1", "expressionList2"), "compile_expression_list"
 )
+EXPRESSION = merge_tuple(("expression1", "expression2"), "compile_expression")
 
 
 @pytest.mark.parametrize(
-    "test_name, function_name", CLASS_VAR_DEC + TERM + EXPRESSION_LIST
+    "test_name, function_name", CLASS_VAR_DEC + TERM + EXPRESSION_LIST + EXPRESSION
 )
 def test_compile_functions(
     tmp_path: Path, data_path: Path, test_name: str, function_name: str
