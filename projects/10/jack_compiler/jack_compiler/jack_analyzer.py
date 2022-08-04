@@ -4,7 +4,7 @@
 
 import argparse
 from pathlib import Path
-from typing import Optional, cast, get_args
+from typing import Optional
 
 from jack_compiler.compilation_engine import CompilationEngine
 from jack_compiler.jack_tokenizer import JackTokenizer
@@ -33,7 +33,7 @@ def process_file(
     """Process a single file.
 
     Args:
-        file_to_parse (Path): File to parse
+        in_path (Path): File to parse
         tokens_only (bool, optional): Whether or not to only parse tokens. Defaults to False.
         out_path (Optional[Path], optional): The out path. Defaults to None.
     """
@@ -55,7 +55,8 @@ def process_file(
             compilation_engine.compile_class()
 
     print(
-        f"Processing {in_path}...{out_path} written{'' if not tokens_only else ' in tokens only mode'}"
+        f"Processing {in_path}...{out_path} written"
+        f"{'' if not tokens_only else ' in tokens only mode'}"
     )
 
 

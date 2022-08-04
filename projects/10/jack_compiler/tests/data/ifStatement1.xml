@@ -8,6 +8,8 @@
   </expression>
   <symbol> ) </symbol>
   <symbol> { </symbol>
+  <statements>
+  </statements>
   <symbol> } </symbol>
 </ifStatement>
 <ifStatement>

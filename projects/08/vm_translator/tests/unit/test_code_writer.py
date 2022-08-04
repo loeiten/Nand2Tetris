@@ -73,9 +73,9 @@ def test_write_push_pop(
     The content is tested with the test files of the project
 
     Args:
+        code_writer (CodeWriter): The code writer object
         command (Literal["C_PUSH", "C_POP"]): The command to translate into assembly
-        segment (Literal["local", "argument", "this", "that", "constant", "static", "pointer",
-        "temp"]):
+        segment (Literal["local", "argument", "this", "that", "constant", "static", "pointer", "temp"]):
             Which virtual memory segment to push from/pop to
     """
     index = 1

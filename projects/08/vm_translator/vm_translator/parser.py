@@ -7,8 +7,7 @@ from typing import Literal
 
 
 class CommandEnum(Enum):
-    """
-    Enum describing the possible commands.
+    """Enum describing the possible commands.
 
     - has been replaced with _
     """

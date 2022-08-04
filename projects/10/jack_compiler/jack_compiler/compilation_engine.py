@@ -465,6 +465,9 @@ class CompilationEngine:
             assert self.jack_tokenizer.has_more_tokens()
             self._advance()
             self.compile_statements()
+        else:
+            self._open_grammar("statements")
+            self._close_grammar("statements")
 
         # The } symbol
         assert self.jack_tokenizer.has_more_tokens()

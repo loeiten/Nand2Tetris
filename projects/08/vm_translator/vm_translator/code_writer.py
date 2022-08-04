@@ -95,8 +95,7 @@ class CodeWriter:
         self,
         command: Literal["add", "sub", "eq", "gt", "lt", "and", "or", "neg", "not"],
     ) -> None:
-        """
-        Write to the output file the assembly code that implements the given arithmetic command.
+        """Write to the output file the assembly code that implements the given arithmetic command.
 
         This is done by:
         1. Dereference the decremented stack pointer to give us the top of the stack
@@ -266,7 +265,7 @@ class CodeWriter:
               the segment pointers LCL, ARG, THIS, THAT
               The standard mapping will be extended in the next project
 
-        Pseudocode:
+        Pseudo-code:
             - If segment == {local, argument, this, that}
                 - push segment i => addr = segmentPointer + i, *SP=*addr, SP++
                 - pop segment i => addr = segmentPointer + i, SP--, *addr=*SP
@@ -285,8 +284,7 @@ class CodeWriter:
 
         Args:
             command (Literal["C_PUSH", "C_POP"]): The command to translate into assembly
-            segment (Literal["local", "argument", "this", "that", "constant", "static", "pointer",
-            "temp"]):
+            segment (Literal["local", "argument", "this", "that", "constant", "static", "pointer", "temp"]):
                 Which virtual memory segment to push from/pop to
             index (int): Segment index to push from/pop to
         """
@@ -358,10 +356,9 @@ class CodeWriter:
         ],
         index: int,
     ) -> None:
-        """
-        Write to the file the part where the address is obtained.
+        """Write to the file the part where the address is obtained.
 
-        See "Pseudocode" in write_push_pop for details.
+        See "Pseudo-code" in write_push_pop for details.
 
         Args:
             command (Literal["C_PUSH", "C_POP"]): The command to translate into assembly
