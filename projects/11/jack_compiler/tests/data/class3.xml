@@ -1,0 +1,260 @@
+<class>
+  <keyword> class </keyword>
+  <class_definition> myClass </class_definition>
+  <symbol> { </symbol>
+  <classVarDec>
+    <keyword> field </keyword>
+    <class_usage> SillyClass4 </class_usage>
+    <field_0_definition> dummy1 </field_0_definition>
+    <symbol> , </symbol>
+    <field_1_definition> dummy2 </field_1_definition>
+    <symbol> ; </symbol>
+  </classVarDec>
+  <classVarDec>
+    <keyword> field </keyword>
+    <keyword> char </keyword>
+    <field_2_definition> dummy3 </field_2_definition>
+    <symbol> , </symbol>
+    <field_3_definition> dummy4 </field_3_definition>
+    <symbol> , </symbol>
+    <field_4_definition> dummy5 </field_4_definition>
+    <symbol> ; </symbol>
+  </classVarDec>
+  <subroutineDec>
+    <keyword> constructor </keyword>
+    <class_usage> myClass </class_usage>
+    <subroutine_definition> new </subroutine_definition>
+    <symbol> ( </symbol>
+    <parameterList>
+      <keyword> int </keyword>
+      <argument_0_definition> a </argument_0_definition>
+      <symbol> , </symbol>
+      <keyword> char </keyword>
+      <argument_1_definition> b </argument_1_definition>
+      <symbol> , </symbol>
+      <keyword> boolean </keyword>
+      <argument_2_definition> c </argument_2_definition>
+      <symbol> , </symbol>
+      <class_usage> yourClass </class_usage>
+      <argument_3_definition> d </argument_3_definition>
+    </parameterList>
+    <symbol> ) </symbol>
+    <subroutineBody>
+      <symbol> { </symbol>
+      <varDec>
+        <keyword> var </keyword>
+        <keyword> boolean </keyword>
+        <var_0_definition> foo </var_0_definition>
+        <symbol> ; </symbol>
+      </varDec>
+      <varDec>
+        <keyword> var </keyword>
+        <keyword> boolean </keyword>
+        <var_1_definition> fooBar </var_1_definition>
+        <symbol> , </symbol>
+        <var_2_definition> qux </var_2_definition>
+        <symbol> ; </symbol>
+      </varDec>
+      <statements>
+        <letStatement>
+          <keyword> let </keyword>
+          <argument_2_usage> c </argument_2_usage>
+          <symbol> = </symbol>
+          <expression>
+            <term>
+              <integerConstant> 2 </integerConstant>
+            </term>
+          </expression>
+          <symbol> ; </symbol>
+        </letStatement>
+        <ifStatement>
+          <keyword> if </keyword>
+          <symbol> ( </symbol>
+          <expression>
+            <term>
+              <keyword> true </keyword>
+            </term>
+          </expression>
+          <symbol> ) </symbol>
+          <symbol> { </symbol>
+          <statements>
+            <letStatement>
+              <keyword> let </keyword>
+              <argument_1_usage> b </argument_1_usage>
+              <symbol> = </symbol>
+              <expression>
+                <term>
+                  <integerConstant> 3 </integerConstant>
+                </term>
+              </expression>
+              <symbol> ; </symbol>
+            </letStatement>
+          </statements>
+          <symbol> } </symbol>
+        </ifStatement>
+        <whileStatement>
+          <keyword> while </keyword>
+          <symbol> ( </symbol>
+          <expression>
+            <term>
+              <keyword> true </keyword>
+            </term>
+          </expression>
+          <symbol> ) </symbol>
+          <symbol> { </symbol>
+          <statements>
+            <doStatement>
+              <keyword> do </keyword>
+              <expression>
+                <term>
+                  <argument_3_usage> d </argument_3_usage>
+                  <symbol> . </symbol>
+                  <subroutine_usage> setVal </subroutine_usage>
+                  <symbol> ( </symbol>
+                    <expression>
+                      <term>
+                        <integerConstant> 15 </integerConstant>
+                      </term>
+                    </expression>
+                  <symbol> ) </symbol>
+                </term>
+              </expression>
+              <symbol> ; </symbol>
+            </doStatement>
+          </statements>
+          <symbol> } </symbol>
+        </whileStatement>
+        <letStatement>
+          <keyword> let </keyword>
+          <var_0_usage> foo </var_0_usage>
+          <symbol> = </symbol>
+          <subroutine_usage> bar </subroutine_usage>
+          <symbol> ( </symbol>
+          <expressionList>
+          </expressionList>
+          <symbol> ) </symbol>
+          <symbol> ; </symbol>
+        </letStatement>
+        <doStatement>
+          <keyword> do </keyword>
+          <subroutine_usage> corge </subroutine_usage>
+          <symbol> ( </symbol>
+          <expressionList>
+          </expressionList>
+          <symbol> ) </symbol>
+          <symbol> ; </symbol>
+        </doStatement>
+        <returnStatement>
+          <keyword> return </keyword>
+          <expression>
+            <term>
+              <keyword> this </keyword>
+            </term>
+          </expression>
+          <symbol> ; </symbol>
+        </returnStatement>
+      </statements>
+      <symbol> } </symbol>
+    </subroutineBody>
+  </subroutineDec>
+  <subroutineDec>
+    <keyword> method </keyword>
+    <keyword> int </keyword>
+    <subroutine_definition> bar </subroutine_definition>
+    <symbol> ( </symbol>
+    <parameterList>
+      <keyword> int </keyword>
+      <argument_0_definition> this </argument_0_definition>
+      <argument_1_definition> e </argument_1_definition>
+    </parameterList>
+    <symbol> ) </symbol>
+    <subroutineBody>
+      <symbol> { </symbol>
+        <returnStatement>
+          <keyword> return </keyword>
+          <expression>
+            <term>
+              <argument_1_usage> e </argument_1_usage>
+            </term>
+          </expression>
+          <symbol> ; </symbol>
+        </returnStatement>
+      <symbol> } </symbol>
+    </subroutineBody>
+  </subroutineDec>
+  <subroutineDec>
+    <keyword> function </keyword>
+    <class_usage> yourClass </class_usage>
+    <subroutine_definition> quux </subroutine_definition>
+    <symbol> ( </symbol>
+    <parameterList>
+    </parameterList>
+    <symbol> ) </symbol>
+    <subroutineBody>
+      <symbol> { </symbol>
+        <varDec>
+          <keyword> var </keyword>
+          <class_usage> yourClass </class_usage>
+          <var_0_definition> f </var_0_definition>
+          <symbol> ; </symbol>
+        </varDec>
+        <letStatement>
+          <keyword> let </keyword>
+          <var_0_usage> f </var_0_usage>
+          <symbol> = </symbol>
+          <expression>
+            <term>
+              <class_usage> yourClass </class_usage>
+              <symbol> . </symbol>
+              <subroutine_usage> new </subroutine_usage>
+              <symbol> ( </symbol>
+              <expressionList>
+              </expressionList>
+              <symbol> ) </symbol>
+            </term>
+          </expression>
+          <symbol> ; </symbol>
+        </letStatement>
+        <returnStatement>
+          <keyword> return </keyword>
+          <expression>
+            <term>
+              <var_0_usage> f </var_0_usage>
+            </term>
+          </expression>
+          <symbol> ; </symbol>
+        </returnStatement>
+      <symbol> } </symbol>
+    </subroutineBody>
+  </subroutineDec>
+
+  <subroutineDec>
+    <keyword> method </keyword>
+    <keyword> void </keyword>
+    <subroutine_definition> corge </subroutine_definition>
+    <symbol> ( </symbol>
+    <parameterList>
+    </parameterList>
+    <symbol> ) </symbol>
+    <subroutineBody>
+      <symbol> { </symbol>
+        <doStatement>
+          <keyword> do </keyword>
+          <field_0_usage> dummy1 </field_0_usage>
+          <symbol> . </symbol>
+          <subroutine_usage> doSillyThing </subroutine_usage>
+          <symbol> ( </symbol>
+          <expressionList>
+          </expressionList>
+          <symbol> ) </symbol>
+          <symbol> ; </symbol>
+        </doStatement>
+        <returnStatement>
+          <keyword> return </keyword>
+          <symbol> ; </symbol>
+        </returnStatement>
+      <symbol> } </symbol>
+    </subroutineBody>
+  </subroutineDec>
+  <symbol> } </symbol>
+</class>

@@ -1,0 +1,35 @@
+class myClass {
+    field SillyClass4 dummy1, dummy2;
+    field char dummy3, dummy4, dummy5;
+
+    constructor myClass new(int a, char b, boolean c, yourClass d){
+      var int foo;
+      var boolean fooBar, qux;
+
+      let c=2;
+      if (true){
+        let b=3;
+      }
+      while(true){
+        do d.setVal(15);
+      }
+      let foo = bar();
+      do corge();
+      return this;
+    }
+
+    method int bar(int e){
+      return e;
+    }
+
+    function yourClass quux(){
+      var yourClass f;
+      let f = yourClass.new();
+      return f;
+    }
+
+    method void corge(){
+      do dummy1.doSillyThing();
+      return;
+    }
+}
