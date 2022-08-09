@@ -1,9 +1,17 @@
+// Only definition of class is here
 class myClass {
+    // These variables are defined in classVarDec (and the class symbol table will be populated)
+    // NOTE: The class in the declaration is used here
     field SillyClass4 dummy1, dummy2;
     field char dummy3, dummy4, dummy5;
+    static char dummy6;
 
+    // Subroutines are defined in the subroutineDec
+    // These variables are defined in parameterList (and the subroutine table will be populated)
     constructor myClass new(int a, char b, boolean c, yourClass d){
+      // These are defined in varDec (and the subroutine table will be populated)
       var int foo;
+      var char e;
       var boolean fooBar, qux;
 
       let c=2;
@@ -14,11 +22,21 @@ class myClass {
         do d.setVal(15);
       }
       let foo = bar();
-      do corge();
+      do corge(e);
       return this;
     }
 
     method int bar(int e){
+      var char f;
+      // This is setting a field variable
+      let dummy3 = "a";
+      // This is setting a static variable
+      let dummy6 = "b";
+      // This is setting a local variable
+      let f = "c";
+      // This is setting an argument variable
+      let e = 0;
+
       return e;
     }
 
@@ -28,8 +46,8 @@ class myClass {
       return f;
     }
 
-    method void corge(){
-      do dummy1.doSillyThing();
+    method void corge(char e){
+      do dummy1.doSillyThing(e);
       return;
     }
 }

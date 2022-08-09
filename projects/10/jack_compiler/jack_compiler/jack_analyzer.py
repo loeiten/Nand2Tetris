@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""File containing functions for translating .jack files to .xlm files."""
+"""Module containing functions for translating .jack files to .xlm files."""
 
 import argparse
 from pathlib import Path
