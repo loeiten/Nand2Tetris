@@ -1,0 +1,6 @@
+<classVarDec>
+  <keyword> field </keyword>
+  <identifier> class_method_function_constructor_int_boolean_char_void_var_static_field_let_do_if_else_while_return_true_false_null_this </identifier>
+  <identifier> theKeyword </identifier>
+  <symbol> ; </symbol>
+</classVarDec>

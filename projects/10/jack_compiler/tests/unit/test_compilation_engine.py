@@ -43,7 +43,8 @@ SUBROUTINE_DEC = merge_tuple(
     ("subroutineDec1", "subroutineDec2"), "compile_subroutine_dec"
 )
 CLASS_VAR_DEC = merge_tuple(
-    ("classVarDec1", "classVarDec2", "classVarDec3"), "compile_class_var_dec"
+    ("classVarDec1", "classVarDec2", "classVarDec3", "classVarDec4"),
+    "compile_class_var_dec",
 )
 
 
