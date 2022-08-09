@@ -1,8 +1,9 @@
 """Module containing the CompilationEngine class."""
 
 from io import TextIOWrapper
-from typing import Literal, Union, get_args
+from typing import Literal, Union, cast, get_args
 
+from jack_compiler import KIND
 from jack_compiler.jack_tokenizer import JackTokenizer
 from jack_compiler.symbol_table import SymbolTable
 
@@ -56,8 +57,8 @@ class CompilationEngine:
         self.out_file = out_file
         self.indentation = 0
 
-        self.class_table = SymbolTable()
-        self.subroutine_table = SymbolTable()
+        self.symbol_tables = {"class": SymbolTable(), "subroutine": SymbolTable()}
+        self.class_name = ""
 
         self.token_type = ""
         self.token = ""
@@ -111,12 +112,12 @@ class CompilationEngine:
         if token_type == "identifier":
             # First we figure out where our symbol is (if in any)
             # Search first in the subroutine table
-            kind = self.subroutine_table.kind_of(token_str)
-            table = self.subroutine_table
+            kind = self.symbol_tables["subroutine"].kind_of(token_str)
+            table = self.symbol_tables["subroutine"]
             if kind is None:
                 # Search then in the class table
-                kind = self.class_table.kind_of(token_str)
-                table = self.class_table
+                kind = self.symbol_tables["class"].kind_of(token_str)
+                table = self.symbol_tables["class"]
             if kind is None:
                 # We must be dealing with either a class or a subroutine
                 # If it is a subroutine name it must be followed by a "("
@@ -129,7 +130,7 @@ class CompilationEngine:
             else:
                 index = table.index_of(token_str)
                 cur_token_type = (
-                    f"{kind}_{index}_{'definition' if definition else 'usage'}"
+                    f"{kind.lower()}_{index}_{'definition' if definition else 'usage'}"
                 )
         else:
             cur_token_type = token_type
@@ -180,7 +181,10 @@ class CompilationEngine:
         # Class name
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self._write_token(self.token_type, self.token)  # type: ignore
+        # This is a definition
+        self._write_token(self.token_type, self.token, definition=True)  # type: ignore
+        # Set the class name
+        self.class_name = self.token
 
         # The { symbol
         assert self.jack_tokenizer.has_more_tokens()
@@ -216,18 +220,26 @@ class CompilationEngine:
 
         # static | field
         self._write_token(self.token_type, self.token)  # type: ignore
+        kind = self.token.upper()
+        if kind not in get_args(KIND):
+            raise RuntimeError(f"Unknown kind: {kind}, must be one of {KIND}")
 
         # type
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
         # We may be dealing with a class, which in this case is being used
-        if self.token_type == "identifier":
-            self._write_token(self.token_type, self.token, definition=False)  # type: ignore
+        self._write_token(self.token_type, self.token, definition=False)  # type: ignore
+        identifier_type = self.token
 
         # varName
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
         # Here the variables are being defined
+        # Add to the class table before writing
+        # mypy seem unable to detect that we are checking for the correct type
+        self.symbol_tables["class"].define(
+            name=self.token, identifier_type=identifier_type, kind=kind  # type: ignore
+        )
         self._write_token(self.token_type, self.token, definition=True)  # type: ignore
 
         assert self.jack_tokenizer.has_more_tokens()
@@ -242,6 +254,11 @@ class CompilationEngine:
             assert self.jack_tokenizer.has_more_tokens()
             self._advance()
             # Here the variables are being defined
+            # Add to the class table before writing
+            # mypy seem unable to detect that we are checking for the correct type
+            self.symbol_tables["class"].define(
+                name=self.token, identifier_type=identifier_type, kind=kind  # type: ignore
+            )
             self._write_token(self.token_type, self.token, definition=True)  # type: ignore
 
             assert self.jack_tokenizer.has_more_tokens()
@@ -258,6 +275,11 @@ class CompilationEngine:
 
         # constructor | function | method
         self._write_token(self.token_type, self.token)  # type: ignore
+        if self.token == "method":
+            # Populate the symbol table with the implicit `this`
+            self.symbol_tables["subroutine"].define(
+                name="this", identifier_type=self.class_name, kind="ARG"
+            )
 
         # void | type
         assert self.jack_tokenizer.has_more_tokens()
@@ -267,7 +289,8 @@ class CompilationEngine:
         # subroutineName
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self._write_token(self.token_type, self.token)  # type: ignore
+        # We are here defining the subroutine
+        self._write_token(self.token_type, self.token, definition=True)  # type: ignore
 
         # The ( symbol
         assert self.jack_tokenizer.has_more_tokens()
@@ -296,8 +319,8 @@ class CompilationEngine:
 
         self._close_grammar("subroutineDec")
 
-        # Reset the subroutine_table
-        self.subroutine_table = SymbolTable()
+        # Reset the tables["subroutine"]
+        self.symbol_tables["subroutine"] = SymbolTable()
 
     def compile_parameter_list(self) -> None:
         """Compile a (possibly empty) parameter list.
@@ -305,15 +328,28 @@ class CompilationEngine:
         Does not handle the enclosing "()"
         """
         self._open_grammar("parameterList")
+        kind: KIND = "ARG"
+        cast(KIND, kind)
 
         next_token = self.jack_tokenizer.look_ahead()
         if next_token != ")":
+            # Add the implicit `this` parameter if present in the subroutine table
+            if self.symbol_tables["subroutine"].kind_of("this") is not None:
+                self._write_token("identifier", "myClass", definition=False)
+                self._write_token("identifier", "this", definition=True)
+                self._write_token("symbol", ",")
+
             # type
             self._write_token(self.token_type, self.token)  # type: ignore
+            identifier_type = self.token
 
             # varName
             assert self.jack_tokenizer.has_more_tokens()
             self._advance()
+            # Add to the subroutine table before writing
+            self.symbol_tables["subroutine"].define(
+                name=self.token, identifier_type=identifier_type, kind=kind
+            )
             # Here the variables are being defined
             self._write_token(self.token_type, self.token, definition=True)  # type: ignore
 
@@ -328,11 +364,16 @@ class CompilationEngine:
                 assert self.jack_tokenizer.has_more_tokens()
                 self._advance()
                 self._write_token(self.token_type, self.token)  # type: ignore
+                identifier_type = self.token
 
                 # varName
                 assert self.jack_tokenizer.has_more_tokens()
                 self._advance()
                 # Here the variables are being defined
+                # Add to the subroutine table before writing
+                self.symbol_tables["subroutine"].define(
+                    name=self.token, identifier_type=identifier_type, kind=kind
+                )
                 self._write_token(self.token_type, self.token, definition=True)  # type: ignore
 
                 next_token = self.jack_tokenizer.look_ahead()
@@ -371,6 +412,7 @@ class CompilationEngine:
     def compile_var_dec(self) -> None:
         """Compile a var declaration."""
         self._open_grammar("varDec")
+        kind: KIND = "VAR"
 
         # var
         self._write_token(self.token_type, self.token)  # type: ignore
@@ -379,11 +421,16 @@ class CompilationEngine:
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
         self._write_token(self.token_type, self.token)  # type: ignore
+        identifier_type = self.token
 
         # varName
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
         # Here the tokens are being defined
+        # Add to the subroutine table before writing
+        self.symbol_tables["subroutine"].define(
+            name=self.token, identifier_type=identifier_type, kind=kind
+        )
         self._write_token(self.token_type, self.token, definition=True)  # type: ignore
 
         # (, varName)*
@@ -398,6 +445,10 @@ class CompilationEngine:
             assert self.jack_tokenizer.has_more_tokens()
             self._advance()
             # Here the tokens are being defined
+            # Add to the subroutine table before writing
+            self.symbol_tables["subroutine"].define(
+                name=self.token, identifier_type=identifier_type, kind=kind
+            )
             self._write_token(self.token_type, self.token, definition=True)  # type: ignore
 
             next_token = self.jack_tokenizer.look_ahead()

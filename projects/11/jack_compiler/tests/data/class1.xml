@@ -1,6 +1,6 @@
 <class>
   <keyword> class </keyword>
-  <class> myClass </class>
+  <class_definition> myClass </class_definition>
   <symbol> { </symbol>
   <symbol> } </symbol>
 </class>

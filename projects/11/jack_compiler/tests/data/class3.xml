@@ -20,6 +20,12 @@
     <field_4_definition> dummy5 </field_4_definition>
     <symbol> ; </symbol>
   </classVarDec>
+  <classVarDec>
+    <keyword> static </keyword>
+    <keyword> char </keyword>
+    <static_0_definition> dummy6 </static_0_definition>
+    <symbol> ; </symbol>
+  </classVarDec>
   <subroutineDec>
     <keyword> constructor </keyword>
     <class_usage> myClass </class_usage>
@@ -27,38 +33,44 @@
     <symbol> ( </symbol>
     <parameterList>
       <keyword> int </keyword>
-      <argument_0_definition> a </argument_0_definition>
+      <arg_0_definition> a </arg_0_definition>
       <symbol> , </symbol>
       <keyword> char </keyword>
-      <argument_1_definition> b </argument_1_definition>
+      <arg_1_definition> b </arg_1_definition>
       <symbol> , </symbol>
       <keyword> boolean </keyword>
-      <argument_2_definition> c </argument_2_definition>
+      <arg_2_definition> c </arg_2_definition>
       <symbol> , </symbol>
       <class_usage> yourClass </class_usage>
-      <argument_3_definition> d </argument_3_definition>
+      <arg_3_definition> d </arg_3_definition>
     </parameterList>
     <symbol> ) </symbol>
     <subroutineBody>
       <symbol> { </symbol>
       <varDec>
         <keyword> var </keyword>
-        <keyword> boolean </keyword>
+        <keyword> int </keyword>
         <var_0_definition> foo </var_0_definition>
         <symbol> ; </symbol>
       </varDec>
       <varDec>
         <keyword> var </keyword>
+        <keyword> char </keyword>
+        <var_1_definition> e </var_1_definition>
+        <symbol> ; </symbol>
+      </varDec>
+      <varDec>
+        <keyword> var </keyword>
         <keyword> boolean </keyword>
-        <var_1_definition> fooBar </var_1_definition>
+        <var_2_definition> fooBar </var_2_definition>
         <symbol> , </symbol>
-        <var_2_definition> qux </var_2_definition>
+        <var_3_definition> qux </var_3_definition>
         <symbol> ; </symbol>
       </varDec>
       <statements>
         <letStatement>
           <keyword> let </keyword>
-          <argument_2_usage> c </argument_2_usage>
+          <arg_2_usage> c </arg_2_usage>
           <symbol> = </symbol>
           <expression>
             <term>
@@ -80,7 +92,7 @@
           <statements>
             <letStatement>
               <keyword> let </keyword>
-              <argument_1_usage> b </argument_1_usage>
+              <arg_1_usage> b </arg_1_usage>
               <symbol> = </symbol>
               <expression>
                 <term>
@@ -105,20 +117,18 @@
           <statements>
             <doStatement>
               <keyword> do </keyword>
-              <expression>
-                <term>
-                  <argument_3_usage> d </argument_3_usage>
-                  <symbol> . </symbol>
-                  <subroutine_usage> setVal </subroutine_usage>
-                  <symbol> ( </symbol>
-                    <expression>
-                      <term>
-                        <integerConstant> 15 </integerConstant>
-                      </term>
-                    </expression>
-                  <symbol> ) </symbol>
-                </term>
-              </expression>
+              <arg_3_usage> d </arg_3_usage>
+              <symbol> . </symbol>
+              <subroutine_usage> setVal </subroutine_usage>
+              <symbol> ( </symbol>
+              <expressionList>
+                <expression>
+                  <term>
+                    <integerConstant> 15 </integerConstant>
+                  </term>
+                </expression>
+              </expressionList>
+              <symbol> ) </symbol>
               <symbol> ; </symbol>
             </doStatement>
           </statements>
@@ -128,11 +138,15 @@
           <keyword> let </keyword>
           <var_0_usage> foo </var_0_usage>
           <symbol> = </symbol>
-          <subroutine_usage> bar </subroutine_usage>
-          <symbol> ( </symbol>
-          <expressionList>
-          </expressionList>
-          <symbol> ) </symbol>
+          <expression>
+            <term>
+              <subroutine_usage> bar </subroutine_usage>
+              <symbol> ( </symbol>
+              <expressionList>
+              </expressionList>
+              <symbol> ) </symbol>
+            </term>
+          </expression>
           <symbol> ; </symbol>
         </letStatement>
         <doStatement>
@@ -140,6 +154,11 @@
           <subroutine_usage> corge </subroutine_usage>
           <symbol> ( </symbol>
           <expressionList>
+            <expression>
+              <term>
+                <var_1_usage> e </var_1_usage>
+              </term>
+            </expression>
           </expressionList>
           <symbol> ) </symbol>
           <symbol> ; </symbol>
@@ -163,22 +182,76 @@
     <subroutine_definition> bar </subroutine_definition>
     <symbol> ( </symbol>
     <parameterList>
+      <class_usage> myClass </class_usage>
+      <arg_0_definition> this </arg_0_definition>
+      <symbol> , </symbol>
       <keyword> int </keyword>
-      <argument_0_definition> this </argument_0_definition>
-      <argument_1_definition> e </argument_1_definition>
+      <arg_1_definition> e </arg_1_definition>
     </parameterList>
     <symbol> ) </symbol>
     <subroutineBody>
       <symbol> { </symbol>
+      <varDec>
+        <keyword> var </keyword>
+        <keyword> char </keyword>
+        <var_0_definition> f </var_0_definition>
+        <symbol> ; </symbol>
+      </varDec>
+      <statements>
+        <letStatement>
+          <keyword> let </keyword>
+          <field_2_usage> dummy3 </field_2_usage>
+          <symbol> = </symbol>
+          <expression>
+            <term>
+              <stringConstant> a </stringConstant>
+            </term>
+          </expression>
+          <symbol> ; </symbol>
+        </letStatement>
+        <letStatement>
+          <keyword> let </keyword>
+          <static_0_usage> dummy6 </static_0_usage>
+          <symbol> = </symbol>
+          <expression>
+            <term>
+              <stringConstant> b </stringConstant>
+            </term>
+          </expression>
+          <symbol> ; </symbol>
+        </letStatement>
+        <letStatement>
+          <keyword> let </keyword>
+          <var_0_usage> f </var_0_usage>
+          <symbol> = </symbol>
+          <expression>
+            <term>
+              <stringConstant> c </stringConstant>
+            </term>
+          </expression>
+          <symbol> ; </symbol>
+        </letStatement>
+        <letStatement>
+          <keyword> let </keyword>
+          <arg_1_usage> e </arg_1_usage>
+          <symbol> = </symbol>
+          <expression>
+            <term>
+              <integerConstant> 0 </integerConstant>
+            </term>
+          </expression>
+          <symbol> ; </symbol>
+        </letStatement>
         <returnStatement>
           <keyword> return </keyword>
           <expression>
             <term>
-              <argument_1_usage> e </argument_1_usage>
+              <arg_1_usage> e </arg_1_usage>
             </term>
           </expression>
           <symbol> ; </symbol>
         </returnStatement>
+      </statements>
       <symbol> } </symbol>
     </subroutineBody>
   </subroutineDec>
@@ -192,12 +265,13 @@
     <symbol> ) </symbol>
     <subroutineBody>
       <symbol> { </symbol>
-        <varDec>
-          <keyword> var </keyword>
-          <class_usage> yourClass </class_usage>
-          <var_0_definition> f </var_0_definition>
-          <symbol> ; </symbol>
-        </varDec>
+      <varDec>
+        <keyword> var </keyword>
+        <class_usage> yourClass </class_usage>
+        <var_0_definition> f </var_0_definition>
+        <symbol> ; </symbol>
+      </varDec>
+      <statements>
         <letStatement>
           <keyword> let </keyword>
           <var_0_usage> f </var_0_usage>
@@ -224,20 +298,26 @@
           </expression>
           <symbol> ; </symbol>
         </returnStatement>
+      </statements>
       <symbol> } </symbol>
     </subroutineBody>
   </subroutineDec>
-
   <subroutineDec>
     <keyword> method </keyword>
     <keyword> void </keyword>
     <subroutine_definition> corge </subroutine_definition>
     <symbol> ( </symbol>
     <parameterList>
+      <class_usage> myClass </class_usage>
+      <arg_0_definition> this </arg_0_definition>
+      <symbol> , </symbol>
+      <keyword> char </keyword>
+      <arg_1_definition> e </arg_1_definition>
     </parameterList>
     <symbol> ) </symbol>
     <subroutineBody>
       <symbol> { </symbol>
+      <statements>
         <doStatement>
           <keyword> do </keyword>
           <field_0_usage> dummy1 </field_0_usage>
@@ -245,6 +325,11 @@
           <subroutine_usage> doSillyThing </subroutine_usage>
           <symbol> ( </symbol>
           <expressionList>
+            <expression>
+              <term>
+                <arg_1_usage> e </arg_1_usage>
+              </term>
+            </expression>
           </expressionList>
           <symbol> ) </symbol>
           <symbol> ; </symbol>
@@ -253,6 +338,7 @@
           <keyword> return </keyword>
           <symbol> ; </symbol>
         </returnStatement>
+      </statements>
       <symbol> } </symbol>
     </subroutineBody>
   </subroutineDec>

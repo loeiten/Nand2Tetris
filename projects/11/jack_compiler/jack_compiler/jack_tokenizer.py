@@ -83,12 +83,14 @@ class JackTokenizer:
         backslash = "\\"  # f-string expression part cannot include a backslash
         # As we do greedy capture, we must have the comment first in order not
         # to classify as a SYMBOL
+        # We have (?!\w) in keywords as we might have variables like `do_this`
+        # which would have matched with `do` and `this` instead of `do_this`
         # We also have STRING_CONST last as it matches everything
         # Notice also the ? modifier after * which makes it non-greedy
         regex_str = (
             r"\s*(?P<LINE_COMMENT>//)|"
             r"\s*(?P<BLOCK_COMMENT_START>/\*)|"
-            rf"\s*(?P<KEYWORD>{'|'.join(self.keywords)})|"
+            rf"\s*(?P<KEYWORD>{'|'.join(self.keywords)})(?!\w)|"
             rf"\s*(?P<SYMBOL>{backslash}{f'|{backslash}'.join(self.symbols)})|"
             r"\s*(?P<INT_CONST>\d{1,5})|"
             r"\s*(?P<IDENTIFIER>\w+)|"

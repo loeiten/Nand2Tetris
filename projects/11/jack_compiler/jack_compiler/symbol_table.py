@@ -2,7 +2,8 @@
 
 from typing import Dict, Literal, Optional, TypedDict
 
-KIND = Literal["STATIC", "FIELD", "ARG", "VAR"]
+from jack_compiler import KIND
+
 LowerKind = Literal["static", "field", "arg", "var"]
 
 
