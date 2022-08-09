@@ -3,6 +3,7 @@
 from typing import Dict, Literal, Optional, TypedDict
 
 KIND = Literal["STATIC", "FIELD", "ARG", "VAR"]
+LowerKind = Literal["static", "field", "arg", "var"]
 
 
 class SymbolTable:
@@ -12,7 +13,9 @@ class SymbolTable:
         """Create a new symbol table."""
         # NOTE: The total = True (default) guarantees that all keys must be present
         table_entry_type = TypedDict(
-            "table_entry_type", {"type": str, "kind": KIND, "index": int}, total=True
+            "table_entry_type",
+            {"type": str, "kind": LowerKind, "index": int},
+            total=True,
         )
         self.table: Dict[str, table_entry_type] = dict()
         self.kind_indices: Dict[str, int] = dict()
@@ -28,16 +31,19 @@ class SymbolTable:
             identifier_type (str): Type of the identifier
             kind (KIND): Kind of the identifier
         """
+        lower_kind = kind.lower()
         # Update the index
-        if identifier_type in self.kind_indices.keys():
-            self.kind_indices[identifier_type] += 1
+        if lower_kind in self.kind_indices.keys():
+            self.kind_indices[lower_kind] += 1
         else:
-            self.kind_indices[identifier_type] = 1
+            self.kind_indices[lower_kind] = 0
 
+        # Type ignore as mypy doesn't detect that we are ensuring the
+        # correct input type for lower_kind
         self.table[name] = {
             "type": identifier_type,
-            "kind": kind,
-            "index": self.kind_indices[identifier_type],
+            "kind": lower_kind,  # type: ignore
+            "index": self.kind_indices[lower_kind],
         }
 
     def var_count(self, kind: KIND) -> int:
@@ -49,7 +55,11 @@ class SymbolTable:
         Returns:
             int: The number of variables
         """
-        return self.kind_indices[kind]
+        lower_kind = kind.lower()
+        if lower_kind in self.kind_indices.keys():
+            # +1 as the index is running from 0
+            return self.kind_indices[lower_kind] + 1
+        return 0
 
     def kind_of(self, name: str) -> Optional[KIND]:
         """Return the kind of the named identifier in the current scope.
@@ -61,7 +71,13 @@ class SymbolTable:
             Optional[KIND]: The kind of the named identifier.
                 If the identifier is unknown in the current scope, return None
         """
-        return self.table[name]["kind"]
+        if name in self.table.keys():
+            lower_kind = self.table[name]["kind"]
+            # Type ignore as mypy doesn't detect that we are ensuring the
+            # correct type for kind
+            kind: KIND = lower_kind.upper()  # type: ignore
+            return kind
+        return None
 
     def type_of(self, name: str) -> str:
         """Return the type of the named identifier in the current scope.
