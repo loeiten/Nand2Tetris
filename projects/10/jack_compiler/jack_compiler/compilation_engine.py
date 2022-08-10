@@ -55,8 +55,7 @@ class CompilationEngine:
         self.out_file = out_file
         self.indentation = 0
 
-        self.token_type = ""
-        self.token = ""
+        self.token = {"type": "", "token": ""}
 
         if not jack_tokenizer.has_more_tokens():
             raise RuntimeError(
@@ -73,10 +72,10 @@ class CompilationEngine:
 
         token_type = self.jack_tokenizer.token_type()
         func = getattr(self.jack_tokenizer, self.token_map[token_type]["function_name"])
-        self.token = func()
-        self.token_type = self.token_map[token_type]["text"]
+        self.token["token"] = func()
+        self.token["type"] = self.token_map[token_type]["text"]
         if token_type == "KEYWORD":
-            self.token = self.token.lower()
+            self.token["token"] = self.token["token"].lower()
 
     def compile_tokens_only(self) -> None:
         """Only compile tokens."""
@@ -85,7 +84,7 @@ class CompilationEngine:
             # Type ignore as mypy doesn't detect that we are ensuring the
             # correct input type for token_type
             self.write_token(
-                token_type=self.token_type, token=self.token  # type: ignore
+                token_type=self.token["type"], token=self.token["token"]  # type: ignore
             )
 
     def write_token(self, token_type: TerminalElement, token: Union[str, int]) -> None:
@@ -131,7 +130,7 @@ class CompilationEngine:
         """Compile a complete class."""
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        if self.token != "class":
+        if self.token["token"] != "class":
             raise RuntimeError(
                 f"{self.jack_tokenizer.file.name} did not start with a definition of 'class'"
             )
@@ -139,17 +138,17 @@ class CompilationEngine:
         self._open_grammar("class")
         # Type ignore as mypy doesn't detect that we are ensuring the
         # correct input type for token_type
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # Class name
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # The { symbol
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # Zero or more classVarDec
         next_token = self.jack_tokenizer.look_ahead()
@@ -170,7 +169,7 @@ class CompilationEngine:
         # The } symbol
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         self._close_grammar("class")
 
@@ -179,36 +178,36 @@ class CompilationEngine:
         self._open_grammar("classVarDec")
 
         # static | field
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # type
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # varName
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
 
         # (, varName)*
-        while self.token == ",":
+        while self.token["token"] == ",":
             # The , symbol
-            self.write_token(self.token_type, self.token)  # type: ignore
+            self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
             # varName
             assert self.jack_tokenizer.has_more_tokens()
             self._advance()
-            self.write_token(self.token_type, self.token)  # type: ignore
+            self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
             assert self.jack_tokenizer.has_more_tokens()
             self._advance()
 
         # The ; symbol
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         self._close_grammar("classVarDec")
 
@@ -217,22 +216,22 @@ class CompilationEngine:
         self._open_grammar("subroutineDec")
 
         # constructor | function | method
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # void | type
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # subroutineName
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # The ( symbol
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # parameterList
         next_token = self.jack_tokenizer.look_ahead()
@@ -247,7 +246,7 @@ class CompilationEngine:
         # The ) symbol
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # subRoutine body
         assert self.jack_tokenizer.has_more_tokens()
@@ -266,29 +265,29 @@ class CompilationEngine:
         next_token = self.jack_tokenizer.look_ahead()
         if next_token != ")":
             # type
-            self.write_token(self.token_type, self.token)  # type: ignore
+            self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
             # varName
             assert self.jack_tokenizer.has_more_tokens()
             self._advance()
-            self.write_token(self.token_type, self.token)  # type: ignore
+            self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
             next_token = self.jack_tokenizer.look_ahead()
             while next_token == ",":
                 # ,
                 assert self.jack_tokenizer.has_more_tokens()
                 self._advance()
-                self.write_token(self.token_type, self.token)  # type: ignore
+                self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
                 # type
                 assert self.jack_tokenizer.has_more_tokens()
                 self._advance()
-                self.write_token(self.token_type, self.token)  # type: ignore
+                self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
                 # varName
                 assert self.jack_tokenizer.has_more_tokens()
                 self._advance()
-                self.write_token(self.token_type, self.token)  # type: ignore
+                self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
                 next_token = self.jack_tokenizer.look_ahead()
 
@@ -299,7 +298,7 @@ class CompilationEngine:
         self._open_grammar("subroutineBody")
 
         # The { symbol
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # varDec
         next_token = self.jack_tokenizer.look_ahead()
@@ -319,7 +318,7 @@ class CompilationEngine:
         # The } symbol
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         self._close_grammar("subroutineBody")
 
@@ -328,17 +327,17 @@ class CompilationEngine:
         self._open_grammar("varDec")
 
         # var
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # type
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # varName
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # (, varName)*
         next_token = self.jack_tokenizer.look_ahead()
@@ -346,19 +345,19 @@ class CompilationEngine:
             # The , symbol
             assert self.jack_tokenizer.has_more_tokens()
             self._advance()
-            self.write_token(self.token_type, self.token)  # type: ignore
+            self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
             # varName
             assert self.jack_tokenizer.has_more_tokens()
             self._advance()
-            self.write_token(self.token_type, self.token)  # type: ignore
+            self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
             next_token = self.jack_tokenizer.look_ahead()
 
         # The symbol ;
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         self._close_grammar("varDec")
 
@@ -369,16 +368,16 @@ class CompilationEngine:
         """
         self._open_grammar("statements")
 
-        while self.token in ("let", "if", "while", "do", "return"):
-            if self.token == "let":
+        while self.token["token"] in ("let", "if", "while", "do", "return"):
+            if self.token["token"] == "let":
                 self.compile_let()
-            elif self.token == "if":
+            elif self.token["token"] == "if":
                 self.compile_if()
-            elif self.token == "while":
+            elif self.token["token"] == "while":
                 self.compile_while()
-            elif self.token == "do":
+            elif self.token["token"] == "do":
                 self.compile_do()
-            elif self.token == "return":
+            elif self.token["token"] == "return":
                 self.compile_return()
             next_token = self.jack_tokenizer.look_ahead()
             if next_token in ("let", "if", "while", "do", "return"):
@@ -392,12 +391,12 @@ class CompilationEngine:
         self._open_grammar("letStatement")
 
         # let
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # varName
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # [expression]
         next_token = self.jack_tokenizer.look_ahead()
@@ -405,7 +404,7 @@ class CompilationEngine:
             # The symbol [
             assert self.jack_tokenizer.has_more_tokens()
             self._advance()
-            self.write_token(self.token_type, self.token)  # type: ignore
+            self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
             # expression
             assert self.jack_tokenizer.has_more_tokens()
@@ -415,12 +414,12 @@ class CompilationEngine:
             # The symbol ]
             assert self.jack_tokenizer.has_more_tokens()
             self._advance()
-            self.write_token(self.token_type, self.token)  # type: ignore
+            self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # The symbol =
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # expression
         assert self.jack_tokenizer.has_more_tokens()
@@ -430,14 +429,14 @@ class CompilationEngine:
         # The ; symbol
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         self._close_grammar("letStatement")
 
     def _write_expression_body(self) -> None:
         """Write '('expression')''{statements}'."""
         # The ( symbol
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # expression
         assert self.jack_tokenizer.has_more_tokens()
@@ -447,7 +446,7 @@ class CompilationEngine:
         # The ) symbol
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # '{statements}'
         assert self.jack_tokenizer.has_more_tokens()
@@ -457,7 +456,7 @@ class CompilationEngine:
     def _write_body(self) -> None:
         """Write '{statements}'."""
         # The { symbol
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # statements
         next_token = self.jack_tokenizer.look_ahead()
@@ -472,14 +471,14 @@ class CompilationEngine:
         # The } symbol
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
     def compile_if(self) -> None:
         """Compile an `if` statement, possibly with a trailing else clause."""
         self._open_grammar("ifStatement")
 
         # if
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # '('expression')''{statements}'
         assert self.jack_tokenizer.has_more_tokens()
@@ -490,7 +489,7 @@ class CompilationEngine:
         if next_token == "else":
             assert self.jack_tokenizer.has_more_tokens()
             self._advance()
-            self.write_token(self.token_type, self.token)  # type: ignore
+            self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
             # '{statements}'
             assert self.jack_tokenizer.has_more_tokens()
@@ -504,7 +503,7 @@ class CompilationEngine:
         self._open_grammar("whileStatement")
 
         # while
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # '('expression')''{statements}'
         assert self.jack_tokenizer.has_more_tokens()
@@ -516,24 +515,24 @@ class CompilationEngine:
     def _write_subroutine_call(self):
         """Write the subroutine call."""
         # subroutineName | varName | className
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         next_token = self.jack_tokenizer.look_ahead()
         if next_token == ".":
             # The symbol .
             assert self.jack_tokenizer.has_more_tokens()
             self._advance()
-            self.write_token(self.token_type, self.token)  # type: ignore
+            self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
             # subroutineName
             assert self.jack_tokenizer.has_more_tokens()
             self._advance()
-            self.write_token(self.token_type, self.token)  # type: ignore
+            self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # The ( symbol
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         # The expression list
         assert self.jack_tokenizer.has_more_tokens()
@@ -542,14 +541,14 @@ class CompilationEngine:
 
         # The ) symbol
         # We are guaranteed
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
     def compile_do(self) -> None:
         """Compile a `do` statement."""
         self._open_grammar("doStatement")
 
         # do
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
@@ -558,7 +557,7 @@ class CompilationEngine:
         # The ; symbol
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         self._close_grammar("doStatement")
 
@@ -567,7 +566,7 @@ class CompilationEngine:
         self._open_grammar("returnStatement")
 
         # return
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         next_token = self.jack_tokenizer.look_ahead()
         if next_token != ";":
@@ -578,7 +577,7 @@ class CompilationEngine:
         # The ; symbol
         assert self.jack_tokenizer.has_more_tokens()
         self._advance()
-        self.write_token(self.token_type, self.token)  # type: ignore
+        self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
         self._close_grammar("returnStatement")
 
@@ -596,7 +595,7 @@ class CompilationEngine:
             # op
             assert self.jack_tokenizer.has_more_tokens()
             self._advance()
-            self.write_token(self.token_type, self.token)  # type: ignore
+            self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
             # term
             assert self.jack_tokenizer.has_more_tokens()
@@ -618,46 +617,12 @@ class CompilationEngine:
         """
         self._open_grammar("term")
 
-        if self.token_type == "stringConstant":
-            # stringConstant
-            self.write_token(self.token_type, self.token.replace('"', ""))  # type: ignore
-        elif self.token_type in ("integerConstant", "keyword"):
-            # integerConstant | keywordConstant
-            self.write_token(self.token_type, self.token)  # type: ignore
-        elif self.token_type == "identifier":
-            # varName | varName'['expression']' | subroutineCall
-            next_token = self.jack_tokenizer.look_ahead()
-
-            if next_token == "[":
-                # varName'['expression']'
-
-                # varName
-                self.write_token(self.token_type, self.token)  # type: ignore
-
-                # The [ symbol
-                assert self.jack_tokenizer.has_more_tokens()
-                self._advance()
-                self.write_token(self.token_type, self.token)  # type: ignore
-
-                # expression
-                assert self.jack_tokenizer.has_more_tokens()
-                self._advance()
-                self.compile_expression()
-
-                # The ] symbol
-                assert self.jack_tokenizer.has_more_tokens()
-                self._advance()
-                self.write_token(self.token_type, self.token)  # type: ignore
-            elif next_token in ("(", "."):
-                self._write_subroutine_call()
-            else:
-                # varName
-                self.write_token(self.token_type, self.token)  # type: ignore
-        elif self.token == "(":
+        # Expressions in paratheses must be evaluated first
+        if self.token["token"] == "(":
             # '('expression')'
 
             # '('
-            self.write_token(self.token_type, self.token)  # type: ignore
+            self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
             # expression
             assert self.jack_tokenizer.has_more_tokens()
@@ -667,12 +632,49 @@ class CompilationEngine:
             # ')'
             assert self.jack_tokenizer.has_more_tokens()
             self._advance()
-            self.write_token(self.token_type, self.token)  # type: ignore
-        elif self.token_type == "symbol":
+            self.write_token(self.token["type"], self.token["token"])  # type: ignore
+        elif self.token["type"] == "stringConstant":
+            # stringConstant
+            self.write_token(
+                self.token["type"], self.token["token"].replace('"', "")  # type: ignore
+            )
+        elif self.token["type"] in ("integerConstant", "keyword"):
+            # integerConstant | keywordConstant
+            self.write_token(self.token["type"], self.token["token"])  # type: ignore
+        elif self.token["type"] == "identifier":
+            # varName | varName'['expression']' | subroutineCall
+            next_token = self.jack_tokenizer.look_ahead()
+
+            if next_token == "[":
+                # varName'['expression']'
+
+                # varName
+                self.write_token(self.token["type"], self.token["token"])  # type: ignore
+
+                # The [ symbol
+                assert self.jack_tokenizer.has_more_tokens()
+                self._advance()
+                self.write_token(self.token["type"], self.token["token"])  # type: ignore
+
+                # expression
+                assert self.jack_tokenizer.has_more_tokens()
+                self._advance()
+                self.compile_expression()
+
+                # The ] symbol
+                assert self.jack_tokenizer.has_more_tokens()
+                self._advance()
+                self.write_token(self.token["type"], self.token["token"])  # type: ignore
+            elif next_token in ("(", "."):
+                self._write_subroutine_call()
+            else:
+                # varName
+                self.write_token(self.token["type"], self.token["token"])  # type: ignore
+        elif self.token["type"] == "symbol":
             # unaryOp term
 
             # 'unaryOp'
-            self.write_token(self.token_type, self.token)  # type: ignore
+            self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
             # term
             assert self.jack_tokenizer.has_more_tokens()
@@ -680,7 +682,8 @@ class CompilationEngine:
             self.compile_term()
         else:
             raise RuntimeError(
-                f"Token type {self.token_type} with token {self.token} not recognized as a term"
+                f"Token type {self.token['type']} with token "
+                f"{self.token['token']} not recognized as a term"
             )
 
         self._close_grammar("term")
@@ -689,13 +692,13 @@ class CompilationEngine:
         """Compile a (possibly empty) comma-separated list of expressions."""
         self._open_grammar("expressionList")
 
-        if self.token != ")":
+        if self.token["token"] != ")":
             # expression
             self.compile_expression()
 
             next_token = self.jack_tokenizer.look_ahead()
             if next_token == ")":
-                # Advance at the end of the list, so that self.token is
+                # Advance at the end of the list, so that self.token["token"] is
                 # the same irrespective of whether the expression list
                 # was empty or not
                 assert self.jack_tokenizer.has_more_tokens()
@@ -706,7 +709,7 @@ class CompilationEngine:
                 # The , symbol
                 assert self.jack_tokenizer.has_more_tokens()
                 self._advance()
-                self.write_token(self.token_type, self.token)  # type: ignore
+                self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
                 # expression
                 assert self.jack_tokenizer.has_more_tokens()
@@ -715,7 +718,7 @@ class CompilationEngine:
                 next_token = self.jack_tokenizer.look_ahead()
 
                 if next_token == ")":
-                    # Advance at the end of the list, so that self.token is
+                    # Advance at the end of the list, so that self.token["token"] is
                     # the same irrespective of whether the expression list
                     # was empty or not
                     assert self.jack_tokenizer.has_more_tokens()
