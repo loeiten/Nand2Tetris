@@ -2,7 +2,7 @@
 
 from io import TextIOWrapper
 from pathlib import Path
-from typing import Literal, Union, cast, get_args
+from typing import Any, Dict, Literal, Union, cast, get_args
 
 from jack_compiler import KIND
 from jack_compiler.jack_tokenizer import JackTokenizer
@@ -35,7 +35,13 @@ Op = Literal["+", "-", "*", "/", "&", "|", "<", ">", "="]
 
 
 class CompilationEngine:
-    """Class which generates the compiler's output."""
+    """
+    Class which generates the compiler's output.
+
+    Note:
+        There is no operator precedence of expressions.
+        Expressions are simply compiled from left to the right.
+    """
 
     token_map = {
         "KEYWORD": {"text": "keyword", "function_name": "keyword"},
@@ -66,7 +72,10 @@ class CompilationEngine:
             "subroutine_type": "",
             "return_type": "",
             "assign_to": "",
+            "expression_depth": 0,
         }
+        # FIXME: Remove
+        self._expression_tree = dict()
 
         self.token = {"type": "", "token": ""}
 
@@ -494,7 +503,7 @@ class CompilationEngine:
                 name=self.token["token"], identifier_type=identifier_type, kind=kind
             )
             self._write_token(
-                self.token["type"], # type: ignore
+                self.token["type"],  # type: ignore
                 self.token["token"],
                 definition=True,
             )
@@ -703,6 +712,7 @@ class CompilationEngine:
         # The ) symbol
         # We are guaranteed
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
+        # FIXME: Add call subroutine name in the end
 
     def compile_do(self) -> None:
         """Compile a `do` statement."""
@@ -743,7 +753,14 @@ class CompilationEngine:
         self._close_grammar("returnStatement")
 
     def compile_expression(self) -> None:
-        """Compile an `expression` statement."""
+        """Compile an `expression` statement.
+
+        Note:
+            - There is no operator precedence of expressions.
+              Expressions are simply compiled from left to the right.
+            - A more industrial strength compiler would make a syntax tree
+        """
+        self._context_details["expression_depth"] += 1
         self._open_grammar("expression")
 
         # FIXME: YOU ARE HERE: Need to distinguish the expressions (slide 21)
@@ -773,9 +790,54 @@ class CompilationEngine:
             self._advance()
             self.compile_term()
 
+            # FIXME: Add op in the end
+
             next_token = self._jack_tokenizer.look_ahead()
 
         self._close_grammar("expression")
+        # FIXME: Remove expression depth
+        # self._context_details["expression_depth"] -= 1
+
+        # FIXME: Maybe no need for rearranging
+        # FIXME: Would use parse tree in other places
+        # FIXME: Can do this on the fly
+        # if self._context_details["expression_depth"] == 0:
+        #     # Rearrange the expression tree
+        #     self.rearrange_expression_tree(self._expression_tree)
+        #     self.code_write(self._expression_tree)
+        #     # Reset the expression tree
+        #     self._expression_tree = dict()
+
+    #    @staticmethod
+    #    def rearrange_expression_tree(expression_tree: Dict[str, Any]) -> Dict[str, Any]:
+    #        """Rearrange the expression tree recursively.
+    #
+    #        The expression tree will be rearranged so that the follow vm code will
+    #        have the following precedence:
+    #            1. Expression in parenthesis
+    #            2. Subroutines
+    #            3. Subscripts
+    #            3. Unary -
+    #            4. Unary !
+    #            5. <
+    #            6. >
+    #            7. &
+    #            8. |
+    #            9. Multiplication
+    #            10. Division
+    #            11. Addition
+    #            12. Subtraction
+    #
+    #        Args:
+    #            expression_tree (Dict[str, Any]): Expression tree to rearrange
+    #
+    #        Returns:
+    #            Dict[str, Any]: Rearranged expression tree
+    #        """
+    #        # Find parenthesis
+    #        expression_types = expression_tree.keys()
+    #        for expression_type in expression_types:
+    #            pass
 
     def compile_term(self) -> None:
         """Compile a term.
@@ -805,14 +867,15 @@ class CompilationEngine:
             self._advance()
             self._write_token(self.token["type"], self.token["token"])  # type: ignore
         elif self.token["type"] == "stringConstant":
+            # FIXME: Need to append string
             # stringConstant
             self._write_token(
-                self.token["type"], # type: ignore
-                self.token["token"].replace('"', "")
+                self.token["type"], self.token["token"].replace('"', "")  # type: ignore
             )
         elif self.token["type"] in ("integerConstant", "keyword"):
             # integerConstant | keywordConstant
             self._write_token(self.token["type"], self.token["token"])  # type: ignore
+            # FIXME: Add integer constant and check what keyword constant there is
         elif self.token["type"] == "identifier":
             # varName | varName'['expression']' | subroutineCall
             next_token = self._jack_tokenizer.look_ahead()
@@ -822,6 +885,7 @@ class CompilationEngine:
 
                 # varName
                 self._write_token(self.token["type"], self.token["token"])  # type: ignore
+                # FIXME: Add var
 
                 # The [ symbol
                 assert self._jack_tokenizer.has_more_tokens()
@@ -837,11 +901,18 @@ class CompilationEngine:
                 assert self._jack_tokenizer.has_more_tokens()
                 self._advance()
                 self._write_token(self.token["type"], self.token["token"])  # type: ignore
+                # FIXME: Add "add" to sum up pointer
+                # FIXME: NOTE: Special care for let arr[exp1] = exp2
+                #        NOTE: pop pointer 1 and push that 0 can be used for eval exp2
+                # FIXME: let var = [exp1]
+                #        NOTE: pop pointer 1, push that 0 -> value on stack
+                #        The let value will then do pop var to assign (that is what the last "pop that 0" does in let arr[exp1] = exp2)
             elif next_token in ("(", "."):
                 self._write_subroutine_call()
             else:
                 # varName
                 self._write_token(self.token["type"], self.token["token"])  # type: ignore
+                # FIXME: Just output varname
         elif self.token["type"] == "symbol":
             # unaryOp term
 
@@ -852,6 +923,7 @@ class CompilationEngine:
             assert self._jack_tokenizer.has_more_tokens()
             self._advance()
             self.compile_term()
+            # FIXME: Add symbol in the end
         else:
             raise RuntimeError(
                 f"Token type {self.token['type']} with token "
