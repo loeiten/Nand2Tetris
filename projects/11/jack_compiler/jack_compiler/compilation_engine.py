@@ -74,6 +74,7 @@ class CompilationEngine:
             "assign_to": "",
             "expression_depth": 0,
         }
+        self._labels = {"if_start": 0, "if_end":0, "while_start":0, "while_end":0}
         # FIXME: Remove
         self._expression_tree = dict()
 
@@ -574,6 +575,8 @@ class CompilationEngine:
             self._advance()
             self._write_token(self.token["type"], self.token["token"])  # type: ignore
 
+            # FIXME: Here you can toggle if the LHS is array
+
         # The symbol =
         assert self._jack_tokenizer.has_more_tokens()
         self._advance()
@@ -589,6 +592,8 @@ class CompilationEngine:
         self._advance()
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
 
+        # FIXME: Need to distinguish: Was the RHS array
+        #        If RHS not array, was LHS array?
         # Write the pop (assign) command
         table = self._symbol_tables["subroutine"]
         segment = table.kind_of(self._context_details["assign_to"])
@@ -617,6 +622,10 @@ class CompilationEngine:
         assert self._jack_tokenizer.has_more_tokens()
         self._advance()
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
+
+        # FIXME: If context is while or if, add a not statement
+        #        If in if context: if-goto L1
+        #        If in while context: if-goto L2
 
         # '{statements}'
         assert self._jack_tokenizer.has_more_tokens()
@@ -647,6 +656,8 @@ class CompilationEngine:
         """Compile an `if` statement, possibly with a trailing else clause."""
         self._open_grammar("ifStatement")
 
+        # FIXME: Set context here (remember nested-ness)
+
         # if
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
 
@@ -657,6 +668,7 @@ class CompilationEngine:
 
         next_token = self._jack_tokenizer.look_ahead()
         if next_token == "else":
+            # FIXME: goto L2, label L1, comp(s), label L2
             assert self._jack_tokenizer.has_more_tokens()
             self._advance()
             self._write_token(self.token["type"], self.token["token"])  # type: ignore
@@ -665,6 +677,8 @@ class CompilationEngine:
             assert self._jack_tokenizer.has_more_tokens()
             self._advance()
             self._write_body()
+            # FIXME: Make new branch:
+            #       label L1
 
         self._close_grammar("ifStatement")
 
@@ -675,10 +689,15 @@ class CompilationEngine:
         # while
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
 
+        # FIXME:
+        # Add label L1
+
         # '('expression')''{statements}'
         assert self._jack_tokenizer.has_more_tokens()
         self._advance()
         self._write_expression_body()
+
+        # FIXME: goto L1, label L2
 
         self._close_grammar("whileStatement")
 
@@ -907,6 +926,14 @@ class CompilationEngine:
                 # FIXME: let var = [exp1]
                 #        NOTE: pop pointer 1, push that 0 -> value on stack
                 #        The let value will then do pop var to assign (that is what the last "pop that 0" does in let arr[exp1] = exp2)
+                # FIXME: Toggle if we are on LHS or RHS of the expr
+                # FIXME: The "magic code can be added in the end of the let statement"
+                # FIXME: Summary: Two cases
+                #        1. let arr[exp1] = exp2
+                #           Just push, push, add here, the rest of the magic in let
+                #        2. let var = [exp]
+                #           Here we do push, push, add here
+                #           Need to pop pointer 1 and push that 0 (dereference pointer) in let
             elif next_token in ("(", "."):
                 self._write_subroutine_call()
             else:
