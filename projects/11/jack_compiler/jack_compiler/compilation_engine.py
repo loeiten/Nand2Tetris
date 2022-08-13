@@ -796,6 +796,7 @@ class CompilationEngine:
         # subroutineName | varName | className
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
         token = self.token["token"]
+        is_method = False
 
         next_token = self._jack_tokenizer.look_ahead()
         if next_token == ".":

@@ -19,6 +19,7 @@ class VMWriter:
         "ARG": "argument",
         "LOCAL": "local",
         "STATIC": "static",
+        "FIELD": "this",
         "THIS": "this",
         "THAT": "that",
         "POINTER": "pointer",
