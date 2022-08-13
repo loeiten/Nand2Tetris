@@ -18,6 +18,7 @@ class VMWriter:
     segment_map = {
         "ARG": "argument",
         "LOCAL": "local",
+        "VAR": "local",
         "STATIC": "static",
         "FIELD": "this",
         "THIS": "this",

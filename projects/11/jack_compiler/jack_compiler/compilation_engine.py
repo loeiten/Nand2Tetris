@@ -87,12 +87,12 @@ class CompilationEngine:
             {
                 "class_name": str,
                 "subroutine_type": str,
+                "subroutine_name": str,
                 "return_type": str,
                 "assign_to": str,
                 "array_lhs": bool,
                 "do_statement": bool,
-                "if_statement": bool,
-                "while_statement": bool,
+                "current_statement": List[str],
                 "expression_list_count": List[int],
                 "xml_indent": int,
             },
@@ -100,12 +100,12 @@ class CompilationEngine:
         self._context_details: context_type = {
             "class_name": "",
             "subroutine_type": "",
+            "subroutine_name": "",
             "return_type": "",
             "assign_to": "",
             "array_lhs": False,
             "do_statement": False,
-            "if_statement": False,
-            "while_statement": False,
+            "current_statement": list(),
             "expression_list_count": list(),
             "xml_indent": 0,
         }
@@ -376,7 +376,7 @@ class CompilationEngine:
         self._advance()
         # We are here defining the subroutine
         self._write_token(self.token["type"], self.token["token"], definition=True)  # type: ignore
-        subroutine_name = self.token["token"]
+        self._context_details["subroutine_name"] = self.token["token"]
 
         # The ( symbol
         assert self._jack_tokenizer.has_more_tokens()
@@ -487,6 +487,13 @@ class CompilationEngine:
             self.compile_var_dec()
             next_token = self._jack_tokenizer.look_ahead()
 
+        # As the subroutine table has been populated, we can now write vm statements
+        self._vm_writer.write_function(
+            name=f"{self._context_details['class_name']}."
+            f"{self._context_details['subroutine_name']}",
+            n_locals=self._symbol_tables["subroutine"].var_count("VAR"),
+        )
+
         # If we are dealing with the constructor
         if self._context_details["subroutine_type"] == "constructor":
             # Pushes size of object
@@ -497,13 +504,13 @@ class CompilationEngine:
             self._vm_writer.write_call("Memory.alloc", 1)
             # Anchors this at the base address
             self._vm_writer.write_pop("POINTER", 0)
-
-        # FIXME: YOU ARE HERE (just moved)
-        # As the subroutine table has been populated, we can now write vm statements
-        self._vm_writer.write_function(
-            name=f"{self._context_details['class_name']}.{subroutine_name}",
-            n_locals=self._symbol_tables["subroutine"].var_count("VAR"),
-        )
+        # If we are dealing with a method
+        if self._context_details["subroutine_type"] == "method":
+            # Associate `this` with the object on which the method was called to operate
+            # Push the first argument to the stack
+            self._vm_writer.write_push(segment="ARG", index=0)
+            # Set this to the element first in the stack
+            self._vm_writer.write_pop(segment="POINTER", index=0)
 
         # statements
         next_token = self._jack_tokenizer.look_ahead()
@@ -691,12 +698,12 @@ class CompilationEngine:
         self._advance()
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
 
-        if self._context_details["while_statement"]:
+        if self._context_details["current_statement"][-1] == "while_statement":
             # Negate the expression in order to simplify the vm code
             self._vm_writer.write_arithmetic(command="NOT")
             # NOTE: We use the list instead of the counter
             self._vm_writer.write_if(label=f"WHILE_END_L{self._labels['while'][-1]+1}")
-        elif self._context_details["if_statement"]:
+        elif self._context_details["current_statement"][-1] == "if_statement":
             # Negate the expression in order to simplify the vm code
             self._vm_writer.write_arithmetic(command="NOT")
             # NOTE: We use the list instead of the counter
@@ -737,6 +744,7 @@ class CompilationEngine:
         # (one for an if statement, one for a potential else statement)
         self._labels["if_counter"] += 2
         self._labels["if"].append(self._labels["if_counter"])
+        self._context_details["current_statement"].append("if_statement")
 
         # if
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
@@ -767,11 +775,13 @@ class CompilationEngine:
 
         # Pop the list
         self._labels["if"].pop()
+        self._context_details["current_statement"].pop()
         self._close_grammar("ifStatement")
 
     def compile_while(self) -> None:
         """Compile a `while` statement."""
         self._open_grammar("whileStatement")
+        self._context_details["current_statement"].append("while_statement")
 
         # As we can have nested statements we need to have a structure to account for this
         # We will to this by appending and popping a list
@@ -795,7 +805,9 @@ class CompilationEngine:
         self._vm_writer.write_goto(label=f"WHILE_START_L{self._labels['while'][-1]}")
         self._vm_writer.write_label(label=f"WHILE_END_L{self._labels['while'][-1] + 1}")
 
+        # Pop the lists
         self._labels["while"].pop()
+        self._context_details["current_statement"].pop()
         self._close_grammar("whileStatement")
 
     def _write_subroutine_call(self):
@@ -817,16 +829,19 @@ class CompilationEngine:
             self._advance()
             self._write_token(self.token["type"], self.token["token"])  # type: ignore
             subroutine_name = self.token["token"]
-            call_name = f"{token}.{subroutine_name}"
 
             # We here check if the token is a variable name
             table, segment = self._get_table_segment(token)
             if segment is not None:
+                call_name = f"{table.type_of(token)}.{subroutine_name}"
                 # Since we have found the variable in one of the tables,
                 # we know that it must be a method we are calling
                 is_method = True
                 # We must push the object we are working on to the front of the argument list
                 self._vm_writer.write_push(segment=segment, index=table.index_of(token))
+            else:
+                # The token must be a class name
+                call_name = f"{token}.{subroutine_name}"
         else:
             # If we have no "." accessor, we must be operating on this object
             call_name = f"{self._context_details['class_name']}.{token}"
