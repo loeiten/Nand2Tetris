@@ -1,8 +1,9 @@
 """Module containing the CompilationEngine class."""
+# pylint: disable=too-many-lines
 
 from io import TextIOWrapper
 from pathlib import Path
-from typing import Dict, Literal, Optional, Tuple, Union, cast, get_args
+from typing import List, Literal, Optional, Tuple, TypedDict, Union, cast, get_args
 
 from jack_compiler import KIND
 from jack_compiler.jack_tokenizer import JackTokenizer
@@ -36,8 +37,7 @@ OpName = Literal["ADD", "SUB", "MUL", "DIV", "AND", "OR", "LT", "GT", "EQ"]
 
 
 class CompilationEngine:
-    """
-    Class which generates the compiler's output.
+    """Class which generates the compiler's output.
 
     Note:
         There is no operator precedence of expressions.
@@ -76,10 +76,23 @@ class CompilationEngine:
         """
         self._jack_tokenizer = jack_tokenizer
         self._out_file = out_file
-        self._indentation = 0
 
         self._symbol_tables = {"class": SymbolTable(), "subroutine": SymbolTable()}
-        self._context_details = {
+        context_type = TypedDict(
+            "context_type",
+            {
+                "class_name": str,
+                "subroutine_type": str,
+                "return_type": str,
+                "assign_to": str,
+                "array_lhs": bool,
+                "if_statement": bool,
+                "while_statement": bool,
+                "expression_list_count": List[int],
+                "xml_indent": int,
+            },
+        )
+        self._context_details: context_type = {
             "class_name": "",
             "subroutine_type": "",
             "return_type": "",
@@ -88,10 +101,20 @@ class CompilationEngine:
             "if_statement": False,
             "while_statement": False,
             "expression_list_count": list(),
+            "xml_indent": 0,
         }
         # We start on -2 as the first thing the if and while compiler is going to do is
         # to increment these values by 2
-        self._labels = {
+        label_type = TypedDict(
+            "label_type",
+            {
+                "while_counter": int,
+                "if_counter": int,
+                "while": List[int],
+                "if": List[int],
+            },
+        )
+        self._labels: label_type = {
             "while_counter": -2,
             "if_counter": -2,
             "while": list(),
@@ -184,7 +207,8 @@ class CompilationEngine:
             .replace('"', "&quot;")
         )
         self._out_file.write(
-            f"{' '*self._indentation}<{cur_token_type}> {token} </{cur_token_type}>\n"
+            f"{' '*self._context_details['xml_indent']}"
+            f"<{cur_token_type}> {token} </{cur_token_type}>\n"
         )
 
     def _open_grammar(self, grammar_type: NonTerminalElement) -> None:
@@ -193,9 +217,11 @@ class CompilationEngine:
         Args:
             grammar_type (NON_TERMINAL_ELEMENT): The grammar tag
         """
-        self._out_file.write(f"{' '*self._indentation}<{grammar_type}>\n")
+        self._out_file.write(
+            f"{' '*self._context_details['xml_indent']}<{grammar_type}>\n"
+        )
         # Increase the current indentation
-        self._indentation += 2
+        self._context_details["xml_indent"] += 2
 
     def _close_grammar(self, grammar_type: NonTerminalElement) -> None:
         """Close the grammar body.
@@ -204,8 +230,12 @@ class CompilationEngine:
             grammar_type (NON_TERMINAL_ELEMENT): The grammar tag
         """
         # Decrease the current indentation
-        self._indentation = max(0, self._indentation - 2)
-        self._out_file.write(f"{' '*self._indentation}</{grammar_type}>\n")
+        self._context_details["xml_indent"] = max(
+            0, self._context_details["xml_indent"] - 2
+        )
+        self._out_file.write(
+            f"{' '*self._context_details['xml_indent']}</{grammar_type}>\n"
+        )
 
     def compile_class(self) -> None:
         """Compile a complete class."""
@@ -612,7 +642,7 @@ class CompilationEngine:
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
 
         if self._context_details["array_lhs"]:
-            # In order not to overwrite the array pointer we must use the 
+            # In order not to overwrite the array pointer we must use the
             # general solution for array access
             # NOTE: We can use this even if the RHS is not an array
             # Dereference the RHS array
@@ -784,7 +814,7 @@ class CompilationEngine:
             # We here check if the token is a variable name
             table, segment = self._get_table_segment(token)
             if segment is not None:
-                # Since we have found the variable in one of the tables, 
+                # Since we have found the variable in one of the tables,
                 # we know that it must be a method we are calling
                 is_method = True
                 # We must push the object we are working on to the front of the argument list
@@ -873,7 +903,8 @@ class CompilationEngine:
 
         # (op term)*
         while next_token in get_args(Op):
-            cur_op = self.op_map[next_token]
+            # next_token cannot be None
+            cur_op = self.op_map[next_token]  # type: ignore
             # op
             assert self._jack_tokenizer.has_more_tokens()
             self._advance()
@@ -885,7 +916,8 @@ class CompilationEngine:
             self.compile_term()
 
             # As stack is postfixed, we will add the ops to the very end
-            self._write_op(cur_op)
+            # Due to op_map, cur_op must be in OpName
+            self._write_op(cur_op)  # type: ignore
 
             next_token = self._jack_tokenizer.look_ahead()
 
@@ -937,59 +969,14 @@ class CompilationEngine:
             self._write_token(self.token["type"], string)  # type: ignore
         elif self.token["type"] in ("integerConstant", "keyword"):
             # integerConstant | keywordConstant
-            self._write_token(self.token["type"], self.token["token"])  # type: ignore
-            if self.token["type"] == "integerConstant":
-                self._vm_writer.write_push(segment="CONST", index=self.token["token"])
-            elif self.token["token"] == "null":
-                self._vm_writer.write_push(segment="CONST", index=0)
-            elif self.token["token"] == "false":
-                self._vm_writer.write_push(segment="CONST", index=0)
-            elif self.token["token"] == "true":
-                self._vm_writer.write_push(segment="CONST", index=1)
-                self._vm_writer.write_arithmetic(command="NEG")
-            elif self.token["token"] == "this":
-                self._vm_writer.write_push(segment="POINTER", index=0)
+            self._write_integer_or_keyword()
         elif self.token["type"] == "identifier":
             # varName | varName'['expression']' | subroutineCall
             next_token = self._jack_tokenizer.look_ahead()
 
             if next_token == "[":
                 # varName'['expression']'
-
-                # varName
-                self._write_token(self.token["type"], self.token["token"])  # type: ignore
-                var_name = self.token["token"]
-                table, segment = self._get_table_segment(var_name=var_name)
-                self._vm_writer.write_push(
-                    segment=self.segment_map[segment],  # type: ignore
-                    index=table.index_of(var_name),
-                )
-
-                # The [ symbol
-                assert self._jack_tokenizer.has_more_tokens()
-                self._advance()
-                self._write_token(self.token["type"], self.token["token"])  # type: ignore
-
-                # expression
-                assert self._jack_tokenizer.has_more_tokens()
-                self._advance()
-                self.compile_expression()
-
-                # The ] symbol
-                assert self._jack_tokenizer.has_more_tokens()
-                self._advance()
-                self._write_token(self.token["type"], self.token["token"])  # type: ignore
-
-                # Add [expression] to varName
-                self._vm_writer.write_arithmetic(command="ADD")
-
-                # Assignments of arrays are dealt with in compile_let
-                if not self._context_details["array_lhs"]:
-                    # The topmost value in the stack is an address, we will now dereference it
-                    # Set the address to the array segment pointer
-                    self._vm_writer.write_pop(segment="POINTER", index=1)
-                    # Obtain the value of the address pointed to by pointer 1
-                    self._vm_writer.write_push(segment="THAT", index=0)
+                self._write_array_expression()
             elif next_token in ("(", "."):
                 self._write_subroutine_call()
             else:
@@ -1014,7 +1001,8 @@ class CompilationEngine:
             self.compile_term()
 
             # As stack is postfixed, we will add the ops to the very end
-            self._write_op(cur_op)
+            # Due to op_map, cur_op must be in OpName
+            self._write_op(cur_op)  # type: ignore
         else:
             raise RuntimeError(
                 f"Token type {self.token['type']} with token "
@@ -1022,6 +1010,58 @@ class CompilationEngine:
             )
 
         self._close_grammar("term")
+
+    def _write_integer_or_keyword(self) -> None:
+        """Write an integer or a keyword constant."""
+        self._write_token(self.token["type"], self.token["token"])  # type: ignore
+        if self.token["type"] == "integerConstant":
+            self._vm_writer.write_push(segment="CONST", index=int(self.token["token"]))
+        elif self.token["token"] == "null":
+            self._vm_writer.write_push(segment="CONST", index=0)
+        elif self.token["token"] == "false":
+            self._vm_writer.write_push(segment="CONST", index=0)
+        elif self.token["token"] == "true":
+            self._vm_writer.write_push(segment="CONST", index=1)
+            self._vm_writer.write_arithmetic(command="NEG")
+        elif self.token["token"] == "this":
+            self._vm_writer.write_push(segment="POINTER", index=0)
+
+    def _write_array_expression(self) -> None:
+        """Write an array expression."""
+        # varName
+        self._write_token(self.token["type"], self.token["token"])  # type: ignore
+        var_name = self.token["token"]
+        table, segment = self._get_table_segment(var_name=var_name)
+        self._vm_writer.write_push(
+            segment=self.segment_map[segment],  # type: ignore
+            index=table.index_of(var_name),
+        )
+
+        # The [ symbol
+        assert self._jack_tokenizer.has_more_tokens()
+        self._advance()
+        self._write_token(self.token["type"], self.token["token"])  # type: ignore
+
+        # expression
+        assert self._jack_tokenizer.has_more_tokens()
+        self._advance()
+        self.compile_expression()
+
+        # The ] symbol
+        assert self._jack_tokenizer.has_more_tokens()
+        self._advance()
+        self._write_token(self.token["type"], self.token["token"])  # type: ignore
+
+        # Add [expression] to varName
+        self._vm_writer.write_arithmetic(command="ADD")
+
+        # Assignments of arrays are dealt with in compile_let
+        if not self._context_details["array_lhs"]:
+            # The topmost value in the stack is an address, we will now dereference it
+            # Set the address to the array segment pointer
+            self._vm_writer.write_pop(segment="POINTER", index=1)
+            # Obtain the value of the address pointed to by pointer 1
+            self._vm_writer.write_push(segment="THAT", index=0)
 
     def _write_op(self, cur_op: OpName) -> None:
         """Write the op to vm code.
@@ -1036,16 +1076,14 @@ class CompilationEngine:
         else:
             self._vm_writer.write_arithmetic(command=cur_op)
 
-    def _get_table_segment(
-        self, var_name: str
-    ) -> Tuple[Dict[str, SymbolTable], Optional[KIND]]:
+    def _get_table_segment(self, var_name: str) -> Tuple[SymbolTable, Optional[KIND]]:
         """Return table and segment of the variable.
 
         Args:
             var_name (str): Name of the variable
 
         Returns:
-            Tuple[Dict[str, SymbolTable], Optional[KIND]]: The var name, table and segment
+            Tuple[SymbolTable, Optional[KIND]]: The var name, table and segment
         """
         table = self._symbol_tables["subroutine"]
         segment = table.kind_of(name=var_name)
