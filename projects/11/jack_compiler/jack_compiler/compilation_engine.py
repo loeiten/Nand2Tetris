@@ -91,6 +91,7 @@ class CompilationEngine:
                 "return_type": str,
                 "assign_to": str,
                 "array_lhs": bool,
+                "array_rhs": bool,
                 "do_statement": bool,
                 "current_statement": List[str],
                 "expression_list_count": List[int],
@@ -104,6 +105,7 @@ class CompilationEngine:
             "return_type": "",
             "assign_to": "",
             "array_lhs": False,
+            "array_rhs": False,
             "do_statement": False,
             "current_statement": list(),
             "expression_list_count": list(),
@@ -609,6 +611,10 @@ class CompilationEngine:
     def compile_let(self) -> None:
         """Compile a `let` statement."""
         self._open_grammar("letStatement")
+        # Reset the array flags in order to start with clean slates
+        # NOTE: We cannot have nested let statements
+        self._context_details["array_lhs"] = False
+        self._context_details["array_rhs"] = False
 
         # let
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
@@ -617,12 +623,19 @@ class CompilationEngine:
         assert self._jack_tokenizer.has_more_tokens()
         self._advance()
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
-        # Get the address we want to pop to
+        # Get the address, table and segment we want to pop to
         self._context_details["assign_to"] = self.token["token"]
+        table, segment = self._get_table_segment(self._context_details["assign_to"])
 
         # [expression]
         next_token = self._jack_tokenizer.look_ahead()
         if next_token == "[":
+            # Push the varName
+            self._vm_writer.write_push(
+                segment=segment,  # type: ignore
+                index=table.index_of(self._context_details["assign_to"]),
+            )
+
             # The symbol [
             assert self._jack_tokenizer.has_more_tokens()
             self._advance()
@@ -638,7 +651,13 @@ class CompilationEngine:
             self._advance()
             self._write_token(self.token["type"], self.token["token"])  # type: ignore
 
+            # Add in order to get the appropriate address
+            self._vm_writer.write_arithmetic(command="ADD")
+
             self._context_details["array_lhs"] = True
+            # NOTE: We could have had nested arrays,
+            #       so we don't know if the RHS contains an array yet
+            self._context_details["array_rhs"] = False
 
         # The symbol =
         assert self._jack_tokenizer.has_more_tokens()
@@ -658,10 +677,10 @@ class CompilationEngine:
         if self._context_details["array_lhs"]:
             # In order not to overwrite the array pointer we must use the
             # general solution for array access
-            # NOTE: We can use this even if the RHS is not an array
-            # Dereference the RHS array
-            self._vm_writer.write_pop(segment="POINTER", index=1)
-            self._vm_writer.write_push(segment="THAT", index=0)
+            if self._context_details["array_rhs"]:
+                # Dereference the RHS array
+                self._vm_writer.write_pop(segment="POINTER", index=1)
+                self._vm_writer.write_push(segment="THAT", index=0)
             # Push the value to temp
             self._vm_writer.write_pop(segment="TEMP", index=0)
             # Pop the LHS address to the array pointer
@@ -673,14 +692,15 @@ class CompilationEngine:
         else:
             # We are dealing with a normal variable
             # Write the pop (assign) command
-            table, segment = self._get_table_segment(self._context_details["assign_to"])
             # mypy doesn't recognize the segment_map
             self._vm_writer.write_pop(
                 segment=self.segment_map[segment],  # type: ignore
                 index=table.index_of(self._context_details["assign_to"]),
             )
 
+        # Reset the array flags as we may have arrays outside let statements
         self._context_details["array_lhs"] = False
+        self._context_details["array_rhs"] = False
         self._close_grammar("letStatement")
 
     def _write_expression_body(self) -> None:
@@ -996,6 +1016,7 @@ class CompilationEngine:
             # let a = "string"
             # For both use cases we need to create a new string object and use appendChar to fill
             self._vm_writer.write_push(segment="CONST", index=len(string))
+            self._vm_writer.write_call(name="String.new", n_args=1)
             for char in string:
                 # NOTE: The character set follows the ASCII mapping, hence we can use ord
                 self._vm_writer.write_push(segment="CONST", index=ord(char))
@@ -1066,6 +1087,10 @@ class CompilationEngine:
 
     def _write_array_expression(self) -> None:
         """Write an array expression."""
+        # We potentially have a rhs expression
+        # NOTE: This is appropriately dealt with in compile_let
+        self._context_details["array_rhs"] = True
+
         # varName
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
         var_name = self.token["token"]
