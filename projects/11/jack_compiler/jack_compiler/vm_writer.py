@@ -24,7 +24,7 @@ class VMWriter:
         "THAT": "that",
         "POINTER": "pointer",
         "TEMP": "temp",
-        "CONST": "const",
+        "CONST": "constant",
     }
 
     def __init__(self, out_file: TextIOWrapper) -> None:
@@ -46,7 +46,7 @@ class VMWriter:
             segment (VIRTUAL_SEGMENTS): The segment to write
             index (int): The index to write
         """
-        self.out_file.write(f"push {self.segment_map[segment]} {index}")
+        self.out_file.write(f"push {self.segment_map[segment]} {index}\n")
 
     def write_pop(self, segment: NonConstVirtualSegments, index: int) -> None:
         """Write a VM pop command.
@@ -55,7 +55,7 @@ class VMWriter:
             segment (NON_CONST_VIRTUAL_SEGMENTS): The segment to write
             index (int): The index to write
         """
-        self.out_file.write(f"pop {self.segment_map[segment]} {index}")
+        self.out_file.write(f"pop {self.segment_map[segment]} {index}\n")
 
     def write_arithmetic(self, command: Arithmetic) -> None:
         """Write a VM arithmetic-logical command.
@@ -63,7 +63,7 @@ class VMWriter:
         Args:
             command (ARITHMETIC): The command to write
         """
-        self.out_file.write(f"{command.lower()}")
+        self.out_file.write(f"{command.lower()}\n")
 
     def write_label(self, label: str) -> None:
         """Write a VM label command.
@@ -71,7 +71,7 @@ class VMWriter:
         Args:
             label (str): The label to write
         """
-        self.out_file.write(f"label {label}")
+        self.out_file.write(f"label {label}\n")
 
     def write_goto(self, label: str) -> None:
         """Write a VM goto command.
@@ -79,7 +79,7 @@ class VMWriter:
         Args:
             label (str): The label to go to
         """
-        self.out_file.write(f"goto {label}")
+        self.out_file.write(f"goto {label}\n")
 
     def write_if(self, label: str) -> None:
         """Write a VM if-goto command.
@@ -87,7 +87,7 @@ class VMWriter:
         Args:
             label (str): The label to go to
         """
-        self.out_file.write(f"if-goto {label}")
+        self.out_file.write(f"if-goto {label}\n")
 
     def write_call(self, name: str, n_args: int) -> None:
         """Write a VM call command.
@@ -96,7 +96,7 @@ class VMWriter:
             name (str): The function name to call
             n_args (int): The number of arguments
         """
-        self.out_file.write(f"call {name} {n_args}")
+        self.out_file.write(f"call {name} {n_args}\n")
 
     def write_function(self, name: str, n_locals: int) -> None:
         """Write a VM function command.
@@ -105,11 +105,11 @@ class VMWriter:
             name (str): The name of the function to write
             n_locals (int): The number of local variables
         """
-        self.out_file.write(f"function {name} {n_locals}")
+        self.out_file.write(f"function {name} {n_locals}\n")
 
     def write_return(self) -> None:
         """Write a VM return command."""
-        self.out_file.write("return")
+        self.out_file.write("return\n")
 
     def close(self) -> None:
         """Close the output file."""

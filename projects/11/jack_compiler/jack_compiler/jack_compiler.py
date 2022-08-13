@@ -54,10 +54,12 @@ def process_file(
         else:
             compilation_engine.compile_class()
 
-    print(
-        f"Processing {in_path}...{out_path} written"
-        f"{'' if not tokens_only else ' in tokens only mode'}"
-    )
+    if tokens_only:
+        print(f"Processing {in_path}...{out_path} written in tokens only mode")
+    else:
+        print(f"Processing {in_path}")
+        print(f"...{out_path} written")
+        print(f"...{out_path.with_suffix('.vm')} written")
 
 
 def main(in_path: Path) -> None:

@@ -33,7 +33,9 @@ NonTerminalElement = Literal[
 ]
 
 Op = Literal["+", "-", "*", "/", "&", "|", "<", ">", "="]
-OpName = Literal["ADD", "SUB", "MUL", "DIV", "AND", "OR", "LT", "GT", "EQ"]
+OpName = Literal[
+    "ADD", "SUB", "MUL", "DIV", "AND", "OR", "LT", "GT", "EQ", "NEG", "NOT"
+]
 
 
 class CompilationEngine:
@@ -62,6 +64,8 @@ class CompilationEngine:
         "<": "LT",
         ">": "GT",
         "=": "EQ",
+        "NEG": "NEG",
+        "~": "NOT",
     }
 
     def __init__(self, jack_tokenizer: JackTokenizer, out_file: TextIOWrapper) -> None:
@@ -86,6 +90,7 @@ class CompilationEngine:
                 "return_type": str,
                 "assign_to": str,
                 "array_lhs": bool,
+                "do_statement": bool,
                 "if_statement": bool,
                 "while_statement": bool,
                 "expression_list_count": List[int],
@@ -98,6 +103,7 @@ class CompilationEngine:
             "return_type": "",
             "assign_to": "",
             "array_lhs": False,
+            "do_statement": False,
             "if_statement": False,
             "while_statement": False,
             "expression_list_count": list(),
@@ -392,12 +398,6 @@ class CompilationEngine:
         self._advance()
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
 
-        # As the subroutine table has been populated, we can now write vm statements
-        self._vm_writer.write_function(
-            name=f"{self._context_details['class_name']}.{subroutine_name}",
-            n_locals=self._symbol_tables["subroutine"].var_count("VAR"),
-        )
-
         # subRoutine body
         assert self._jack_tokenizer.has_more_tokens()
         self._advance()
@@ -497,6 +497,13 @@ class CompilationEngine:
             self._vm_writer.write_call("Memory.alloc", 1)
             # Anchors this at the base address
             self._vm_writer.write_pop("POINTER", 0)
+
+        # FIXME: YOU ARE HERE (just moved)
+        # As the subroutine table has been populated, we can now write vm statements
+        self._vm_writer.write_function(
+            name=f"{self._context_details['class_name']}.{subroutine_name}",
+            n_locals=self._symbol_tables["subroutine"].var_count("VAR"),
+        )
 
         # statements
         next_token = self._jack_tokenizer.look_ahead()
@@ -848,10 +855,17 @@ class CompilationEngine:
             expression_list_count += 1
 
         self._vm_writer.write_call(name=call_name, n_args=expression_list_count)
+        # If the called function was a void function, we need to dump the
+        # returned value
+        # We know whether it was a void function or not to see if we are
+        # currently calling do
+        if self._context_details["do_statement"]:
+            self._vm_writer.write_pop(segment="TEMP", index=0)
 
     def compile_do(self) -> None:
         """Compile a `do` statement."""
         self._open_grammar("doStatement")
+        self._context_details["do_statement"] = True
 
         # do
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
@@ -865,6 +879,7 @@ class CompilationEngine:
         self._advance()
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
 
+        self._context_details["do_statement"] = False
         self._close_grammar("doStatement")
 
     def compile_return(self) -> None:
@@ -884,6 +899,11 @@ class CompilationEngine:
         assert self._jack_tokenizer.has_more_tokens()
         self._advance()
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
+
+        # Handling of void
+        if self._context_details["return_type"] == "void":
+            self._vm_writer.write_push(segment="CONST", index=0)
+        self._vm_writer.write_return()
 
         self._close_grammar("returnStatement")
 
@@ -1003,6 +1023,8 @@ class CompilationEngine:
 
             # As stack is postfixed, we will add the ops to the very end
             # Due to op_map, cur_op must be in OpName
+            if cur_op == "SUB":
+                cur_op = "NEG"
             self._write_op(cur_op)  # type: ignore
         else:
             raise RuntimeError(
