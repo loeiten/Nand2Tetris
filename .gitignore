@@ -7,3 +7,4 @@ tools/
 demo/
 __pycache__/
 .pytest_cache/
+*bak

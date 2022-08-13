@@ -2,7 +2,7 @@
 
 from io import TextIOWrapper
 from pathlib import Path
-from typing import Any, Dict, Literal, Union, cast, get_args
+from typing import Dict, Literal, Optional, Tuple, Union, cast, get_args
 
 from jack_compiler import KIND
 from jack_compiler.jack_tokenizer import JackTokenizer
@@ -32,6 +32,7 @@ NonTerminalElement = Literal[
 ]
 
 Op = Literal["+", "-", "*", "/", "&", "|", "<", ">", "="]
+OpName = Literal["ADD", "SUB", "MUL", "DIV", "AND", "OR", "LT", "GT", "EQ"]
 
 
 class CompilationEngine:
@@ -51,6 +52,17 @@ class CompilationEngine:
         "STRING_CONST": {"text": "stringConstant", "function_name": "string_val"},
     }
     segment_map = {"STATIC": "STATIC", "FIELD": "THIS", "ARG": "ARG", "VAR": "LOCAL"}
+    op_map = {
+        "+": "ADD",
+        "-": "SUB",
+        "*": "MUL",
+        "/": "DIV",
+        "&": "AND",
+        "|": "OR",
+        "<": "LT",
+        ">": "GT",
+        "=": "EQ",
+    }
 
     def __init__(self, jack_tokenizer: JackTokenizer, out_file: TextIOWrapper) -> None:
         """Create a new compilation engine with the given input and output.
@@ -72,11 +84,19 @@ class CompilationEngine:
             "subroutine_type": "",
             "return_type": "",
             "assign_to": "",
-            "expression_depth": 0,
+            "array_lhs": False,
+            "if_statement": False,
+            "while_statement": False,
+            "expression_list_count": list(),
         }
-        self._labels = {"if_start": 0, "if_end":0, "while_start":0, "while_end":0}
-        # FIXME: Remove
-        self._expression_tree = dict()
+        # We start on -2 as the first thing the if and while compiler is going to do is
+        # to increment these values by 2
+        self._labels = {
+            "while_counter": -2,
+            "if_counter": -2,
+            "while": list(),
+            "if": list(),
+        }
 
         self.token = {"type": "", "token": ""}
 
@@ -227,7 +247,6 @@ class CompilationEngine:
         while next_token in ("constructor", "function", "method"):
             assert self._jack_tokenizer.has_more_tokens()
             self._advance()
-            # FIXME: You are here
             self.compile_subroutine_dec()
             next_token = self._jack_tokenizer.look_ahead()
 
@@ -575,7 +594,7 @@ class CompilationEngine:
             self._advance()
             self._write_token(self.token["type"], self.token["token"])  # type: ignore
 
-            # FIXME: Here you can toggle if the LHS is array
+            self._context_details["array_lhs"] = True
 
         # The symbol =
         assert self._jack_tokenizer.has_more_tokens()
@@ -592,20 +611,32 @@ class CompilationEngine:
         self._advance()
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
 
-        # FIXME: Need to distinguish: Was the RHS array
-        #        If RHS not array, was LHS array?
-        # Write the pop (assign) command
-        table = self._symbol_tables["subroutine"]
-        segment = table.kind_of(self._context_details["assign_to"])
-        if segment is None:
-            table = self._symbol_tables["class"]
-            segment = table.kind_of(self._context_details["assign_to"])
-        # mypy doesn't recognize the segment_map
-        self._vm_writer.write_pop(
-            segment=self.segment_map[segment],  # type: ignore
-            index=table.index_of(self._context_details["assign_to"]),
-        )
+        if self._context_details["array_lhs"]:
+            # In order not to overwrite the array pointer we must use the 
+            # general solution for array access
+            # NOTE: We can use this even if the RHS is not an array
+            # Dereference the RHS array
+            self._vm_writer.write_pop(segment="POINTER", index=1)
+            self._vm_writer.write_push(segment="THAT", index=0)
+            # Push the value to temp
+            self._vm_writer.write_pop(segment="TEMP", index=0)
+            # Pop the LHS address to the array pointer
+            self._vm_writer.write_pop(segment="POINTER", index=1)
+            # Push the RHS value to the stack
+            self._vm_writer.write_push(segment="TEMP", index=0)
+            # Add the value to the LHS address
+            self._vm_writer.write_pop(segment="THAT", index=0)
+        else:
+            # We are dealing with a normal variable
+            # Write the pop (assign) command
+            table, segment = self._get_table_segment(self._context_details["assign_to"])
+            # mypy doesn't recognize the segment_map
+            self._vm_writer.write_pop(
+                segment=self.segment_map[segment],  # type: ignore
+                index=table.index_of(self._context_details["assign_to"]),
+            )
 
+        self._context_details["array_lhs"] = False
         self._close_grammar("letStatement")
 
     def _write_expression_body(self) -> None:
@@ -623,9 +654,16 @@ class CompilationEngine:
         self._advance()
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
 
-        # FIXME: If context is while or if, add a not statement
-        #        If in if context: if-goto L1
-        #        If in while context: if-goto L2
+        if self._context_details["while_statement"]:
+            # Negate the expression in order to simplify the vm code
+            self._vm_writer.write_arithmetic(command="NOT")
+            # NOTE: We use the list instead of the counter
+            self._vm_writer.write_if(label=f"WHILE_END_L{self._labels['while'][-1]+1}")
+        elif self._context_details["if_statement"]:
+            # Negate the expression in order to simplify the vm code
+            self._vm_writer.write_arithmetic(command="NOT")
+            # NOTE: We use the list instead of the counter
+            self._vm_writer.write_if(label=f"NOT_IF_L{self._labels['if'][-1]}")
 
         # '{statements}'
         assert self._jack_tokenizer.has_more_tokens()
@@ -656,7 +694,12 @@ class CompilationEngine:
         """Compile an `if` statement, possibly with a trailing else clause."""
         self._open_grammar("ifStatement")
 
-        # FIXME: Set context here (remember nested-ness)
+        # As we can have nested statements we need to have a structure to account for this
+        # We will to this by appending and popping a list
+        # We start by add 2 to the counter
+        # (one for an if statement, one for a potential else statement)
+        self._labels["if_counter"] += 2
+        self._labels["if"].append(self._labels["if_counter"])
 
         # if
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
@@ -668,7 +711,9 @@ class CompilationEngine:
 
         next_token = self._jack_tokenizer.look_ahead()
         if next_token == "else":
-            # FIXME: goto L2, label L1, comp(s), label L2
+            # Add the goto L2 and label L1 before compiling the statements
+            self._vm_writer.write_goto(label=f"IF_END_L{self._labels['if'][-1] + 1}")
+            self._vm_writer.write_label(label=f"NOT_IF_L{self._labels['if'][-1]}")
             assert self._jack_tokenizer.has_more_tokens()
             self._advance()
             self._write_token(self.token["type"], self.token["token"])  # type: ignore
@@ -677,34 +722,50 @@ class CompilationEngine:
             assert self._jack_tokenizer.has_more_tokens()
             self._advance()
             self._write_body()
-            # FIXME: Make new branch:
-            #       label L1
 
+            # Add the L2 label
+            self._vm_writer.write_label(label=f"IF_END_L{self._labels['if'][-1] + 1}")
+        else:
+            self._vm_writer.write_label(label=f"NOT_IF_L{self._labels['if'][-1]}")
+
+        # Pop the list
+        self._labels["if"].pop()
         self._close_grammar("ifStatement")
 
     def compile_while(self) -> None:
         """Compile a `while` statement."""
         self._open_grammar("whileStatement")
 
+        # As we can have nested statements we need to have a structure to account for this
+        # We will to this by appending and popping a list
+        # We start by add 2 to the counter
+        # (one for the start, and one for the end)
+        self._labels["while_counter"] += 2
+        self._labels["while"].append(self._labels["while_counter"])
+
         # while
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
 
-        # FIXME:
         # Add label L1
+        self._vm_writer.write_label(label=f"WHILE_START_L{self._labels['while'][-1]}")
 
         # '('expression')''{statements}'
         assert self._jack_tokenizer.has_more_tokens()
         self._advance()
         self._write_expression_body()
 
-        # FIXME: goto L1, label L2
+        # goto L1, label L2
+        self._vm_writer.write_goto(label=f"WHILE_START_L{self._labels['while'][-1]}")
+        self._vm_writer.write_label(label=f"WHILE_END_L{self._labels['while'][-1] + 1}")
 
+        self._labels["while"].pop()
         self._close_grammar("whileStatement")
 
     def _write_subroutine_call(self):
         """Write the subroutine call."""
         # subroutineName | varName | className
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
+        token = self.token["token"]
 
         next_token = self._jack_tokenizer.look_ahead()
         if next_token == ".":
@@ -717,6 +778,24 @@ class CompilationEngine:
             assert self._jack_tokenizer.has_more_tokens()
             self._advance()
             self._write_token(self.token["type"], self.token["token"])  # type: ignore
+            subroutine_name = self.token["token"]
+            call_name = f"{token}.{subroutine_name}"
+
+            # We here check if the token is a variable name
+            table, segment = self._get_table_segment(token)
+            if segment is not None:
+                # Since we have found the variable in one of the tables, 
+                # we know that it must be a method we are calling
+                is_method = True
+                # We must push the object we are working on to the front of the argument list
+                self._vm_writer.write_push(segment=segment, index=table.index_of(token))
+        else:
+            # If we have no "." accessor, we must be operating on this object
+            call_name = f"{self._context_details['class_name']}.{token}"
+
+            is_method = True
+            # We are working on "this" object, and must push it in first in the argument list
+            self._vm_writer.write_push(segment="POINTER", index=0)
 
         # The ( symbol
         assert self._jack_tokenizer.has_more_tokens()
@@ -729,9 +808,15 @@ class CompilationEngine:
         self.compile_expression_list()
 
         # The ) symbol
-        # We are guaranteed
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
-        # FIXME: Add call subroutine name in the end
+
+        # Write the call to the subroutine
+        # We need to add +1 if we are calling a method
+        expression_list_count = self._context_details["expression_list_count"].pop()
+        if is_method:
+            expression_list_count += 1
+
+        self._vm_writer.write_call(name=call_name, n_args=expression_list_count)
 
     def compile_do(self) -> None:
         """Compile a `do` statement."""
@@ -779,18 +864,7 @@ class CompilationEngine:
               Expressions are simply compiled from left to the right.
             - A more industrial strength compiler would make a syntax tree
         """
-        self._context_details["expression_depth"] += 1
         self._open_grammar("expression")
-
-        # FIXME: YOU ARE HERE: Need to distinguish the expressions (slide 21)
-        #        Suggestion:
-        #        1. Make an expression variable
-        #           NOTE: May be nested, so need a list/queue
-        #        2. Just before closing the grammar, call codeWrite
-        #        3. Could try do do operator order priority
-        #           See for example: https://en.cppreference.com/w/cpp/language/operator_precedence
-        #        4. When part of expression is processed, replace it with `!`
-        #           (which is not part of lang specification)
 
         # term
         self.compile_term()
@@ -799,6 +873,7 @@ class CompilationEngine:
 
         # (op term)*
         while next_token in get_args(Op):
+            cur_op = self.op_map[next_token]
             # op
             assert self._jack_tokenizer.has_more_tokens()
             self._advance()
@@ -809,54 +884,12 @@ class CompilationEngine:
             self._advance()
             self.compile_term()
 
-            # FIXME: Add op in the end
+            # As stack is postfixed, we will add the ops to the very end
+            self._write_op(cur_op)
 
             next_token = self._jack_tokenizer.look_ahead()
 
         self._close_grammar("expression")
-        # FIXME: Remove expression depth
-        # self._context_details["expression_depth"] -= 1
-
-        # FIXME: Maybe no need for rearranging
-        # FIXME: Would use parse tree in other places
-        # FIXME: Can do this on the fly
-        # if self._context_details["expression_depth"] == 0:
-        #     # Rearrange the expression tree
-        #     self.rearrange_expression_tree(self._expression_tree)
-        #     self.code_write(self._expression_tree)
-        #     # Reset the expression tree
-        #     self._expression_tree = dict()
-
-    #    @staticmethod
-    #    def rearrange_expression_tree(expression_tree: Dict[str, Any]) -> Dict[str, Any]:
-    #        """Rearrange the expression tree recursively.
-    #
-    #        The expression tree will be rearranged so that the follow vm code will
-    #        have the following precedence:
-    #            1. Expression in parenthesis
-    #            2. Subroutines
-    #            3. Subscripts
-    #            3. Unary -
-    #            4. Unary !
-    #            5. <
-    #            6. >
-    #            7. &
-    #            8. |
-    #            9. Multiplication
-    #            10. Division
-    #            11. Addition
-    #            12. Subtraction
-    #
-    #        Args:
-    #            expression_tree (Dict[str, Any]): Expression tree to rearrange
-    #
-    #        Returns:
-    #            Dict[str, Any]: Rearranged expression tree
-    #        """
-    #        # Find parenthesis
-    #        expression_types = expression_tree.keys()
-    #        for expression_type in expression_types:
-    #            pass
 
     def compile_term(self) -> None:
         """Compile a term.
@@ -869,7 +902,7 @@ class CompilationEngine:
         """
         self._open_grammar("term")
 
-        # Expressions in paratheses must be evaluated first
+        # Expressions in parantheses must be evaluated first
         if self.token["token"] == "(":
             # '('expression')'
 
@@ -886,15 +919,36 @@ class CompilationEngine:
             self._advance()
             self._write_token(self.token["type"], self.token["token"])  # type: ignore
         elif self.token["type"] == "stringConstant":
-            # FIXME: Need to append string
             # stringConstant
-            self._write_token(
-                self.token["type"], self.token["token"].replace('"', "")  # type: ignore
-            )
+            string = self.token["token"].replace('"', "")
+
+            # NOTE: The constructor is NOT String.new("string"), but String.new(6)
+            # Use-cases:
+            # foo("string")
+            # let a = "string"
+            # For both use cases we need to create a new string object and use appendChar to fill
+            self._vm_writer.write_push(segment="CONST", index=len(string))
+            for char in string:
+                # NOTE: The character set follows the ASCII mapping, hence we can use ord
+                self._vm_writer.write_push(segment="CONST", index=ord(char))
+                # Two arguments: One for this and one for the character
+                self._vm_writer.write_call(name="String.appendChar", n_args=2)
+
+            self._write_token(self.token["type"], string)  # type: ignore
         elif self.token["type"] in ("integerConstant", "keyword"):
             # integerConstant | keywordConstant
             self._write_token(self.token["type"], self.token["token"])  # type: ignore
-            # FIXME: Add integer constant and check what keyword constant there is
+            if self.token["type"] == "integerConstant":
+                self._vm_writer.write_push(segment="CONST", index=self.token["token"])
+            elif self.token["token"] == "null":
+                self._vm_writer.write_push(segment="CONST", index=0)
+            elif self.token["token"] == "false":
+                self._vm_writer.write_push(segment="CONST", index=0)
+            elif self.token["token"] == "true":
+                self._vm_writer.write_push(segment="CONST", index=1)
+                self._vm_writer.write_arithmetic(command="NEG")
+            elif self.token["token"] == "this":
+                self._vm_writer.write_push(segment="POINTER", index=0)
         elif self.token["type"] == "identifier":
             # varName | varName'['expression']' | subroutineCall
             next_token = self._jack_tokenizer.look_ahead()
@@ -904,7 +958,12 @@ class CompilationEngine:
 
                 # varName
                 self._write_token(self.token["type"], self.token["token"])  # type: ignore
-                # FIXME: Add var
+                var_name = self.token["token"]
+                table, segment = self._get_table_segment(var_name=var_name)
+                self._vm_writer.write_push(
+                    segment=self.segment_map[segment],  # type: ignore
+                    index=table.index_of(var_name),
+                )
 
                 # The [ symbol
                 assert self._jack_tokenizer.has_more_tokens()
@@ -920,37 +979,42 @@ class CompilationEngine:
                 assert self._jack_tokenizer.has_more_tokens()
                 self._advance()
                 self._write_token(self.token["type"], self.token["token"])  # type: ignore
-                # FIXME: Add "add" to sum up pointer
-                # FIXME: NOTE: Special care for let arr[exp1] = exp2
-                #        NOTE: pop pointer 1 and push that 0 can be used for eval exp2
-                # FIXME: let var = [exp1]
-                #        NOTE: pop pointer 1, push that 0 -> value on stack
-                #        The let value will then do pop var to assign (that is what the last "pop that 0" does in let arr[exp1] = exp2)
-                # FIXME: Toggle if we are on LHS or RHS of the expr
-                # FIXME: The "magic code can be added in the end of the let statement"
-                # FIXME: Summary: Two cases
-                #        1. let arr[exp1] = exp2
-                #           Just push, push, add here, the rest of the magic in let
-                #        2. let var = [exp]
-                #           Here we do push, push, add here
-                #           Need to pop pointer 1 and push that 0 (dereference pointer) in let
+
+                # Add [expression] to varName
+                self._vm_writer.write_arithmetic(command="ADD")
+
+                # Assignments of arrays are dealt with in compile_let
+                if not self._context_details["array_lhs"]:
+                    # The topmost value in the stack is an address, we will now dereference it
+                    # Set the address to the array segment pointer
+                    self._vm_writer.write_pop(segment="POINTER", index=1)
+                    # Obtain the value of the address pointed to by pointer 1
+                    self._vm_writer.write_push(segment="THAT", index=0)
             elif next_token in ("(", "."):
                 self._write_subroutine_call()
             else:
                 # varName
                 self._write_token(self.token["type"], self.token["token"])  # type: ignore
-                # FIXME: Just output varname
+                var_name = self.token["token"]
+                table, segment = self._get_table_segment(var_name=var_name)
+                self._vm_writer.write_push(
+                    segment=self.segment_map[segment],  # type: ignore
+                    index=table.index_of(var_name),
+                )
         elif self.token["type"] == "symbol":
             # unaryOp term
 
             # 'unaryOp'
             self._write_token(self.token["type"], self.token["token"])  # type: ignore
+            cur_op = self.op_map[self.token["token"]]
 
             # term
             assert self._jack_tokenizer.has_more_tokens()
             self._advance()
             self.compile_term()
-            # FIXME: Add symbol in the end
+
+            # As stack is postfixed, we will add the ops to the very end
+            self._write_op(cur_op)
         else:
             raise RuntimeError(
                 f"Token type {self.token['type']} with token "
@@ -959,13 +1023,48 @@ class CompilationEngine:
 
         self._close_grammar("term")
 
+    def _write_op(self, cur_op: OpName) -> None:
+        """Write the op to vm code.
+
+        Args:
+            cur_op (OpName): The op to write
+        """
+        if cur_op == "MUL":
+            self._vm_writer.write_call(name="Math.multiply", n_args=2)
+        elif cur_op == "DIV":
+            self._vm_writer.write_call(name="Math.divide", n_args=2)
+        else:
+            self._vm_writer.write_arithmetic(command=cur_op)
+
+    def _get_table_segment(
+        self, var_name: str
+    ) -> Tuple[Dict[str, SymbolTable], Optional[KIND]]:
+        """Return table and segment of the variable.
+
+        Args:
+            var_name (str): Name of the variable
+
+        Returns:
+            Tuple[Dict[str, SymbolTable], Optional[KIND]]: The var name, table and segment
+        """
+        table = self._symbol_tables["subroutine"]
+        segment = table.kind_of(name=var_name)
+        if segment is None:
+            table = self._symbol_tables["class"]
+            segment = table.kind_of(name=var_name)
+        return table, segment
+
     def compile_expression_list(self) -> None:
         """Compile a (possibly empty) comma-separated list of expressions."""
         self._open_grammar("expressionList")
+        # NOTE: We can have nested expression lists
+        # Reset the expression list count
+        self._context_details["expression_list_count"].append(0)
 
         if self.token["token"] != ")":
             # expression
             self.compile_expression()
+            self._context_details["expression_list_count"][-1] += 1
 
             next_token = self._jack_tokenizer.look_ahead()
             if next_token == ")":
@@ -986,6 +1085,7 @@ class CompilationEngine:
                 assert self._jack_tokenizer.has_more_tokens()
                 self._advance()
                 self.compile_expression()
+                self._context_details["expression_list_count"][-1] += 1
                 next_token = self._jack_tokenizer.look_ahead()
 
                 if next_token == ")":

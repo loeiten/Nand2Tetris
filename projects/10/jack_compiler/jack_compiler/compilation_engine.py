@@ -540,7 +540,6 @@ class CompilationEngine:
         self.compile_expression_list()
 
         # The ) symbol
-        # We are guaranteed
         self.write_token(self.token["type"], self.token["token"])  # type: ignore
 
     def compile_do(self) -> None:
