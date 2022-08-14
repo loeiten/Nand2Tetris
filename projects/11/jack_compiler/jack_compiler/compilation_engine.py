@@ -90,7 +90,7 @@ class CompilationEngine:
                 "subroutine_name": str,
                 "return_type": str,
                 "assign_to": str,
-                "array_lhs": bool,
+                "array_lhs": List[bool],
                 # "array_rhs": bool,
                 "do_statement": bool,
                 "current_statement": List[str],
@@ -104,7 +104,7 @@ class CompilationEngine:
             "subroutine_name": "",
             "return_type": "",
             "assign_to": "",
-            "array_lhs": False,
+            "array_lhs": list(),
             # "array_rhs": False,
             "do_statement": False,
             "current_statement": list(),
@@ -613,7 +613,7 @@ class CompilationEngine:
         self._open_grammar("letStatement")
         # Reset the array flags in order to start with clean slates
         # NOTE: We cannot have nested let statements
-        self._context_details["array_lhs"] = False
+        # self._context_details["array_lhs"] = False
         entered_array_lhs = False
         # self._context_details["array_rhs"] = False
 
@@ -639,7 +639,7 @@ class CompilationEngine:
 
             # FIXME: New
             entered_array_lhs = True
-            self._context_details["array_lhs"] = True
+            self._context_details["array_lhs"].append(True) 
             # FIXME: Only the last parenthesis we need to worry about
 
             # The symbol [
@@ -657,6 +657,9 @@ class CompilationEngine:
             self._advance()
             self._write_token(self.token["type"], self.token["token"])  # type: ignore
 
+            # FIXME:
+            self._context_details["array_lhs"].pop() 
+
             # Add in order to get the appropriate address
             self._vm_writer.write_arithmetic(command="ADD")
 
@@ -667,7 +670,7 @@ class CompilationEngine:
             # self._context_details["array_rhs"] = False
 
         # The symbol =
-        self._context_details["array_lhs"] = False
+        # self._context_details["array_lhs"] = False
         assert self._jack_tokenizer.has_more_tokens()
         self._advance()
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
@@ -707,7 +710,7 @@ class CompilationEngine:
             )
 
         # Reset the array flags as we may have arrays outside let statements
-        self._context_details["array_lhs"] = False
+        # self._context_details["array_lhs"] = False
         # self._context_details["array_rhs"] = False
         self._close_grammar("letStatement")
 
@@ -1100,6 +1103,7 @@ class CompilationEngine:
         # self._context_details["array_rhs"] = True
 
         # varName
+        print(repr(self._jack_tokenizer.cur_line))
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
         var_name = self.token["token"]
         table, segment = self._get_table_segment(var_name=var_name)
@@ -1113,27 +1117,50 @@ class CompilationEngine:
         self._advance()
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
 
+
+        # FIXME: Added
+        self._context_details["array_lhs"].append(False) 
+
         # expression
         assert self._jack_tokenizer.has_more_tokens()
         self._advance()
         self.compile_expression()
+
+        # FIXME: Added
+        self._context_details["array_lhs"].pop() 
 
         # The ] symbol
         assert self._jack_tokenizer.has_more_tokens()
         self._advance()
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
 
+        # FIXME: Is this our trouble?
         # Add [expression] to varName
         self._vm_writer.write_arithmetic(command="ADD")
 
-        # FIXME:
-        # Assignments of arrays are dealt with in compile_let
-        if not self._context_details["array_lhs"]:
-            # The topmost value in the stack is an address, we will now dereference it
-            # Set the address to the array segment pointer
-            self._vm_writer.write_pop(segment="POINTER", index=1)
-            # Obtain the value of the address pointed to by pointer 1
-            self._vm_writer.write_push(segment="THAT", index=0)
+        # print(self._context_details["array_lhs"])
+        # if len(self._context_details["array_lhs"]) != 0 and self._context_details["array_lhs"][-1]:
+        #     print("Enter\n")
+        #     # FIXME: Added
+        #     # self._vm_writer.write_arithmetic(command="ADD")
+        #     return
+        # print("No enter")
+        
+        # Set the address to the array segment pointer
+        self._vm_writer.write_pop(segment="POINTER", index=1)
+        # Obtain the value of the address pointed to by pointer 1
+        self._vm_writer.write_push(segment="THAT", index=0)
+
+        # self._vm_writer.write_arithmetic(command="ADD")
+
+        # # FIXME:
+        # # Assignments of arrays are dealt with in compile_let
+        # if not self._context_details["array_lhs"]:
+        #     # The topmost value in the stack is an address, we will now dereference it
+        #     # Set the address to the array segment pointer
+        #     self._vm_writer.write_pop(segment="POINTER", index=1)
+        #     # Obtain the value of the address pointed to by pointer 1
+        #     self._vm_writer.write_push(segment="THAT", index=0)
 
     def _write_op(self, cur_op: OpName) -> None:
         """Write the op to vm code.
