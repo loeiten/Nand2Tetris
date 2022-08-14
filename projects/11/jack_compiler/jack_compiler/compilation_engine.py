@@ -91,7 +91,7 @@ class CompilationEngine:
                 "return_type": str,
                 "assign_to": str,
                 "array_lhs": bool,
-                "array_rhs": bool,
+                # "array_rhs": bool,
                 "do_statement": bool,
                 "current_statement": List[str],
                 "expression_list_count": List[int],
@@ -105,7 +105,7 @@ class CompilationEngine:
             "return_type": "",
             "assign_to": "",
             "array_lhs": False,
-            "array_rhs": False,
+            # "array_rhs": False,
             "do_statement": False,
             "current_statement": list(),
             "expression_list_count": list(),
@@ -614,7 +614,8 @@ class CompilationEngine:
         # Reset the array flags in order to start with clean slates
         # NOTE: We cannot have nested let statements
         self._context_details["array_lhs"] = False
-        self._context_details["array_rhs"] = False
+        entered_array_lhs = False
+        # self._context_details["array_rhs"] = False
 
         # let
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
@@ -636,6 +637,11 @@ class CompilationEngine:
                 index=table.index_of(self._context_details["assign_to"]),
             )
 
+            # FIXME: New
+            entered_array_lhs = True
+            self._context_details["array_lhs"] = True
+            # FIXME: Only the last parenthesis we need to worry about
+
             # The symbol [
             assert self._jack_tokenizer.has_more_tokens()
             self._advance()
@@ -654,12 +660,14 @@ class CompilationEngine:
             # Add in order to get the appropriate address
             self._vm_writer.write_arithmetic(command="ADD")
 
-            self._context_details["array_lhs"] = True
+            # FIXME: Old
+            # self._context_details["array_lhs"] = True
             # NOTE: We could have had nested arrays,
             #       so we don't know if the RHS contains an array yet
-            self._context_details["array_rhs"] = False
+            # self._context_details["array_rhs"] = False
 
         # The symbol =
+        self._context_details["array_lhs"] = False
         assert self._jack_tokenizer.has_more_tokens()
         self._advance()
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
@@ -674,13 +682,13 @@ class CompilationEngine:
         self._advance()
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
 
-        if self._context_details["array_lhs"]:
+        if entered_array_lhs:
             # In order not to overwrite the array pointer we must use the
             # general solution for array access
-            if self._context_details["array_rhs"]:
-                # Dereference the RHS array
-                self._vm_writer.write_pop(segment="POINTER", index=1)
-                self._vm_writer.write_push(segment="THAT", index=0)
+            # if self._context_details["array_rhs"]:
+            #     # Dereference the RHS array
+            #     self._vm_writer.write_pop(segment="POINTER", index=1)
+            #     self._vm_writer.write_push(segment="THAT", index=0)
             # Push the value to temp
             self._vm_writer.write_pop(segment="TEMP", index=0)
             # Pop the LHS address to the array pointer
@@ -700,7 +708,7 @@ class CompilationEngine:
 
         # Reset the array flags as we may have arrays outside let statements
         self._context_details["array_lhs"] = False
-        self._context_details["array_rhs"] = False
+        # self._context_details["array_rhs"] = False
         self._close_grammar("letStatement")
 
     def _write_expression_body(self) -> None:
@@ -1089,7 +1097,7 @@ class CompilationEngine:
         """Write an array expression."""
         # We potentially have a rhs expression
         # NOTE: This is appropriately dealt with in compile_let
-        self._context_details["array_rhs"] = True
+        # self._context_details["array_rhs"] = True
 
         # varName
         self._write_token(self.token["type"], self.token["token"])  # type: ignore
@@ -1118,6 +1126,7 @@ class CompilationEngine:
         # Add [expression] to varName
         self._vm_writer.write_arithmetic(command="ADD")
 
+        # FIXME:
         # Assignments of arrays are dealt with in compile_let
         if not self._context_details["array_lhs"]:
             # The topmost value in the stack is an address, we will now dereference it
