@@ -12,7 +12,7 @@ class Memory {
   static Array ram;  // Access to the whole RAM
   static Array heap;
   static int freeList;  // FIXME: Rename to first free?
-  static int lastAddress;  // FIXME: Should be the actual address
+  static int endListNextAddress;  // The next address of the last element in the list
 
   /** Initialize the class. */
   function void init() {
@@ -24,8 +24,9 @@ class Memory {
     let heap = 2048;  // Heap base
     let freeList = heap;  // Weak typing, will be the integer 2048
 
-    let lastAddress = heap[1]
+    let endListNextAddress = 2048;
 
+    // FIXME: Not sure what these are used to
     let heap[0] = 0;  // next
     let heap[1] = 14334;  // length
     return;
@@ -59,6 +60,7 @@ class Memory {
    */
   function int alloc(int size) {
     var int requestedBlockSize;
+    var int curFreeListPrevAddress;
     var int curFreeListCurAddress;
     var int curFreeListNextAddress;
     var int curFreeListSize;
@@ -66,7 +68,8 @@ class Memory {
 
     // Initialization
     let requestedBlockSize = size + 2;
-    let curFreeListCurAddress = heap[0];  // FIXME: Anchor to heapBase
+    let curFreeListPrevAddress = -1;  // At the very start we do not have a previous address
+    let curFreeListCurAddress = 2048;  // Heap base
     let curFreeListNextAddress = heap[0];
     let curFreeListSize = peek(curFreeListNextAddress + 1);
 
@@ -74,22 +77,33 @@ class Memory {
     //       curFreeListSize == requestedBlockSize
     while(curFreeListSize < (requestedBlockSize - 1)){
       // Jump to the next freeList block
+      let curFreeListPrevAddress = curFreeListCurAddress;
       let curFreeListCurAddress = curFreeListNextAddress;
       let curFreeListNextAddress = peek(curFreeListNextAddress);
       let curFreeListSize = peek(curFreeListNextAddress + 1);
       // FIXME: We can raise an error if curFreeListNextAddress == -1
     }
 
-    // Carve out from the end of the current freeList block
-    // NOTE: We add 2 to account for the overhead containing the next address and size of the current block
-    let carvedOutStartAddress = (curFreeListCurAddress + 2) + curFreeListSize - requestedBlockSize;
+    if(curFreeListSize == requestedBlockSize){
+      // The whole block is consumed
+      let carvedOutStartAddress = curFreeListCurAddress;
+
+      // We must let the previous "next" point at the next for this block
+      do poke(curFreeListPrevAddress, curFreeListCurAddress);
+    } else {
+      // Only part of block is consumed, we must update size
+      // Carve out from the end of the current freeList block
+      // NOTE: We add 2 to account for the overhead containing the next address and size of the current block
+      let carvedOutStartAddress = (curFreeListCurAddress + 2) + curFreeListSize - requestedBlockSize;
+      // Set the size
+      do poke(carvedOutStartAddress + 1, size);
+
+      // Update the available size in the non-carved out block
+      do poke(curFreeListNextAddress + 1, curFreeListSize - requestedBlockSize);
+    }
+
     // The carved out block will not have a next address, so we terminate the list with a -1
     do poke(carvedOutStartAddress, -1);
-    // Set the size
-    do poke(carvedOutStartAddress + 1, size);
-
-    // Update the available size in the non-carved out block
-    do poke(curFreeListNextAddress + 1, curFreeListSize - requestedBlockSize);
 
     // NOTE: +2 to account for the overhead
     return carvedOutStartAddress + 2;
@@ -101,6 +115,22 @@ class Memory {
    * /param object The object to de-allocate
    */
   function void deAlloc(Array object) {
-    // FIXME: You are here
+    var int objectAddress;
+    var int objectBaseAddress;
+
+    // Get the address of the object (we can do this due to weak typing)
+    let objectAddress = object;
+    let objectBaseAddress = objectAddress - 2;  // One for "next", one for "size"
+
+    // Let the last element of the freeList point at this address
+    do poke(endListNextAddress, objectBaseAddress);
+    // Update the "next" pointer in the last block of freeList
+    let endListNextAddress = objectAddress;
+
+    // Since we are appending this block to the end of the freeList,
+    // it's "next" pointer must terminate
+    do poke(objectBaseAddress, -1);
+
+    return;
   }
 }
