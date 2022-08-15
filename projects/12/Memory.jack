@@ -9,26 +9,98 @@
  * consists of 32,768 words, each holding a 16-bit binary number.
  */
 class Memory {
+  static Array ram;  // Access to the whole RAM
+  static Array heap;
+  static int freeList;  // FIXME: Rename to first free?
+  static int lastAddress;  // FIXME: Should be the actual address
 
-    /** Initializes the class. */
-    function void init() {
+  /** Initialize the class. */
+  function void init() {
+    // NOTE: We cannot call the Array constructor we need access to the whole RAM
+    //       and the constructor would allocate space in the heap
+    //       As Jack is weakly typed the below is an allowed thing to do
+    let ram=0;
+    // We use the same trick as above with the heap
+    let heap = 2048;  // Heap base
+    let freeList = heap;  // Weak typing, will be the integer 2048
+
+    let lastAddress = heap[1]
+
+    let heap[0] = 0;  // next
+    let heap[1] = 14334;  // length
+    return;
+  }
+
+  /**
+   * Returns the RAM value at the given address.
+   *
+   * \param address The address to peek at
+   * \return The value at the peeked address
+   */
+  function int peek(int address) {
+    return ram[address];
+  }
+
+  /**
+   * Set the RAM value at the given address to the given value.
+   *
+   * \param address The address to poke
+   * \param value The value to assign the address
+   */
+  function void poke(int address, int value) {
+    let ram[address] = value;
+    return;
+  }
+
+  /** Find an available RAM block.
+   *
+   * \param size Size of the desired RAM block
+   * \return A reference to the base address of the RAM block
+   */
+  function int alloc(int size) {
+    var int requestedBlockSize;
+    var int curFreeListCurAddress;
+    var int curFreeListNextAddress;
+    var int curFreeListSize;
+    var int carvedOutStartAddress;
+
+    // Initialization
+    let requestedBlockSize = size + 2;
+    let curFreeListCurAddress = heap[0];  // FIXME: Anchor to heapBase
+    let curFreeListNextAddress = heap[0];
+    let curFreeListSize = peek(curFreeListNextAddress + 1);
+
+    // NOTE: The condition will be true if
+    //       curFreeListSize == requestedBlockSize
+    while(curFreeListSize < (requestedBlockSize - 1)){
+      // Jump to the next freeList block
+      let curFreeListCurAddress = curFreeListNextAddress;
+      let curFreeListNextAddress = peek(curFreeListNextAddress);
+      let curFreeListSize = peek(curFreeListNextAddress + 1);
+      // FIXME: We can raise an error if curFreeListNextAddress == -1
     }
 
-    /** Returns the RAM value at the given address. */
-    function int peek(int address) {
-    }
+    // Carve out from the end of the current freeList block
+    // NOTE: We add 2 to account for the overhead containing the next address and size of the current block
+    let carvedOutStartAddress = (curFreeListCurAddress + 2) + curFreeListSize - requestedBlockSize;
+    // The carved out block will not have a next address, so we terminate the list with a -1
+    do poke(carvedOutStartAddress, -1);
+    // Set the size
+    do poke(carvedOutStartAddress + 1, size);
 
-    /** Sets the RAM value at the given address to the given value. */
-    function void poke(int address, int value) {
-    }
+    // Update the available size in the non-carved out block
+    do poke(curFreeListNextAddress + 1, curFreeListSize - requestedBlockSize);
 
-    /** Finds an available RAM block of the given size and returns
-     *  a reference to its base address. */
-    function int alloc(int size) {
-    }
+    // NOTE: +2 to account for the overhead
+    return carvedOutStartAddress + 2;
+  }
 
-    /** De-allocates the given object (cast as an array) by making
-     *  it available for future allocations. */
-    function void deAlloc(Array o) {
-    }
+  /**
+   * De-allocate the given object so that it's available for future allocations.
+   *
+   * /param object The object to de-allocate
+   */
+  function void deAlloc(Array object) {
+    // FIXME: You are here
+  }
 }
