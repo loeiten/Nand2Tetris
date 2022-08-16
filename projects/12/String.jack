@@ -11,54 +11,102 @@
  * string-oriented operations.
  */
 class String {
+  field Array str;
+  field int length;
 
-    /** constructs a new empty string with a maximum length of maxLength
-     *  and initial length of 0. */
-    constructor String new(int maxLength) {
-    }
+  /**
+   * Construct a new empty string.
+   *
+   * The initial length of the string will be 0
+   *
+   * \param maxLength Maximum length of the string
+   * \return The current object
+   */
+  constructor String new(int maxLength) {
+  }
 
-    /** Disposes this string. */
-    method void dispose() {
-    }
+  /** Dispose this string. */
+  method void dispose() {
+  }
 
-    /** Returns the current length of this string. */
-    method int length() {
-    }
+  /**
+   * Return the current length of this string.
+   *
+   * \return The current length of the string.
+   */
+  method int length() {
+  }
 
-    /** Returns the character at the j-th location of this string. */
-    method char charAt(int j) {
-    }
+  /**
+   * Return the character at the j-th location of this string.
+   *
+   * \param j The location to get the character at
+   * \return The character value of the j-th character
+   */
+  method char charAt(int j) {
+  }
 
-    /** Sets the character at the j-th location of this string to c. */
-    method void setCharAt(int j, char c) {
-    }
+  /**
+   * Set the character at the j-th location of this string to c.
+   *
+   * \param j The j-th location of this string
+   * \param c The character value to set in the string
+   */
+  method void setCharAt(int j, char c) {
+  }
 
-    /** Appends c to this string's end and returns this string. */
-    method String appendChar(char c) {
-    }
+  /**
+   * Append c to this string's end and returns this string.
+   *
+   * \param c The string to append to the end
+   * \return The string with c appended
+   */
+  method String appendChar(char c) {
+  }
 
-    /** Erases the last character from this string. */
-    method void eraseLastChar() {
-    }
+  /** Erase the last character from this string. */
+  method void eraseLastChar() {
+  }
 
-    /** Returns the integer value of this string,
-     *  until a non-digit character is detected. */
-    method int intValue() {
-    }
+  /**
+   * Return the integer value of this string.
+   *
+   * It will process until a non-digit character is detected.
+   *
+   * \return The integer value
+   */
+  method int intValue() {
+  }
 
-    /** Sets this string to hold a representation of the given value. */
-    method void setInt(int val) {
-    }
+  /**
+   * Set this string to hold a representation of the given value.
+   *
+   * \param val The value to represent
+   */
+  method void setInt(int val) {
+  }
 
-    /** Returns the new line character. */
-    function char newLine() {
-    }
+  /**
+   * Return the new line character.
+   *
+   * \return The new line character
+   */
+  function char newLine() {
+  }
 
-    /** Returns the backspace character. */
-    function char backSpace() {
-    }
+  /**
+   * Return the backspace character.
+   *
+   * \return The backspace character
+   */
+  function char backSpace() {
+  }
 
-    /** Returns the double quote (") character. */
-    function char doubleQuote() {
-    }
+  /**
+   * Return the double quote (") character.
+   *
+   * \return The double quote character
+   */
+  function char doubleQuote() {
+  }
 }
