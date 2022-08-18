@@ -8,40 +8,133 @@
  * Note: Jack compilers implement multiplication and division using OS method calls.
  */
 class Math {
+  static Array twoToThe;
 
-    /** Initializes the library. */
-    function void init() {
-    }
+  /** Initialize the library. */
+  function void init() {
+    let twoToThe = Array.new(16);
+    twoToThe[0] = 1;
+    twoToThe[1] = 2;
+    twoToThe[2] = 4;
+    twoToThe[3] = 8;
+    twoToThe[4] = 16;
+    twoToThe[5] = 32;
+    twoToThe[6] = 64;
+    twoToThe[7] = 128;
+    twoToThe[8] = 256;
+    twoToThe[9] = 512;
+    twoToThe[10] = 1024;
+    twoToThe[11] = 2048;
+    twoToThe[12] = 4096;
+    twoToThe[13] = 8192;
+    twoToThe[14] = 16384;
+    twoToThe[15] = 32768;
+  }
 
-    /** Returns the absolute value of x. */
-    function int abs(int x) {
-    }
+  /**
+   * Return the absolute value of x.
+   *
+   * \param x The number to take the absolute value of
+   * \return The absolute value of x
+   */
+  function int abs(int x) {
+  }
 
-    /** Returns the product of x and y.
-     *  When a Jack compiler detects the multiplication operator '*' in the
-     *  program's code, it handles it by invoking this method. In other words,
-     *  the Jack expressions x*y and multiply(x,y) return the same value.
-     */
-    function int multiply(int x, int y) {
-    }
+  /**
+   * Return the product of x and y.
+   *
+   * When a Jack compiler detects the multiplication operator '*' in the
+   * program's code, it handles it by invoking this method. In other words,
+   * the Jack expressions x*y and multiply(x,y) return the same value.
+   *
+   * \param x The multiplier
+   * \param y The multiplicand
+   * \return The product
+   */
+  function int multiply(int x, int y) {
+  }
 
-    /** Returns the integer part of x/y.
-     *  When a Jack compiler detects the multiplication operator '/' in the
-     *  program's code, it handles it by invoking this method. In other words,
-     *  the Jack expressions x/y and divide(x,y) return the same value.
-     */
-    function int divide(int x, int y) {
-    }
+  /**
+   * Returns the integer part of x/y.
+   *
+   * When a Jack compiler detects the multiplication operator '/' in the
+   * program's code, it handles it by invoking this method. In other words,
+   * the Jack expressions x/y and divide(x,y) return the same value.
+   *
+   * \param x The dividend
+   * \param y The divisor
+   * \return The quotient
+   */
+  function int divide(int x, int y) {
+  }
 
-    /** Returns the integer part of the square root of x. */
-    function int sqrt(int x) {
-    }
+  /**
+   * Return the integer part of the square root of x.
+   *
+   * \param x The number to take the square root of
+   * \return The square root of x
+   */
+  function int sqrt(int x) {
+  }
 
-    /** Returns the greater number. */
-    function int max(int a, int b) {
+  /**
+   * Return the greater number.
+   *
+   * \param a The first number
+   * \param b The second number
+   * \return The greater number
+   */
+  function int max(int a, int b) {
+    if(a<b){
+      return b;
+    } else {
+      return a;
     }
+  }
 
-    /** Returns the smaller number. */
-    function int min(int a, int b) {
+  /**
+   * Return the smaller number.
+   *
+   * \param a The first number
+   * \param b The second number
+   * \return The smaller number
+   */
+  function int min(int a, int b) {
+    if(a>b){
+      return b;
+    } else {
+      return a;
     }
+  }
+
+  /**
+   * Return the i-th bit of x.
+   *
+   * \param x The number to find the i-th bit of
+   * \param i The bit position to find the value of
+   * \return True if the i-th bit of x is 1, false otherwise
+   */
+  function boolean bit(int x, int i){
+    // & is the bitwise and
+    // Looking at the binary representation of the numbers:
+    // & will only be true for the power under consideration
+    // The returned numbered will be the decimal representation of that power
+    //
+    // Example:
+    // We check 6 for the 3rd power
+    //   110
+    // & 100
+    // ------
+    //   100
+    // The decimal representation of 100 is 4, so that's the integer which will be returned
+    //
+    // Example:
+    // We check 6 for the 1st power
+    //   110
+    // & 001
+    // ------
+    //   000
+    // The decimal representation of 000 is 0, so that's the integer which will be returned
+    return ~((x & twoToThe[i]) = 0);
+  }
 }
