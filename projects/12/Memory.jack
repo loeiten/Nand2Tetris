@@ -11,24 +11,25 @@
 class Memory {
   static Array ram;  // Access to the whole RAM
   static Array heap;
-  static int freeList;  // FIXME: Rename to first free?
+  static int heapBase;
   static int endListNextAddress;  // The next address of the last element in the list
 
   /** Initialize the class. */
   function void init() {
+    let heapBase = 2048;
     // NOTE: We cannot call the Array constructor we need access to the whole RAM
     //       and the constructor would allocate space in the heap
     //       As Jack is weakly typed the below is an allowed thing to do
     let ram=0;
     // We use the same trick as above with the heap
-    let heap = 2048;  // Heap base
-    let freeList = heap;  // Weak typing, will be the integer 2048
+    let heap = heapBase;  // Heap base
 
     let endListNextAddress = 2048;
 
-    // FIXME: Not sure what these are used to
-    let heap[0] = 0;  // next
-    let heap[1] = 14334;  // length
+    // Set the value of the address 2048 and 2049
+    // Alternatively we could have poked the addresses these idices are pointing to
+    let heap[0] = -1;  // The next (there is no next)
+    let heap[1] = 14334;  // Length
     return;
   }
 
@@ -55,54 +56,54 @@ class Memory {
 
   /** Find an available RAM block.
    *
-   * \param size Size of the desired RAM block
+   * \param size size of the desired RAM block
    * \return A reference to the base address of the RAM block
    */
   function int alloc(int size) {
     var int requestedBlockSize;
-    var int curFreeListPrevAddress;
-    var int curFreeListCurAddress;
-    var int curFreeListNextAddress;
-    var int curFreeListSize;
+    var int prevAddress;
+    var int curAddress;
+    var int nextAddress;
+    var int size;
     var int carvedOutStartAddress;
 
     // Initialization
     let requestedBlockSize = size + 2;
-    let curFreeListPrevAddress = -1;  // At the very start we do not have a previous address
-    let curFreeListCurAddress = 2048;  // Heap base
-    let curFreeListNextAddress = 2048; // Heap base
-    let curFreeListSize = Memory.peek(curFreeListNextAddress + 1);
+    let prevAddress = -1;  // At the very start we do not have a previous address
+    let curAddress = heapBase;
+    let nextAddress = heap[0];
+    let size = heap[1];
 
     // NOTE: The condition will be true if
-    //       curFreeListSize == requestedBlockSize
-    while(curFreeListSize < (requestedBlockSize - 1)){
-      // Jump to the next freeList block
-      let curFreeListPrevAddress = curFreeListCurAddress;
-      let curFreeListCurAddress = curFreeListNextAddress;
-      if (curFreeListCurAddress = -1){
+    //       size == requestedBlockSize
+    while(size < (requestedBlockSize - 1)){
+      if (nextAddress = -1){
         // We are on the terminating end of the list, throw an error
         do Sys.error(137);
       }
-      let curFreeListNextAddress = Memory.peek(curFreeListCurAddress);
-      let curFreeListSize = Memory.peek(curFreeListCurAddress + 1);
+      // Jump to the next heapBase block
+      let prevAddress = curAddress;  // Store the previous address
+      let curAddress = nextAddress;  // Update the current address
+      let nextAddress = Memory.peek(curAddress);  // Look for the next address
+      let size = Memory.peek(curAddress + 1);
     }
 
-    if(curFreeListSize = requestedBlockSize){
+    if(size = requestedBlockSize){
       // The whole block is consumed
-      let carvedOutStartAddress = curFreeListCurAddress;
+      let carvedOutStartAddress = curAddress;
 
       // We must let the previous "next" point at the next for this block
-      do Memory.poke(curFreeListPrevAddress, curFreeListCurAddress);
+      do Memory.poke(prevAddress, curAddress);
     } else {
       // Only part of block is consumed, we must update size
-      // Carve out from the end of the current freeList block
+      // Carve out from the end of the current heapBase block
       // NOTE: We add 2 to account for the overhead containing the next address and size of the current block
-      let carvedOutStartAddress = (curFreeListCurAddress + 2) + curFreeListSize - requestedBlockSize;
+      let carvedOutStartAddress = (curAddress + 2) + size - requestedBlockSize;
       // Set the size
       do Memory.poke(carvedOutStartAddress + 1, size);
 
       // Update the available size in the non-carved out block
-      do Memory.poke(curFreeListNextAddress + 1, curFreeListSize - requestedBlockSize);
+      do Memory.poke(curAddress + 1, size - requestedBlockSize);
     }
 
     // The carved out block will not have a next address, so we terminate the list with a -1
@@ -125,12 +126,12 @@ class Memory {
     let objectAddress = object;
     let objectBaseAddress = objectAddress - 2;  // One for "next", one for "size"
 
-    // Let the last element of the freeList point at this address
+    // Let the last element of the heapBase point at this address
     do Memory.poke(endListNextAddress, objectBaseAddress);
-    // Update the "next" pointer in the last block of freeList
+    // Update the "next" pointer in the last block of heapBase
     let endListNextAddress = objectBaseAddress;
 
-    // Since we are appending this block to the end of the freeList,
+    // Since we are appending this block to the end of the heapBase,
     // it's "next" pointer must terminate
     do Memory.poke(objectBaseAddress, -1);
 
