@@ -13,22 +13,25 @@ class Math {
   /** Initialize the library. */
   function void init() {
     let twoToThe = Array.new(16);
-    twoToThe[0] = 1;
-    twoToThe[1] = 2;
-    twoToThe[2] = 4;
-    twoToThe[3] = 8;
-    twoToThe[4] = 16;
-    twoToThe[5] = 32;
-    twoToThe[6] = 64;
-    twoToThe[7] = 128;
-    twoToThe[8] = 256;
-    twoToThe[9] = 512;
-    twoToThe[10] = 1024;
-    twoToThe[11] = 2048;
-    twoToThe[12] = 4096;
-    twoToThe[13] = 8192;
-    twoToThe[14] = 16384;
-    twoToThe[15] = 32768;
+    let twoToThe[0] = 1;
+    let twoToThe[1] = 2;
+    let twoToThe[2] = 4;
+    let twoToThe[3] = 8;
+    let twoToThe[4] = 16;
+    let twoToThe[5] = 32;
+    let twoToThe[6] = 64;
+    let twoToThe[7] = 128;
+    let twoToThe[8] = 256;
+    let twoToThe[9] = 512;
+    let twoToThe[10] = 1024;
+    let twoToThe[11] = 2048;
+    let twoToThe[12] = 4096;
+    let twoToThe[13] = 8192;
+    let twoToThe[14] = 16384;
+    // The below gives integer constant too big
+    // let twoToThe[15] = 32768;
+    let twoToThe[15] = 32767 + 1;
+    return;
   }
 
   /**
@@ -38,6 +41,10 @@ class Math {
    * \return The absolute value of x
    */
   function int abs(int x) {
+    if(x<0){
+      return -x;
+    }
+    return x;
   }
 
   /**
@@ -52,6 +59,24 @@ class Math {
    * \return The product
    */
   function int multiply(int x, int y) {
+    var int sum;
+    var int shiftedX;
+    var int i;
+
+    let sum = 0;
+    let shiftedX = x;
+
+    while(i < 16){
+      // If the bit at i is zero we don't have to add anything to the sum
+      // (we could have added 0, but that would have been pointless)
+      if(Math.bit(y, i) = true){
+        let sum = sum + shiftedX;
+      }
+      // When we multiply with 2 we shift all bits to the left
+      let shiftedX = shiftedX + shiftedX;
+      let i = i + 1;
+    }
+    return sum;
   }
 
   /**
@@ -66,6 +91,44 @@ class Math {
    * \return The quotient
    */
   function int divide(int x, int y) {
+    var int q;
+    var int sign;
+
+    // Calculate the signedness
+    let sign = 1;
+    if (x < 0){
+      let sign = -1;
+    }
+    if (y < 0){
+      let sign = sign * (-1);
+    }
+
+    // We divide the absolute numbers and add the sign
+    let q = Math.dividePositive(Math.abs(x), Math.abs(y));
+
+    return sign*q;
+  }
+
+  /**
+   * Calculate the division of positive numbers.
+   *
+   * \param x The dividend
+   * \param y The divisor
+   * \return The quotient
+   */
+  function int dividePositive(int x, int y){
+    var int q;
+
+    if((y > x) | (y < 0)){
+      // The first check checks whether the number is no longer divisible
+      // The second check checks whether the number has overflown
+      return 0;
+    }
+    let q = Math.divide(x, 2*y);
+    if ((x - (2 * q * y)) < y){
+      return 2 * q;
+    }
+    return (2 * q) + 1;
   }
 
   /**
@@ -75,6 +138,31 @@ class Math {
    * \return The square root of x
    */
   function int sqrt(int x) {
+    // Strategy: Find an integer such that
+    // y**2 <= x < (y+1)**2 for 0 <= x < 2**n
+    // by performing a binary search in the range 0...(2**(n/2)-1)
+    var int y;
+    var int j;
+    var int expr;
+
+    let y = 0;
+    let j = 7;  // (16/2) - 1
+
+    // The same as j <= 0
+    while( j > (-1) ){
+      let expr = (y + twoToThe[j])*(y + twoToThe[j]);
+      // The first part is the same as
+      // (expr <= x)
+      if (((expr - 1) < x) & (expr > 0)){
+        // The first part performs the search
+        // The second part handles overflow
+        let y = y + twoToThe[j];
+      }
+
+      let j = j - 1;
+    }
+
+    return y;
   }
 
   /**
