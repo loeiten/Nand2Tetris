@@ -32,7 +32,7 @@ class Output {
         // Black square, used for displaying non-printable characters.
         do Output.create(0,63,63,63,63,63,63,63,63,63,0,0);
 
-        // Assigns the bitmap for each character in the charachter set.
+        // Assigns the bitmap for each character in the character set.
         // The first parameter is the character index, the next 11 numbers
         // are the values of each row in the frame that represents this character.
         do Output.create(32,0,0,0,0,0,0,0,0,0,0,0);          //

@@ -9,15 +9,15 @@ class Algorithm {
    *
    * \param dividend The dividend
    * \param divisor The divisor
-   * \return The modoulus
+   * \return The modulus
    */
   function int mod(int dividend, int divisor){
-    var int modolus;
+    var int modulus;
 
-    // Note dividend/divisor is the trucated division
-    let modolus = dividend - (divisor * (dividend/divisor));
+    // Note dividend/divisor is the truncated division
+    let modulus = dividend - (divisor * (dividend/divisor));
 
-    return modolus;
+    return modulus;
   }
 
   /**

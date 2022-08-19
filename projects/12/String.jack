@@ -23,10 +23,19 @@ class String {
    * \return The current object
    */
   constructor String new(int maxLength) {
+    if (maxLength = 0){
+      let maxLength = 1;
+    }
+    let str = Array.new(maxLength);
+    let length = 0;
+    return this;
   }
 
   /** Dispose this string. */
   method void dispose() {
+    do str.dispose();
+    do Memory.deAlloc(this);
+    return;
   }
 
   /**
@@ -35,6 +44,7 @@ class String {
    * \return The current length of the string.
    */
   method int length() {
+    return length;
   }
 
   /**
@@ -44,6 +54,7 @@ class String {
    * \return The character value of the j-th character
    */
   method char charAt(int j) {
+    return str[j];
   }
 
   /**
@@ -53,6 +64,8 @@ class String {
    * \param c The character value to set in the string
    */
   method void setCharAt(int j, char c) {
+    let str[j] = c;
+    return;
   }
 
   /**
@@ -62,10 +75,16 @@ class String {
    * \return The string with c appended
    */
   method String appendChar(char c) {
+    let str[length] = c;
+    let length = length + 1;
+    return this;
   }
 
   /** Erase the last character from this string. */
   method void eraseLastChar() {
+    let str[length] = 0;
+    let length = length - 1;
+    return;
   }
 
   /**
@@ -76,6 +95,38 @@ class String {
    * \return The integer value
    */
   method int intValue() {
+    var int val;
+    var int d;
+    var int i;
+    var int c;
+    var bool negate;
+
+    let i = 0;
+    let negate = false;
+
+    let c = str[i];
+    // Check if we are dealing with a negative number
+
+    if(c = 45){
+      let negate = true;
+      let i = i + 1;
+    }
+
+    while(i < length){
+      let c = str[i];
+      // The characters which represents integers starts at 48 and ends at 57
+      if ((c > 47) & (c < 59)){
+        let d = c - 48;
+        let val = (val*10) + d;
+      }
+      let i = i + 1;
+    }
+
+    if (negate){
+      let val = -val;
+    }
+
+    return val;
   }
 
   /**
@@ -84,6 +135,41 @@ class String {
    * \param val The value to represent
    */
   method void setInt(int val) {
+    // We must reset the string length
+    let length = 0;
+
+    if(val < 0){
+      // 45 is the value of minus
+      do appendChar(45);
+      let val = -val;
+    }
+
+    do setPositiveInt(val);
+
+    return;
+  }
+
+  /**
+   * Set a positive integer
+   *
+   * \param val The value to set
+   */
+  method void setPositiveInt(int val){
+    var int lastDigit;
+    var int c;
+
+    // This is lastDigit = val % 10
+    // Note val/10 is the truncated division
+    let lastDigit = val - (10 * (val/10));
+    // The characters which represents integers starts at 48 and ends at 57
+    let c = lastDigit + 48;
+    // val >= 10
+    if(val > 11){
+      do setPositiveInt(val/10);
+    }
+    do appendChar(c);
+
+    return;
   }
 
   /**
@@ -92,6 +178,7 @@ class String {
    * \return The new line character
    */
   function char newLine() {
+    return 128;
   }
 
   /**
@@ -100,6 +187,7 @@ class String {
    * \return The backspace character
    */
   function char backSpace() {
+    return 129;
   }
 
   /**
@@ -108,5 +196,6 @@ class String {
    * \return The double quote character
    */
   function char doubleQuote() {
+    return 34;
   }
 }
