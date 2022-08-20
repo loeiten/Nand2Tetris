@@ -18,10 +18,14 @@ class Output {
 
   // Character map for displaying characters
   static Array charMaps;
+  static int cursorRow;
+  static int cursorCol;
 
   /** Initialize the screen, and locate the cursor at the screen's top-left. */
   function void init() {
     do Output.initMap();
+    let cursorRow = 0;
+    let cursorCol = 0;
   }
 
   // Initialize the character map array
@@ -203,6 +207,10 @@ class Output {
    * \param i The j'th column to move the cursor to
    */
   function void moveCursor(int i, int j) {
+    let cursorRow = i;
+    let cursorCol = j;
+    do printChar(32);  // Print space character
+    return;
   }
 
   /**
@@ -211,6 +219,8 @@ class Output {
    * \param c Character to display
    */
   function void printChar(char c) {
+    // We need the full memory address as we are only manipulating half of the bit
+    // We first need to find which memory word we need to manipulate
   }
 
   /**
@@ -231,9 +241,29 @@ class Output {
 
   /** Advance the cursor to the beginning of the next line. */
   function void println() {
+    // We let the cursor wrap to the beginning
+    if(cursorRow = 22){
+      let cursorRow = 0;
+    }
+    else {
+      let cursorRow = cursorRow + 1;
+    }
+    return;
   }
 
   /** Move the cursor one column back. */
   function void backSpace() {
+    // Erase the current char
+    do printChar(32);  // Print space character
+    if(cursorCol = 0){
+      if(~(cursorRow = 0)){
+        let cursorRow = cursorRow - 1;
+        let cursorCol = 63;  // Last column
+      }
+    }
+    else{
+      let cursorCol = cursorCol - 1;
+    }
   }
+  return;
 }
