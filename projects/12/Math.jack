@@ -94,7 +94,7 @@ class Math {
     var int q;
     var int sign;
 
-    // Calculate the signedness
+    // Calculate the sign
     let sign = 1;
     if (x < 0){
       let sign = -1;

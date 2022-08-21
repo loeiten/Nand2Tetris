@@ -11,33 +11,69 @@
  */
 class Screen {
 
-    /** Initializes the Screen. */
+    /** Initialize the Screen. */
     function void init() {
     }
 
-    /** Erases the entire screen. */
+    /** Erase the entire screen. */
     function void clearScreen() {
     }
 
-    /** Sets the current color, to be used for all subsequent drawXXX commands.
-     *  Black is represented by true, white by false. */
+    /**
+     * Set the current color, to be used for all subsequent drawXXX commands.
+     *
+     * \param b Color to set: Black is represented by true, white by false.
+     */
     function void setColor(boolean b) {
     }
 
-    /** Draws the (x,y) pixel, using the current color. */
+    /**
+     * Draw the (x,y) pixel, using the current color.
+     *
+     * NOTE: Having the row as first column is opposite of the matrix notation
+     *
+     * \param x The pixel column
+     * \param y The pixel row
+     */
     function void drawPixel(int x, int y) {
     }
 
-    /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
+    /**
+     * Draw a line from pixel (x1,y1) to pixel (x2,y2), using the current color.
+     *
+     * NOTE: Having the row as first column is opposite of the matrix notation
+     *
+     * \param x1 The start column of the line
+     * \param y1 The start row of the line
+     * \param x2 The end column of the line
+     * \param y2 The end row of the line
+     */
     function void drawLine(int x1, int y1, int x2, int y2) {
     }
 
-    /** Draws a filled rectangle whose top left corner is (x1, y1)
-     * and bottom right corner is (x2,y2), using the current color. */
+    /**
+     * Draws a filled rectangle whose top left corner is (x1, y1)
+     * and bottom right corner is (x2,y2), using the current color.
+     *
+     * NOTE: Having the row as first column is opposite of the matrix notation
+     *
+     * \param x1 The start column of the rectangle
+     * \param y1 The start row of the rectangle
+     * \param x2 The end column of the rectangle
+     * \param y2 The end row of the rectangle
+     */
     function void drawRectangle(int x1, int y1, int x2, int y2) {
     }
 
-    /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
+    /**
+     * Draw a filled circle of radius r<=181 around (x,y), using the current color.
+     *
+     * NOTE: Having the row as first column is opposite of the matrix notation
+     *
+     * \param x The column of centrum of the circle
+     * \param y The row of centrum the circle
+     * \param r The radius of the circle
+     */
     function void drawCircle(int x, int y, int r) {
     }
 }

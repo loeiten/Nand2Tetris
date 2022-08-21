@@ -33,9 +33,9 @@ CHIP Memory {
     // Hexadecimal denotes the numbers with base 16, and starts with 0x
     // The following table shows the conversion between different bases and corresponding chip
     // Hexadecimal          Decimal         Binary[13..15]      Chip
-    // 0x0000 - 0x3FFF      0    -16383     000... - 011...     RAM
-    // 0x4000 - 0x5FFF      16384-24574     100... - 101...     Screen
-    // 0x6000 -             24575-          110... -            Keyboard
+    // 0x0000 - 0x3FFF      0     - 16383   000... - 011...     RAM
+    // 0x4000 - 0x5FFF      16384 - 24574   100... - 101...     Screen
+    // 0x6000 -             24575 -         110... -            Keyboard
     //
     // Note that all the RAM chips will always emit something each clock cycle
     // However, it's up to us to select what will be emitted in the output pins and

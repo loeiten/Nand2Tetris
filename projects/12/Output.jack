@@ -18,14 +18,17 @@ class Output {
 
   // Character map for displaying characters
   static Array charMaps;
+  static Array screenMap;  // We can manipulate the screen directly instead of using Memory.peek and Memory.poke
   static int cursorRow;
   static int cursorCol;
 
   /** Initialize the screen, and locate the cursor at the screen's top-left. */
   function void init() {
     do Output.initMap();
+    let screenMap = 16384;
     let cursorRow = 0;
     let cursorCol = 0;
+    return;
   }
 
   // Initialize the character map array
@@ -76,7 +79,7 @@ class Output {
     do Output.create(64,30,51,51,59,59,59,27,3,30,0,0);  // @
     do Output.create(63,30,51,51,24,12,12,0,12,12,0,0);  // ?
 
-    do Output.create(65,12,18,51,51,63,51,51,51,51,0,0); // A
+    do Output.create(65,12,30,51,51,63,51,51,51,51,0,0); // A
     do Output.create(66,31,51,51,51,31,51,51,51,31,0,0); // B
     do Output.create(67,28,54,35,3,3,3,35,54,28,0,0);    // C
     do Output.create(68,15,27,51,51,51,51,51,27,15,0,0); // D
@@ -207,9 +210,14 @@ class Output {
    * \param i The j'th column to move the cursor to
    */
   function void moveCursor(int i, int j) {
+    // Move cursor
     let cursorRow = i;
     let cursorCol = j;
-    do printChar(32);  // Print space character
+    // Erase character
+    do Output.printChar(32);  // Print space character
+    // Move cursor
+    let cursorRow = i;
+    let cursorCol = j;
     return;
   }
 
@@ -219,8 +227,81 @@ class Output {
    * \param c Character to display
    */
   function void printChar(char c) {
+    var Array charMap;
+    var int pixelCol;
+    var int pixelRow;
+    var int modValue;
+    var int charRowValue;
+    var int counter;
+    var int address;
+    var int mask;
     // We need the full memory address as we are only manipulating half of the bit
     // We first need to find which memory word we need to manipulate
+
+    // If we are dealing with an even number we can use the pixel column as is,
+    // However, if we are dealing with an odd number we must "round down" to the
+    // previous even number
+
+    // We could either determine the evenness by using the modulus operator like so
+    // let modValue = cursorCol - (2*(cursorCol/2));  // 2 to check for evenness
+    // However, it's easier to check if both numbers have 1 at the first bit
+    let modValue = cursorCol & 1;
+    let pixelCol = (cursorCol - modValue)*8;  // 8 as that is the number of cols of one char
+
+    // The characters are 11 pixels high
+    let pixelRow = 11*cursorRow;
+    let address = (32*pixelRow) + (pixelCol/16);
+    let charMap = Output.getMap(c);
+
+    let counter = 0;
+    while(counter < 11){
+      let charRowValue = charMap[counter];
+
+      // If the cursor is at the first character of the address, we can shift
+      // the bits to the left by multiplying with 256
+      // (Multiplying with 2 is like multiplying with 10 in decimal)
+      if(modValue = 1){
+        let charRowValue = charRowValue * 256;
+        let mask = 255;  // Translates to 0000 0000 1111 1111 in binary
+      } else{
+        let mask = -256;  // Translates to 1111 1111 0000 0000 in binary
+      }
+
+      // NOTE: We need to remember that hack is little-endian
+      //       This means that the least significant bit is stored firstly in the memory
+      //       So: bin(14) = 0000 0000 0000 1110 is stored in the RAM as
+      //                     0111 0000 0000 0000
+      // First we mask the current address so that all bits where the character will be
+      // written is zero
+      // Example:
+      //   screenMap[address] 0101 0010 0100 1110
+      // & mask               1111 1111 0000 0000  (-256 as we want to fill the first character slot [again, recall the little-endianess])
+      //                      -------------------
+      //                      0101 0010 0000 0000
+      //
+      // we can now add the number we want
+      //
+      // + charRowValue      0000 0000 0011 1000
+      //                     -------------------
+      //                     0101 0010 0011 1000
+
+      let screenMap[address] = (screenMap[address] & mask) + charRowValue;
+
+
+      // When we increment one row, it's the same as adding 32 to the address
+      let address = address + 32;
+      let counter = counter + 1;
+    }
+
+    // Increment the cursor
+    if (cursorCol < 63){
+      let cursorCol = cursorCol + 1;
+    }
+    else {
+      do Output.println();
+    }
+
+    return;
   }
 
   /**
@@ -229,6 +310,13 @@ class Output {
    * \param s The string to print
    */
   function void printString(String s) {
+    var int counter;
+    let counter = 0;
+    while(counter < s.length()){
+      do Output.printChar(s.charAt(counter));
+      let counter = counter + 1;
+    }
+    return;
   }
 
   /**
@@ -237,24 +325,31 @@ class Output {
    * \param i The integer to print
    */
   function void printInt(int i) {
+    var String s;
+    // Including the sign, a number can take maximum
+    let s = String.new(6);
+    do s.setInt(i);
+    do Output.printString(s);
+    do s.dispose();
+    return;
   }
 
   /** Advance the cursor to the beginning of the next line. */
   function void println() {
+    let cursorRow = cursorRow + 1;
     // We let the cursor wrap to the beginning
-    if(cursorRow = 22){
+    if(cursorRow = 23){
       let cursorRow = 0;
     }
-    else {
-      let cursorRow = cursorRow + 1;
-    }
+    let cursorCol = 0;
     return;
   }
 
   /** Move the cursor one column back. */
   function void backSpace() {
     // Erase the current char
-    do printChar(32);  // Print space character
+    do Output.printChar(32);  // Print space character
+    let cursorCol = cursorCol - 1;
     if(cursorCol = 0){
       if(~(cursorRow = 0)){
         let cursorRow = cursorRow - 1;
@@ -264,6 +359,6 @@ class Output {
     else{
       let cursorCol = cursorCol - 1;
     }
+    return;
   }
-  return;
 }

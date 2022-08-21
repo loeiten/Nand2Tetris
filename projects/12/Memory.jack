@@ -27,7 +27,7 @@ class Memory {
     let endListNextAddress = 2048;
 
     // Set the value of the address 2048 and 2049
-    // Alternatively we could have poked the addresses these idices are pointing to
+    // Alternatively we could have poked the addresses these indices are pointing to
     let heap[0] = -1;  // The next (there is no next)
     let heap[1] = 14334;  // Length
     return;
