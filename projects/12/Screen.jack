@@ -10,70 +10,130 @@
  * the screen is indexed (0,0).
  */
 class Screen {
+  static Array twoToThe;
+  static Array screenMap;
+  static bool color;
 
-    /** Initialize the Screen. */
-    function void init() {
-    }
+  /** Initialize the Screen. */
+  function void init() {
+    let color = 0;
+    let screenMap = 16384;
 
-    /** Erase the entire screen. */
-    function void clearScreen() {
-    }
+    // We use the same trick as in the Math class
+    let twoToThe = Array.new(16);
+    let twoToThe[0] = 1;
+    let twoToThe[1] = 2;
+    let twoToThe[2] = 4;
+    let twoToThe[3] = 8;
+    let twoToThe[4] = 16;
+    let twoToThe[5] = 32;
+    let twoToThe[6] = 64;
+    let twoToThe[7] = 128;
+    let twoToThe[8] = 256;
+    let twoToThe[9] = 512;
+    let twoToThe[10] = 1024;
+    let twoToThe[11] = 2048;
+    let twoToThe[12] = 4096;
+    let twoToThe[13] = 8192;
+    let twoToThe[14] = 16384;
+    // The below gives integer constant too big
+    // let twoToThe[15] = 32768;
+    let twoToThe[15] = 32767 + 1;
+    return;
+  }
 
-    /**
-     * Set the current color, to be used for all subsequent drawXXX commands.
-     *
-     * \param b Color to set: Black is represented by true, white by false.
-     */
-    function void setColor(boolean b) {
+  /** Erase the entire screen. */
+  function void clearScreen() {
+    var int address;
+    let address = 0;
+    // First screen address = 16384
+    // Last screen address = 24575
+    // 24575 - 16384 = 8191
+    // Since we want to include the last address, we get
+    while(address < 8192){
+      screenMap[address] = 0;
+      let address = address + 1;
     }
+    return;
+  }
 
-    /**
-     * Draw the (x,y) pixel, using the current color.
-     *
-     * NOTE: Having the row as first column is opposite of the matrix notation
-     *
-     * \param x The pixel column
-     * \param y The pixel row
-     */
-    function void drawPixel(int x, int y) {
-    }
+  /**
+   * Set the current color, to be used for all subsequent drawXXX commands.
+   *
+   * \param b Color to set: Black is represented by true, white by false.
+   */
+  function void setColor(boolean b) {
+    let color = b;
+    return;
+  }
 
-    /**
-     * Draw a line from pixel (x1,y1) to pixel (x2,y2), using the current color.
-     *
-     * NOTE: Having the row as first column is opposite of the matrix notation
-     *
-     * \param x1 The start column of the line
-     * \param y1 The start row of the line
-     * \param x2 The end column of the line
-     * \param y2 The end row of the line
-     */
-    function void drawLine(int x1, int y1, int x2, int y2) {
-    }
+  /**
+   * Draw the (x,y) pixel, using the current color.
+   *
+   * NOTE: Having the row as first column is opposite of the matrix notation
+   *
+   * \param x The pixel column
+   * \param y The pixel row
+   */
+  function void drawPixel(int x, int y) {
+    var int address;
+    var int bitValue;
 
-    /**
-     * Draws a filled rectangle whose top left corner is (x1, y1)
-     * and bottom right corner is (x2,y2), using the current color.
-     *
-     * NOTE: Having the row as first column is opposite of the matrix notation
-     *
-     * \param x1 The start column of the rectangle
-     * \param y1 The start row of the rectangle
-     * \param x2 The end column of the rectangle
-     * \param y2 The end row of the rectangle
-     */
-    function void drawRectangle(int x1, int y1, int x2, int y2) {
-    }
+    let address = (32*y) + (x/16);
 
-    /**
-     * Draw a filled circle of radius r<=181 around (x,y), using the current color.
-     *
-     * NOTE: Having the row as first column is opposite of the matrix notation
-     *
-     * \param x The column of centrum of the circle
-     * \param y The row of centrum the circle
-     * \param r The radius of the circle
-     */
-    function void drawCircle(int x, int y, int r) {
+    // We can use modulus 16, but it's cheaper to use bitwise & 15 which gives the same
+    let bitValue = twoToThe[x & 15];
+
+    // Instead of using peek and poke, we can set the memory directly
+    if (color){
+      // The color is black (i.e. 1), so we can check if any of the bits are 1
+      let screenMap[address] = screenMap[address] | bitValue;
     }
+    else {
+      // The color is white (i.e. 0)
+      // We only want white on the bit we selected, no-one else
+      // To do this we can invert the bit, so that it's only 0 at the value we want to
+      // turn off, and check if both bits are 1 to turn them on
+      let screenMap[address] = screenMap[address] & (~bitValue);
+    }
+  }
+
+  /**
+   * Draw a line from pixel (x1,y1) to pixel (x2,y2), using the current color.
+   *
+   * NOTE: Having the row as first column is opposite of the matrix notation
+   *
+   * \param x1 The start column of the line
+   * \param y1 The start row of the line
+   * \param x2 The end column of the line
+   * \param y2 The end row of the line
+   */
+  function void drawLine(int x1, int y1, int x2, int y2) {
+  }
+
+  /**
+   * Draws a filled rectangle whose top left corner is (x1, y1)
+   * and bottom right corner is (x2,y2), using the current color.
+   *
+   * NOTE: Having the row as first column is opposite of the matrix notation
+   *
+   * \param x1 The start column of the rectangle
+   * \param y1 The start row of the rectangle
+   * \param x2 The end column of the rectangle
+   * \param y2 The end row of the rectangle
+   */
+  function void drawRectangle(int x1, int y1, int x2, int y2) {
+  }
+
+  /**
+   * Draw a filled circle of radius r<=181 around (x,y), using the current color.
+   *
+   * NOTE: Having the row as first column is opposite of the matrix notation
+   *
+   * \param x The column of centrum of the circle
+   * \param y The row of centrum the circle
+   * \param r The radius of the circle
+   */
+  function void drawCircle(int x, int y, int r) {
+  }
 }

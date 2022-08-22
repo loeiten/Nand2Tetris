@@ -244,7 +244,7 @@ class Output {
 
     // We could either determine the evenness by using the modulus operator like so
     // let modValue = cursorCol - (2*(cursorCol/2));  // 2 to check for evenness
-    // However, it's easier to check if both numbers have 1 at the first bit
+    // However, it's equivalent, but cheaper to check for bitwise & 1
     let modValue = cursorCol & 1;
     let pixelCol = (cursorCol - modValue)*8;  // 8 as that is the number of cols of one char
 
