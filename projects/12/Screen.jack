@@ -12,11 +12,11 @@
 class Screen {
   static Array twoToThe;
   static Array screenMap;
-  static bool color;
+  static boolean color;
 
   /** Initialize the Screen. */
   function void init() {
-    let color = 0;
+    let color = true;
     let screenMap = 16384;
 
     // We use the same trick as in the Math class
@@ -51,7 +51,7 @@ class Screen {
     // 24575 - 16384 = 8191
     // Since we want to include the last address, we get
     while(address < 8192){
-      screenMap[address] = 0;
+      let screenMap[address] = 0;
       let address = address + 1;
     }
     return;
@@ -96,6 +96,7 @@ class Screen {
       // turn off, and check if both bits are 1 to turn them on
       let screenMap[address] = screenMap[address] & (~bitValue);
     }
+    return;
   }
 
   /**
@@ -109,6 +110,176 @@ class Screen {
    * \param y2 The end row of the line
    */
   function void drawLine(int x1, int y1, int x2, int y2) {
+    var int a;
+    var int b;
+    var int diff;  // diff = a*dy - b*dx
+    var int address;  // For drawing horizontal lines
+
+    var int xStart;
+    var int xEnd;
+    var int yStart;
+    var int yEnd;
+
+    var int dx;
+    var int dy;
+    var int dxP1;
+    var int dyP1;
+
+    var int curX;
+    var int curY;
+
+    var boolean goUp;
+
+    let a = 0;
+    let b = 0;
+    let diff = 0;
+
+    // Determine start and end points
+    if (x1<x2){
+      let xStart = x1;
+      let xEnd = x2;
+    } else{
+      let xStart = x2;
+      let xEnd = x1;
+    }
+    if(y1<y2){
+      let yStart = y1;
+      let yEnd = y2;
+    } else{
+      let yStart = y2;
+      let yEnd = y1;
+    }
+
+    // Figure out dx and dy
+    let dx = xStart - xEnd;
+    let dy = yStart - yEnd;
+    // Plus 1 as we are checking for <=
+    let dxP1 = dx + 1;
+    let dyP1 = dy + 1;
+
+    // Special case for drawing straight vertical line
+    // (No way to speed this up as the addresses is not contiguous in RAM)
+    if(x1=x2){
+      let curY = yStart + b;
+      while(curY < yEnd){
+        do Screen.drawPixel(xStart, curY);
+        let curY = curY+1;
+      }
+      return;
+    }
+
+    // Special case for drawing straight horizontal line
+    if(y1=y2){
+      // FIXME: YOU ARE HERE: Need to swap startBit and endBit due to endianness?
+      let address = (32*y1) + (xStart/16);
+      // Set the RAM addresses in one go
+      let startAddress = address;
+      let endAddress = (32*y1) + (xEnd/16);
+      // Special case for first word
+      // Find start bit
+      let startBit = xStart & 15;
+      let curBit = startBit;
+      let value = 0
+      // Find end bit
+      if (startAddress = endAddress){
+        // Only one address is used
+        let endBit = xEnd & 15;
+      } else {
+        // The line spans several addresses, so the rest of the word is used
+        let endBit = 0;
+      }
+
+      // NOTE: Due to hack being little-endian we count down to the lowest bit
+      while(curBit > endBit){
+        let value = value + twoToThe[curBit]
+        let curBit = curBit - 1;
+      }
+
+
+
+      let endBit = endAddress & 15;
+      let curBit = startBit;
+      while(curBit<endBit){
+        let value = value + twoToThe[curBit];
+        let curBit = curBit + 1;
+      }
+      // Take care of the endianness by inverting the value
+      let value = ~value;
+      if(color){
+        let screenMap[address] = screenMap[address] | value;
+      }
+      else{
+        let screenMap[address] = screenMap[address] & (~value);
+      }
+
+      let address = address + 1;
+      // Treatment of the in-between words
+      while(address < (endAddress - 1)){
+        // color = true - all ones
+        // color = false - all zeros
+        let screenMap[address] = color;
+        let address = address + 1;
+      }
+      // Special case for last word
+      if (~(address = endAddress)){
+        // FIXME:
+      }
+      return;
+    } else {
+      // Deciding whether we will go up or down
+      // NOTE: The screen starts with (0, 0) in the top left corner
+      if (y1<y2){
+        let goUp = false;
+      } else{
+        let goUp = true;
+      }
+    }
+
+    if (goUp){
+      let curX = xStart + a;
+      let curY = yStart + b;
+      while ((a<dxP1) & (b<dyP1)){
+        do Screen.drawPixel(curX, curY);
+        // Decide if to go right or up
+        if(diff < 0){
+          // Go right
+          let a = a + 1;
+          let curX = curX + 1;
+          let diff = diff + dy;
+        }
+        else {
+          // Go up
+          let b = b + 1;
+          let curY = curY + 1;
+          let diff = diff - dx;
+        }
+      }
+    } else {
+      // We are now moving either to the right or down
+      // If we let b increase as we go down we get the following:
+      // If (b/a)>(dy/dx) => go down
+      // diff < 0         => go down
+      let curX = xStart + a;
+      let curY = yStart + b;
+      while ((a<dxP1) & (b<dyP1)){
+        do Screen.drawPixel(curX, curY);
+        // Decide if to go right or down
+        if(diff < 0){
+          // Go down
+          let b = b + 1;
+          // NOTE: We must decrease y
+          let curY = curY - 1;
+          let diff = diff - dx;
+        }
+        else {
+          // Go right
+          let a = a + 1;
+          let curX = curX + 1;
+          let diff = diff + dy;
+        }
+      }
+    }
+    return;
   }
 
   /**
@@ -123,6 +294,44 @@ class Screen {
    * \param y2 The end row of the rectangle
    */
   function void drawRectangle(int x1, int y1, int x2, int y2) {
+    // Strategy: Draw straight horizontal lines
+    var int xStart;
+    var int xEnd;
+    var int yStart;
+    var int yEnd;
+    var int curX;
+    var int curY;
+
+    if (x1<x2){
+      let xStart = x1;
+      let xEnd = x2;
+    } else{
+      let xStart = x2;
+      let xEnd = x1;
+    }
+
+    if(y1<y2){
+      let yStart = y1;
+      let yEnd = y2;
+    } else{
+      let yStart = y2;
+      let yEnd = y1;
+    }
+
+    let curX = xStart;
+    let curY = yStart;
+
+    // Draw rectangle without calling drawLine
+    while(curY < yEnd){
+      while(curX < xEnd){
+        do Screen.drawPixel(curX, curY);
+        let curX = curX + 1;
+      }
+      let curY = curY + 1;
+      let curX = xStart;
+    }
+
+    return;
   }
 
   /**
@@ -135,5 +344,39 @@ class Screen {
    * \param r The radius of the circle
    */
   function void drawCircle(int x, int y, int r) {
+    var int curY;
+    var int curX;
+    var int xStart;
+    var int xEnd;
+    var int rSquare;
+    var int length;
+
+    var int dy;
+
+    if (r<181){
+      let r = 181;
+    }
+
+    // NOTE: No handling of out of range
+    let dy = -r;
+    let rSquare = r*r;
+
+    while(dy < r){
+      let dy = dy + 1;
+      let length = Math.sqrt(rSquare - (dy*dy));
+      let xStart = x - length;
+      let xEnd = x + length;
+
+      let curY = y + dy;
+      let curX = xStart;
+
+      // Draw a line without calling drawLine
+      while(curX < xEnd){
+        do Screen.drawPixel(curX, curY);
+        let curX = curX + 1;
+      }
+    }
+
+    return;
   }
 }
