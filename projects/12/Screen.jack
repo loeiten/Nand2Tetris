@@ -127,13 +127,13 @@ class Screen {
     var int curX;
     var int curY;
 
-    var boolean goUp;
+    var boolean NWToSE;
 
     let a = 0;
     let b = 0;
     let diff = 0;
 
-    // Determine start and end points
+    // Determine start and end points of x
     if (x1<x2){
       let xStart = x1;
       let xEnd = x2;
@@ -141,6 +141,14 @@ class Screen {
       let xStart = x2;
       let xEnd = x1;
     }
+
+    // Special case for drawing straight horizontal line
+    if(y1=y2){
+      do Screen.drawHorizontalLine(xStart, xEnd, y1);
+      return;
+    }
+
+    // Determine start and end points of y
     if(y1<y2){
       let yStart = y1;
       let yEnd = y2;
@@ -151,7 +159,7 @@ class Screen {
 
     // Figure out dx and dy
     let dx = xStart - xEnd;
-    let dy = yStart - yEnd;
+    let dy = y1 - y2;  // NOTE: dy can be negative
     // Plus 1 as we are checking for <=
     let dxP1 = dx + 1;
     let dyP1 = dy + 1;
@@ -167,25 +175,44 @@ class Screen {
       return;
     }
 
-    // Special case for drawing straight horizontal line
-    if(y1=y2){
-      do Screen.drawHorizontalLine(xStart, xEnd, y);
-    } else {
-      // Deciding whether we will go up or down
-      // NOTE: The screen starts with (0, 0) in the top left corner
-      if (y1<y2){
-        let goUp = false;
-      } else{
-        let goUp = true;
-      }
+    // When drawing non-straight lines we will have two cases (instead of 4 as we will always have xStart < xEnd)
+    // We will have the following:
+    // - The screen starts with (0, 0) in the top left corner
+    //   - This means that the coordinate is flipped horizontally as compared to a normal coordinate system
+    // - y is increasing downwards
+    // - dy is the end-point of y
+    // - x and a is increasing to the right
+    // - dx is the end-point of x
+    // - dy/dx and b/a will be the gradients
+    // - In the case where we start from NW and move towards SE
+    //     - yStart will be close to y=0 and we will move towards dy
+    //     - b is starting on 0 and increase with increasing y
+    //     - The gradient will be POSITIVE (as we have flipped the coordinate system)
+    // - In the case where we start from SW and move towards NE
+    //     - yStart will be close to dy, and we will move towards y=0
+    //     - b is starting on 0 and decrease with decreasing y
+    //     - The gradient will be NEGATIVE (as we have flipped the coordinate system)
+    // - In both cases:
+    //     - If b/a is steeper than dy/dx we will move towards the right
+    //         - We will check whether (b/a) > (dy/dx), which is the same as (a*dy) < (b*dx), which is the same as diff = (a*dy) - (b*dx) < 0
+    //         - As the gradients are positive in the NW -> SE case this means
+    //             - If the condition is true: We should move right and increase a (diff increase with dy)
+    //             - If the condition is false: We should move down (i.e. increase y) and increase b (diff DECREASE with dx)
+    //         - As the gradients are negative in the SW -> NE case this means
+    //             - If the condition is true, we should move up (i.e. decrease y) and decrease b (diff INCREASE by dx)
+    //             - If the condition is false, we should move right and increase a (diff increase by dy)
+    if (y1<y2){
+      let NWToSE = true;
+    } else{
+      let NWToSE = false;
     }
 
-    if (goUp){
-      let curX = xStart + a;
-      let curY = yStart + b;
+    let curX = xStart + a;
+    let curY = yStart + b;
+
+    if (NWToSE){
       while ((a<dxP1) & (b<dyP1)){
         do Screen.drawPixel(curX, curY);
-        // Decide if to go right or up
         if(diff < 0){
           // Go right
           let a = a + 1;
@@ -193,28 +220,20 @@ class Screen {
           let diff = diff + dy;
         }
         else {
-          // Go up
+          // Go down
           let b = b + 1;
           let curY = curY + 1;
           let diff = diff - dx;
         }
       }
     } else {
-      // We are now moving either to the right or down
-      // If we let b increase as we go down we get the following:
-      // If (b/a)>(dy/dx) => go down
-      // diff < 0         => go down
-      let curX = xStart + a;
-      let curY = yStart + b;
       while ((a<dxP1) & (b<dyP1)){
         do Screen.drawPixel(curX, curY);
-        // Decide if to go right or down
         if(diff < 0){
-          // Go down
-          let b = b + 1;
-          // NOTE: We must decrease y
+          // Go up
+          let b = b - 1;
           let curY = curY - 1;
-          let diff = diff - dx;
+          let diff = diff + dx;
         }
         else {
           // Go right
@@ -240,69 +259,119 @@ class Screen {
     var int startAddress;
     var int endAddress;
 
+    var int startBit;
+    var int endBit;
+    var int curBit;
+
+    var int bitValue;
+
     // Set the start and end address
     // | startAddress | startAddress + 1 | ... | endAddress |
     let startAddress = (32*y) + (xStart/16);
     let endAddress = (32*y) + (xEnd/16);
+    let address = startAddress;
 
     // We can now have three cases
     // Recall that Hack is little-endianness
+    // You would normally write a binary digit the mirrored way i.e.
+    // 2**15 + 2**14 + ... + 2**0
+
     // Case 1:
     //     startAddress     startAddress + 1   ...      endAddress
-    // | 15 14 13 ... 1 0 | 15 14 13 ... 1 0 | ... | 15 14 13 ... 1 0 |
-    //          ^                                                 ^
-    //       startBit                                           endBit
+    // | 0 1 ... 13 14 15 | 0 1 ... 13 14 15 | ... | 0 1 ... 13 14 15 |
+    //            ^                                    ^
+    //         startBit                              endBit
 
-    // FIXME: YOU ARE HERE: Need to swap startBit and endBit due to endianness?
-    // Set the RAM addresses in one go
-    // Special case for first word
-    // Find start bit
+    // Case 2:
+    //     startAddress        endAddress
+    // | 0 1 ... 13 14 15 | 0 1 ... 13 14 15 |
+    //            ^           ^
+    //         startBit     endBit
+
+    // Case 3:
+    // startAddress = endAddress
+    // | 0 1 2 ... 12 13 14 15 |
+    //     ^           ^
+    //  startBit     endBit
+
     let startBit = xStart & 15;
+    let endBit = xEnd & 15;
     let curBit = startBit;
-    let value = 0
-    // Find end bit
+    let bitValue = 0;
+
+    // We handle case 3 separately
     if (startAddress = endAddress){
-      // Only one address is used
-      let endBit = xEnd & 15;
-    } else {
-      // The line spans several addresses, so the rest of the word is used
-      let endBit = 0;
+      // +1 as we want to include the endBit
+      while(curBit < (endBit+1)){
+        let bitValue = bitValue + twoToThe[curBit];
+        let curBit = curBit + 1;
+      }
+      // Instead of using peek and poke, we can set the memory directly
+      if (color){
+        // The color is black (i.e. 1), so we can check if any of the bits are 1
+        let screenMap[address] = screenMap[address] | bitValue;
+      }
+      else {
+        // The color is white (i.e. 0)
+        // We only want white on the bit we selected, no-one else
+        // To do this we can invert the bit, so that it's only 0 at the value we want to
+        // turn off, and check if both bits are 1 to turn them on
+        let screenMap[address] = screenMap[address] & (~bitValue);
+      }
     }
+    else {
+      // Handle case 1 and 2 at the same time
+      // In both cases we set the rest of the bits of startAddress to the desired value
+      while(curBit < 16){
+        let bitValue = bitValue + twoToThe[curBit];
+        let curBit = curBit + 1;
+      }
+      // Instead of using peek and poke, we can set the memory directly
+      if (color){
+        // The color is black (i.e. 1), so we can check if any of the bits are 1
+        let screenMap[address] = screenMap[address] | bitValue;
+      }
+      else {
+        // The color is white (i.e. 0)
+        // We only want white on the bit we selected, no-one else
+        // To do this we can invert the bit, so that it's only 0 at the value we want to
+        // turn off, and check if both bits are 1 to turn them on
+        let screenMap[address] = screenMap[address] & (~bitValue);
+      }
 
-    // NOTE: Due to hack being little-endian we count down to the lowest bit
-    while(curBit > endBit){
-      let value = value + twoToThe[curBit]
-      let curBit = curBit - 1;
-    }
-
-
-
-    let endBit = endAddress & 15;
-    let curBit = startBit;
-    while(curBit<endBit){
-      let value = value + twoToThe[curBit];
-      let curBit = curBit + 1;
-    }
-    // Take care of the endianness by inverting the value
-    let value = ~value;
-    if(color){
-      let screenMap[address] = screenMap[address] | value;
-    }
-    else{
-      let screenMap[address] = screenMap[address] & (~value);
-    }
-
-    let address = address + 1;
-    // Treatment of the in-between words
-    while(address < (endAddress - 1)){
-      // color = true - all ones
-      // color = false - all zeros
-      let screenMap[address] = color;
+      // Handle the middle
       let address = address + 1;
-    }
-    // Special case for last word
-    if (~(address = endAddress)){
-      // FIXME:
+      if (color){
+        let bitValue = -1;  // true
+      }
+      else {
+        let bitValue = 0;  // false
+      }
+      // NOTE: This does not include treatment of the endAddress
+      while(address < endAddress){
+        let screenMap[address] = bitValue;
+        let address = address + 1;
+      }
+      // Handle the end
+      let bitValue = 0;
+      let curBit = endBit;
+      while(curBit > (-1)){
+        let bitValue = bitValue + twoToThe[curBit];
+        let curBit = curBit - 1;
+      }
+
+      // Instead of using peek and poke, we can set the memory directly
+      if (color){
+        // The color is black (i.e. 1), so we can check if any of the bits are 1
+        let screenMap[address] = screenMap[address] | bitValue;
+      }
+      else {
+        // The color is white (i.e. 0)
+        // We only want white on the bit we selected, no-one else
+        // To do this we can invert the bit, so that it's only 0 at the value we want to
+        // turn off, and check if both bits are 1 to turn them on
+        let screenMap[address] = screenMap[address] & (~bitValue);
+      }
     }
     return;
   }
@@ -324,7 +393,6 @@ class Screen {
     var int xEnd;
     var int yStart;
     var int yEnd;
-    var int curX;
     var int curY;
 
     if (x1<x2){
@@ -343,17 +411,12 @@ class Screen {
       let yEnd = y1;
     }
 
-    let curX = xStart;
     let curY = yStart;
 
-    // Draw rectangle without calling drawLine
+    // Draw several straight lines
     while(curY < yEnd){
-      while(curX < xEnd){
-        do Screen.drawPixel(curX, curY);
-        let curX = curX + 1;
-      }
+      do Screen.drawHorizontalLine(xStart, xEnd, curY);
       let curY = curY + 1;
-      let curX = xStart;
     }
 
     return;
@@ -370,7 +433,6 @@ class Screen {
    */
   function void drawCircle(int x, int y, int r) {
     var int curY;
-    var int curX;
     var int xStart;
     var int xEnd;
     var int rSquare;
@@ -378,7 +440,7 @@ class Screen {
 
     var int dy;
 
-    if (r<181){
+    if (r>181){
       let r = 181;
     }
 
@@ -387,19 +449,15 @@ class Screen {
     let rSquare = r*r;
 
     while(dy < r){
-      let dy = dy + 1;
       let length = Math.sqrt(rSquare - (dy*dy));
       let xStart = x - length;
       let xEnd = x + length;
 
       let curY = y + dy;
-      let curX = xStart;
 
-      // Draw a line without calling drawLine
-      while(curX < xEnd){
-        do Screen.drawPixel(curX, curY);
-        let curX = curX + 1;
-      }
+      do Screen.drawHorizontalLine(xStart, xEnd, curY);
+
+      let dy = dy + 1;
     }
 
     return;
