@@ -113,7 +113,6 @@ class Screen {
     var int a;
     var int b;
     var int diff;  // diff = a*dy - b*dx
-    var int address;  // For drawing horizontal lines
 
     var int xStart;
     var int xEnd;
@@ -170,61 +169,7 @@ class Screen {
 
     // Special case for drawing straight horizontal line
     if(y1=y2){
-      // FIXME: YOU ARE HERE: Need to swap startBit and endBit due to endianness?
-      let address = (32*y1) + (xStart/16);
-      // Set the RAM addresses in one go
-      let startAddress = address;
-      let endAddress = (32*y1) + (xEnd/16);
-      // Special case for first word
-      // Find start bit
-      let startBit = xStart & 15;
-      let curBit = startBit;
-      let value = 0
-      // Find end bit
-      if (startAddress = endAddress){
-        // Only one address is used
-        let endBit = xEnd & 15;
-      } else {
-        // The line spans several addresses, so the rest of the word is used
-        let endBit = 0;
-      }
-
-      // NOTE: Due to hack being little-endian we count down to the lowest bit
-      while(curBit > endBit){
-        let value = value + twoToThe[curBit]
-        let curBit = curBit - 1;
-      }
-
-
-
-      let endBit = endAddress & 15;
-      let curBit = startBit;
-      while(curBit<endBit){
-        let value = value + twoToThe[curBit];
-        let curBit = curBit + 1;
-      }
-      // Take care of the endianness by inverting the value
-      let value = ~value;
-      if(color){
-        let screenMap[address] = screenMap[address] | value;
-      }
-      else{
-        let screenMap[address] = screenMap[address] & (~value);
-      }
-
-      let address = address + 1;
-      // Treatment of the in-between words
-      while(address < (endAddress - 1)){
-        // color = true - all ones
-        // color = false - all zeros
-        let screenMap[address] = color;
-        let address = address + 1;
-      }
-      // Special case for last word
-      if (~(address = endAddress)){
-        // FIXME:
-      }
-      return;
+      do Screen.drawHorizontalLine(xStart, xEnd, y);
     } else {
       // Deciding whether we will go up or down
       // NOTE: The screen starts with (0, 0) in the top left corner
@@ -278,6 +223,86 @@ class Screen {
           let diff = diff + dy;
         }
       }
+    }
+    return;
+  }
+
+
+  /**
+   * Draw a horizontal line.
+   *
+   * \param xStart The start of the line
+   * \param xEnd The end of the line
+   * \param y The y-coordinate
+   */
+  function void drawHorizontalLine(int xStart, int xEnd, int y){
+    var int address;
+    var int startAddress;
+    var int endAddress;
+
+    // Set the start and end address
+    // | startAddress | startAddress + 1 | ... | endAddress |
+    let startAddress = (32*y) + (xStart/16);
+    let endAddress = (32*y) + (xEnd/16);
+
+    // We can now have three cases
+    // Recall that Hack is little-endianness
+    // Case 1:
+    //     startAddress     startAddress + 1   ...      endAddress
+    // | 15 14 13 ... 1 0 | 15 14 13 ... 1 0 | ... | 15 14 13 ... 1 0 |
+    //          ^                                                 ^
+    //       startBit                                           endBit
+
+    // FIXME: YOU ARE HERE: Need to swap startBit and endBit due to endianness?
+    // Set the RAM addresses in one go
+    // Special case for first word
+    // Find start bit
+    let startBit = xStart & 15;
+    let curBit = startBit;
+    let value = 0
+    // Find end bit
+    if (startAddress = endAddress){
+      // Only one address is used
+      let endBit = xEnd & 15;
+    } else {
+      // The line spans several addresses, so the rest of the word is used
+      let endBit = 0;
+    }
+
+    // NOTE: Due to hack being little-endian we count down to the lowest bit
+    while(curBit > endBit){
+      let value = value + twoToThe[curBit]
+      let curBit = curBit - 1;
+    }
+
+
+
+    let endBit = endAddress & 15;
+    let curBit = startBit;
+    while(curBit<endBit){
+      let value = value + twoToThe[curBit];
+      let curBit = curBit + 1;
+    }
+    // Take care of the endianness by inverting the value
+    let value = ~value;
+    if(color){
+      let screenMap[address] = screenMap[address] | value;
+    }
+    else{
+      let screenMap[address] = screenMap[address] & (~value);
+    }
+
+    let address = address + 1;
+    // Treatment of the in-between words
+    while(address < (endAddress - 1)){
+      // color = true - all ones
+      // color = false - all zeros
+      let screenMap[address] = color;
+      let address = address + 1;
+    }
+    // Special case for last word
+    if (~(address = endAddress)){
+      // FIXME:
     }
     return;
   }
