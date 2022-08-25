@@ -127,7 +127,7 @@ class Screen {
     var int curX;
     var int curY;
 
-    var boolean NWToSE;
+    var boolean draNWToSE;
 
     let a = 0;
     let b = 0;
@@ -157,13 +157,6 @@ class Screen {
       let yEnd = y1;
     }
 
-    // Figure out dx and dy
-    let dx = xStart - xEnd;
-    let dy = y1 - y2;  // NOTE: dy can be negative
-    // Plus 1 as we are checking for <=
-    let dxP1 = dx + 1;
-    let dyP1 = dy + 1;
-
     // Special case for drawing straight vertical line
     // (No way to speed this up as the addresses is not contiguous in RAM)
     if(x1=x2){
@@ -174,6 +167,13 @@ class Screen {
       }
       return;
     }
+
+    // Figure out dx and dy
+    let dx = xEnd - xStart;
+    let dy = y2 - y1;  // NOTE: dy can be negative
+    // Plus 1 as we are checking for <=
+    let dxP1 = dx + 1;
+    let dyP1 = dy + 1;
 
     // When drawing non-straight lines we will have two cases (instead of 4 as we will always have xStart < xEnd)
     // We will have the following:
@@ -201,16 +201,65 @@ class Screen {
     //         - As the gradients are negative in the SW -> NE case this means
     //             - If the condition is true, we should move up (i.e. decrease y) and decrease b (diff INCREASE by dx)
     //             - If the condition is false, we should move right and increase a (diff increase by dy)
-    if (y1<y2){
-      let NWToSE = true;
-    } else{
-      let NWToSE = false;
+    let curX = xStart;
+
+    if ((y1<y2) & (x1<x2)){
+      // Direction is NW to SE
+      let draNWToSE = true;
+      let curY = y1;
+    }
+    if ((y1>y2) & (x1>x2)){
+      // Direction is SE to NW
+      let draNWToSE = true;
+      let dy = -dy;
+      let dyP1 = -dyP1 + 2;
+      let curY = y2;
+    }
+    if ((y1>y2) & (x1<x2)){
+      // Direction is SW to NE
+      let draNWToSE = false;
+      let curX = xStart;
+      let curY = y1;
+    }
+    if ((y1<y2) & (x1>x2)){
+      // Direction is NE to SW
+      let draNWToSE = false;
+      let curY = y2;
+      let dy = -dy;
+      let dyP1 = -dyP1;
     }
 
-    let curX = xStart + a;
-    let curY = yStart + b;
+    // FIXME:
+    // do Output.println();
+    // do Output.printString("draNWToSE: ");
+    // do Output.printInt(draNWToSE);
+    // do Output.println();
+    // do Output.printString("curX: ");
+    // do Output.printInt(curX);
+    // do Output.println();
+    // do Output.printString("x1: ");
+    // do Output.printInt(x1);
+    // do Output.println();
+    // do Output.printString("x2: ");
+    // do Output.printInt(x2);
+    // do Output.println();
+    // do Output.printString("dx: ");
+    // do Output.printInt(dx);
+    // do Output.println();
+    // do Output.printString("curY: ");
+    // do Output.printInt(curY);
+    // do Output.println();
+    // do Output.printString("y1: ");
+    // do Output.printInt(y1);
+    // do Output.println();
+    // do Output.printString("y2: ");
+    // do Output.printInt(y2);
+    // do Output.println();
+    // do Output.printString("dy: ");
+    // do Output.printInt(dy);
+    // do Output.println();
 
-    if (NWToSE){
+    if (draNWToSE){
       while ((a<dxP1) & (b<dyP1)){
         do Screen.drawPixel(curX, curY);
         if(diff < 0){
@@ -227,7 +276,7 @@ class Screen {
         }
       }
     } else {
-      while ((a<dxP1) & (b<dyP1)){
+      while ((a<dxP1) & ~(b<dy)){
         do Screen.drawPixel(curX, curY);
         if(diff < 0){
           // Go up
@@ -414,7 +463,8 @@ class Screen {
     let curY = yStart;
 
     // Draw several straight lines
-    while(curY < yEnd){
+    // Plus one as we want to include yEnd
+    while(curY < (yEnd+1)){
       do Screen.drawHorizontalLine(xStart, xEnd, curY);
       let curY = curY + 1;
     }
@@ -448,7 +498,8 @@ class Screen {
     let dy = -r;
     let rSquare = r*r;
 
-    while(dy < r){
+    // +1 as we want to include r
+    while(dy < (r+1)){
       let length = Math.sqrt(rSquare - (dy*dy));
       let xStart = x - length;
       let xEnd = x + length;

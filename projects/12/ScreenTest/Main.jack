@@ -10,22 +10,6 @@ class Main {
     function void main() {
 
         do Screen.drawLine(0,220,511,220);        // base line
-        // FIXME:
-        // do Screen.drawPixel(0,221);        // base line
-        // do Screen.drawPixel(1,219);        // base line
-
-        // do Screen.drawLine(5,222,13,222);        // base line
-        // do Screen.drawLine(5,223,14,223);        // base line
-        // do Screen.drawLine(5,224,15,224);        // base line
-        // do Screen.drawLine(5,225,16,225);        // base line
-
-        // // do Screen.drawLine(5,225,23,225);        // base line
-        // // do Screen.drawLine(5,226,22,226);        // base line
-        // do Screen.drawLine(5,230,17,230);        // base line
-        // do Screen.drawLine(5,231,16,231);        // base line
-        // do Screen.drawLine(5,232,15,232);        // base line
-        // do Screen.drawLine(5,233,14,233);        // base line
-
         do Screen.drawRectangle(280,90,410,220);  // house
 
         do Screen.setColor(false);
@@ -37,15 +21,15 @@ class Main {
         do Screen.drawLine(280,90,345,35);        // roof
         do Screen.drawLine(345,35,410,90);        // roof
 
-        // do Screen.drawCircle(140,60,30);          // sun
-        // do Screen.drawLine(140,26, 140, 6);
-        // do Screen.drawLine(163,35,178,20);
-        // do Screen.drawLine(174,60,194,60);
-        // do Screen.drawLine(163,85,178,100);
-        // do Screen.drawLine(140,94,140,114);
-        // do Screen.drawLine(117,85,102,100);
-        // do Screen.drawLine(106,60,86,60);
-        // do Screen.drawLine(117,35,102,20);
+        do Screen.drawCircle(140,60,30);          // sun
+        do Screen.drawLine(140,26, 140, 6);
+        do Screen.drawLine(163,35,178,20);
+        do Screen.drawLine(174,60,194,60);
+        do Screen.drawLine(163,85,178,100);
+        do Screen.drawLine(140,94,140,114);
+        do Screen.drawLine(117,85,102,100);
+        do Screen.drawLine(106,60,86,60);
+        do Screen.drawLine(117,35,102,20);
 
         return;
     }

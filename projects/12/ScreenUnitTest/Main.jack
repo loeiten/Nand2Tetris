@@ -1,0 +1,63 @@
+/** Unittest program for the OS Screen class. */
+class Main {
+
+    /** Draws basic lines and shapes. */
+    function void main() {
+        // Draw pixels
+        do Screen.drawPixel(0,0);
+        do Screen.drawPixel(1,1);
+
+        // Draw lines spanning one memory block
+        do Screen.drawLine(5,2,13,2);
+        do Screen.drawLine(5,3,14,3);
+        do Screen.drawLine(5,4,15,4);
+        do Screen.drawLine(5,5,16,5);
+
+        // Draw lines spanning several memory blocks
+        do Screen.drawLine(5,7,34,7);
+        do Screen.drawLine(5,8,33,8);
+        do Screen.drawLine(5,9,32,9);
+        do Screen.drawLine(5,10,31,10);
+
+        // Draw lines spanning two memory blocks
+        do Screen.drawLine(5,12,17,12);
+        do Screen.drawLine(5,13,16,13);
+        do Screen.drawLine(5,14,15,14);
+        do Screen.drawLine(5,15,14,15);
+
+        // Draw precision single lines
+        do Screen.drawLine(0,16,0,16); // Single dot
+        do Screen.drawLine(0,17,1,17); // Two dots
+
+        // Draw vertical lines
+        do Screen.drawLine(36,0,36,15);
+        do Screen.drawLine(37,1,37,14);
+        do Screen.drawLine(38,2,38,13);
+
+        // Draw NW to SE
+        do Screen.drawLine(40,0,45,5);
+        // Draw SW to NE
+        do Screen.drawLine(45,5,50,0);
+        // Draw NE to SW
+        do Screen.drawLine(55,0,50,5);
+        // Draw SE to NW
+        do Screen.drawLine(60,5,55,0);
+
+        // Precision drawing of the above
+        do Screen.drawLine(60,0,61,1);  // NW->SE
+        do Screen.drawLine(64,1,63,0);  // SE->NW
+        do Screen.drawLine(67,0,66,1);  // SE->NW
+        do Screen.drawLine(69,1,70,0);  // SE->NW
+
+        // Draw rectangle
+        do Screen.drawRectangle(0, 20, 0, 20); // Single dot
+        do Screen.drawRectangle(0, 22, 1, 23); // Four dots
+
+        // Draw circle
+        do Screen.drawCircle(5, 20, 0); // Single dot
+        do Screen.drawCircle(8, 20, 1); // Cross
+        do Screen.drawCircle(14, 20, 2); // Cross
+
+        return;
+    }
+}
