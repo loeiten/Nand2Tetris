@@ -211,9 +211,10 @@ class Screen {
     if ((y1>y2) & (x1>x2)){
       // Direction is SE to NW
       let draNWToSE = true;
+      let curY = y2;
+      // Fix gradient to be aligned with the expectation of draNWToSE = true
       let dy = -dy;
       let dyP1 = -dyP1 + 2;
-      let curY = y2;
     }
     if ((y1>y2) & (x1<x2)){
       // Direction is SW to NE
@@ -225,39 +226,10 @@ class Screen {
       // Direction is NE to SW
       let draNWToSE = false;
       let curY = y2;
+      // Fix gradient to be aligned with the expectation of draNWToSE = false
       let dy = -dy;
       let dyP1 = -dyP1;
     }
-
-    // FIXME:
-    // do Output.println();
-    // do Output.printString("draNWToSE: ");
-    // do Output.printInt(draNWToSE);
-    // do Output.println();
-    // do Output.printString("curX: ");
-    // do Output.printInt(curX);
-    // do Output.println();
-    // do Output.printString("x1: ");
-    // do Output.printInt(x1);
-    // do Output.println();
-    // do Output.printString("x2: ");
-    // do Output.printInt(x2);
-    // do Output.println();
-    // do Output.printString("dx: ");
-    // do Output.printInt(dx);
-    // do Output.println();
-    // do Output.printString("curY: ");
-    // do Output.printInt(curY);
-    // do Output.println();
-    // do Output.printString("y1: ");
-    // do Output.printInt(y1);
-    // do Output.println();
-    // do Output.printString("y2: ");
-    // do Output.printInt(y2);
-    // do Output.println();
-    // do Output.printString("dy: ");
-    // do Output.printInt(dy);
-    // do Output.println();
 
     if (draNWToSE){
       while ((a<dxP1) & (b<dyP1)){
