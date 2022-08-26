@@ -82,8 +82,10 @@ class String {
 
   /** Erase the last character from this string. */
   method void eraseLastChar() {
-    let str[length] = 0;
-    let length = length - 1;
+    if (length > 0){
+      let str[length] = 0;
+      let length = length - 1;
+    }
     return;
   }
 

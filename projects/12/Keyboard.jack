@@ -8,55 +8,118 @@
  */
 class Keyboard {
 
-    /** Initializes the keyboard. */
-    function void init() {
+  static Array screenMap;
+
+  /** Initialize the keyboard. */
+  function void init() {
+    let screenMap = 24576;
+    return;
+  }
+
+  /**
+   * Return the character of the currently pressed key on the keyboard.
+   *
+   * If no key is currently pressed, returns 0.
+   *
+   * Recognizes all ASCII characters, as well as the following keys:
+   * new line = 128 = String.newline()
+   * backspace = 129 = String.backspace()
+   * left arrow = 130
+   * up arrow = 131
+   * right arrow = 132
+   * down arrow = 133
+   * home = 134
+   * End = 135
+   * page up = 136
+   * page down = 137
+   * insert = 138
+   * delete = 139
+   * ESC = 140
+   * F1 - F12 = 141 - 152
+   */
+  function char keyPressed() {
+    // The keyboard writes directly to this memory address
+    return screenMap[0];
+  }
+
+  /**
+   * Read a character.
+   *
+   * This function will:
+   * - Wait until a key is pressed on the keyboard and released
+   * - Echo the key to the screen
+   * - Return the character of the pressed key.
+   */
+  function char readChar() {
+    var char key;
+    var char result;
+
+    while (key = 0) {
+      let key = Keyboard.keyPressed();
+    }
+    let result = key;
+    while (~(key = 0)) {
+        let key = Keyboard.keyPressed();
     }
 
-    /**
-     * Returns the character of the currently pressed key on the keyboard;
-     * if no key is currently pressed, returns 0.
-     *
-     * Recognizes all ASCII characters, as well as the following keys:
-     * new line = 128 = String.newline()
-     * backspace = 129 = String.backspace()
-     * left arrow = 130
-     * up arrow = 131
-     * right arrow = 132
-     * down arrow = 133
-     * home = 134
-     * End = 135
-     * page up = 136
-     * page down = 137
-     * insert = 138
-     * delete = 139
-     * ESC = 140
-     * F1 - F12 = 141 - 152
-     */
-    function char keyPressed() {
+    do Output.printChar(result);
+    return result;
+  }
+
+  /**
+   * Read a line.
+   *
+   * This function will:
+   * - Display the input message
+   * - Read from the keyboard the entered text until a newline character is detected
+   * - Echo the text to the screen
+   * - Returns its value
+   * - Handle any backspaces
+   *
+   * \param message Message to display
+   */
+  function String readLine(String message) {
+    var String result;
+    var char character;
+
+    let result = String.new(64);  // Limiting the max capturing to one line
+
+    do Output.printString(message);
+
+    let character = Keyboard.readChar();
+    while (~(character=128)){
+      // Backspace is hit
+      if (character=129){
+        do result.eraseLastChar();
+      }
+      else {
+        do result.appendChar(character);
+      }
+      let character = Keyboard.readChar();
     }
 
-    /**
-     * Waits until a key is pressed on the keyboard and released,
-     * then echoes the key to the screen, and returns the character
-     * of the pressed key.
-     */
-    function char readChar() {
-    }
+    return result;
+  }
 
-    /**
-     * Displays the message on the screen, reads from the keyboard the entered
-     * text until a newline character is detected, echoes the text to the screen,
-     * and returns its value. Also handles user backspaces.
-     */
-    function String readLine(String message) {
-    }
+  /**
+   * Read an integer.
+   *
+   * This function will:
+   * - Display the input message
+   * - Read from the keyboard the entered text until a newline character is detected
+   * - Echo the text to the screen
+   * - Return its integer value (until the first non-digit character in the entered text is detected)
+   * - Handle any backspaces
+   *
+   * \param message Message to display
+   */
+  function int readInt(String message) {
+    var String readString;
+    var int result;
 
-    /**
-     * Displays the message on the screen, reads from the keyboard the entered
-     * text until a newline character is detected, echoes the text to the screen,
-     * and returns its integer value (until the first non-digit character in the
-     * entered text is detected). Also handles user backspaces.
-     */
-    function int readInt(String message) {
-    }
+    let readString = Keyboard.readLine(message);
+    let result = readString.intValue();
+
+  return result;
+  }
 }
