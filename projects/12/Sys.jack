@@ -8,22 +8,59 @@
  */
 class Sys {
 
-    // FIXME: Update highlights
+  /** Perform all the initializations required by the OS. */
+  function void init() {
+    // NOTE: The order is not arbitrary
+    do Memory.init();
+    // NOTE: Array doesn't have an init function
+    do Math.init();
 
-    /** Performs all the initializations required by the OS. */
-    function void init() {
+    // NOTE: String doesn't have an init function
+    do Output.init();
+    do Screen.init();
+    do Keyboard.init();
+
+    do Main.main();
+
+    do Sys.halt();
+    return;
+  }
+
+  /** Halt the program execution. */
+  function void halt() {
+    while(true){}
+    return;
+  }
+
+  /**
+   * Wait approximately duration milliseconds and returns.
+   *
+   * \param duration Milliseconds to wait
+   */
+  function void wait(int duration) {
+    var int innerCounter;
+    var int outerCounter;
+
+    while(outerCounter < duration) {
+      let innerCounter = 0;
+      while(innerCounter < 100) {
+          let innerCounter = innerCounter + 1;
+      }
+      let outerCounter = outerCounter + 1;
     }
 
-    /** Halts the program execution. */
-    function void halt() {
-    }
+    return;
+  }
 
-    /** Waits approximately duration milliseconds and returns.  */
-    function void wait(int duration) {
-    }
-
-    /** Displays the given error code in the form "ERR<errorCode>",
-     *  and halts the program's execution. */
-    function void error(int errorCode) {
-    }
+  /**
+   * Display the given error code in the form "ERR<errorCode>", and halt the program's execution.
+   *
+   * \param errorCode The code to display
+   */
+  function void error(int errorCode) {
+    do Output.printString("ERR");
+    do Output.printInt(errorCode);
+    do Sys.halt();
+    return;
+  }
 }
