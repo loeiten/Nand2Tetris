@@ -288,6 +288,8 @@ class Screen {
 
     var int startMask;
     var int endMask;
+    var int startMask;
+    var int endMask;
     var int combinedMask;
 
     var int counter;
@@ -329,48 +331,71 @@ class Screen {
     // NOTE: We can fill all bits from a number by subtracting 1 from twoToThe
     let startMask = ~(twoToThe[startBit] - 1);
     let endMask = twoToThe[endBit + 1] - 1;
+    let combinedMask = startMask & endMask;
+    let address = startAddress;
 
-    while(counter < repeat){
-      let address = startAddress;
-
-      // We handle case 3 separately
-      if (startAddress = endAddress){
-        let combinedMask = startMask & endMask;
-        // Instead of using peek and poke, we can set the memory directly
-        if (color){
+    // We handle case 3 separately, and ensure that the while-loop is innermost
+    if (startAddress = endAddress){
+      // Instead of using peek and poke, we can set the memory directly
+      if (color){
+        while (counter < repeat){
           // The color is black (i.e. 1), so we can check if any of the bits are 1
           let screenMap[address] = screenMap[address] | combinedMask;
+          let counter = counter + 1;
+          let address = address + 32;
         }
-        else {
+      }
+      else {
+        while (counter < repeat){
           // The color is white (i.e. 0)
           // We only want white on the bit we selected, no-one else
           // To do this we can invert the bit, so that it's only 0 at the value we want to
           // turn off, and check if both bits are 1 to turn them on
           let screenMap[address] = screenMap[address] & (~combinedMask);
+          let counter = counter + 1;
+          let address = address + 32;
+        }
+      }
+    }
+    else {
+      // Handle case 1 and 2 at the same time
+      if (color){
+        while(counter < repeat){
+          let screenMap[startAddress] = screenMap[startAddress] | startMask;
+          let screenMap[endAddress] = screenMap[endAddress] | endMask;
+
+          // Handle the middle
+          let address = address + 1;
+          // NOTE: This does not include treatment of the endAddress
+          while(address < endAddress){
+            let screenMap[address] = color;
+            let address = address + 1;
+          }
+          let startAddress = startAddress + 32;
+          let endAddress = endAddress + 32;
+          let address = startAddress;
+          let counter = counter + 1;
         }
       }
       else {
-        // Handle case 1 and 2 at the same time
-        if (color){
-          let screenMap[startAddress] = screenMap[startAddress] | startMask;
-          let screenMap[endAddress] = screenMap[endAddress] | endMask;
-        }
-        else {
+        while(counter < repeat){
           let screenMap[startAddress] = screenMap[startAddress] & (~startMask);
           let screenMap[endAddress] = screenMap[endAddress] & (~endMask);
-        }
 
-        // Handle the middle
-        let address = address + 1;
-        // NOTE: This does not include treatment of the endAddress
-        while(address < endAddress){
-          let screenMap[address] = color;
+          // Handle the middle
           let address = address + 1;
+          // NOTE: This does not include treatment of the endAddress
+          while(address < endAddress){
+            let screenMap[address] = color;
+            let address = address + 1;
+          }
+          let startAddress = startAddress + 32;
+          let endAddress = endAddress + 32;
+          let address = startAddress;
+
+          let counter = counter + 1;
         }
       }
-      let counter = counter + 1;
-      let startAddress = startAddress + 32;
-      let endAddress = endAddress + 32;
     }
     return;
   }
