@@ -288,9 +288,10 @@ class Screen {
 
     var int startMask;
     var int endMask;
-    var int startMask;
-    var int endMask;
     var int combinedMask;
+    var int notStartMask;
+    var int notEndMask;
+    var int notCombinedMask;
 
     var int counter;
 
@@ -332,6 +333,11 @@ class Screen {
     let startMask = ~(twoToThe[startBit] - 1);
     let endMask = twoToThe[endBit + 1] - 1;
     let combinedMask = startMask & endMask;
+
+    let notStartMask = ~startMask;
+    let notEndMask = ~endMask;
+    let notCombinedMask = ~combinedMask;
+
     let address = startAddress;
 
     // We handle case 3 separately, and ensure that the while-loop is innermost
@@ -351,7 +357,7 @@ class Screen {
           // We only want white on the bit we selected, no-one else
           // To do this we can invert the bit, so that it's only 0 at the value we want to
           // turn off, and check if both bits are 1 to turn them on
-          let screenMap[address] = screenMap[address] & (~combinedMask);
+          let screenMap[address] = screenMap[address] & notCombinedMask;
           let counter = counter + 1;
           let address = address + 32;
         }
@@ -379,8 +385,8 @@ class Screen {
       }
       else {
         while(counter < repeat){
-          let screenMap[startAddress] = screenMap[startAddress] & (~startMask);
-          let screenMap[endAddress] = screenMap[endAddress] & (~endMask);
+          let screenMap[startAddress] = screenMap[startAddress] & notStartMask;
+          let screenMap[endAddress] = screenMap[endAddress] & notEndMask;
 
           // Handle the middle
           let address = address + 1;
