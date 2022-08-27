@@ -39,6 +39,8 @@ class Screen {
     // The below gives integer constant too big
     // let twoToThe[15] = 32768;
     let twoToThe[15] = 32767 + 1;
+    // Needed for masking horizontal lines
+    let twoToThe[16] = 0;
     return;
   }
 
@@ -144,7 +146,7 @@ class Screen {
 
     // Special case for drawing straight horizontal line
     if(y1=y2){
-      do Screen.drawHorizontalLine(xStart, xEnd, y1);
+      do Screen.drawHorizontalLine(xStart, xEnd, y1, 1);
       return;
     }
 
@@ -274,23 +276,28 @@ class Screen {
    * \param xStart The start of the line
    * \param xEnd The end of the line
    * \param y The y-coordinate
+   * \param repeat How many rows to repeat the drawing for
    */
-  function void drawHorizontalLine(int xStart, int xEnd, int y){
+  function void drawHorizontalLine(int xStart, int xEnd, int y, int repeat){
     var int address;
     var int startAddress;
     var int endAddress;
 
     var int startBit;
     var int endBit;
-    var int curBit;
 
-    var int bitValue;
+    var int startMask;
+    var int endMask;
+    var int combinedMask;
+
+    var int counter;
+
+    let counter = 0;
 
     // Set the start and end address
     // | startAddress | startAddress + 1 | ... | endAddress |
     let startAddress = (32*y) + (xStart/16);
     let endAddress = (32*y) + (xEnd/16);
-    let address = startAddress;
 
     // We can now have three cases
     // Recall that Hack is little-endianness
@@ -317,82 +324,53 @@ class Screen {
 
     let startBit = xStart & 15;
     let endBit = xEnd & 15;
-    let curBit = startBit;
-    let bitValue = 0;
 
-    // We handle case 3 separately
-    if (startAddress = endAddress){
-      // +1 as we want to include the endBit
-      while(curBit < (endBit+1)){
-        let bitValue = bitValue + twoToThe[curBit];
-        let curBit = curBit + 1;
-      }
-      // Instead of using peek and poke, we can set the memory directly
-      if (color){
-        // The color is black (i.e. 1), so we can check if any of the bits are 1
-        let screenMap[address] = screenMap[address] | bitValue;
-      }
-      else {
-        // The color is white (i.e. 0)
-        // We only want white on the bit we selected, no-one else
-        // To do this we can invert the bit, so that it's only 0 at the value we want to
-        // turn off, and check if both bits are 1 to turn them on
-        let screenMap[address] = screenMap[address] & (~bitValue);
-      }
-    }
-    else {
-      // Handle case 1 and 2 at the same time
-      // In both cases we set the rest of the bits of startAddress to the desired value
-      while(curBit < 16){
-        let bitValue = bitValue + twoToThe[curBit];
-        let curBit = curBit + 1;
-      }
-      // Instead of using peek and poke, we can set the memory directly
-      if (color){
-        // The color is black (i.e. 1), so we can check if any of the bits are 1
-        let screenMap[address] = screenMap[address] | bitValue;
-      }
-      else {
-        // The color is white (i.e. 0)
-        // We only want white on the bit we selected, no-one else
-        // To do this we can invert the bit, so that it's only 0 at the value we want to
-        // turn off, and check if both bits are 1 to turn them on
-        let screenMap[address] = screenMap[address] & (~bitValue);
-      }
+    // We will create a mask for the startAddress and endAddress
+    // NOTE: We can fill all bits from a number by subtracting 1 from twoToThe
+    let startMask = ~(twoToThe[startBit] - 1);
+    let endMask = twoToThe[endBit + 1] - 1;
 
-      // Handle the middle
-      let address = address + 1;
-      if (color){
-        let bitValue = -1;  // true
+    while(counter < repeat){
+      let address = startAddress;
+
+      // We handle case 3 separately
+      if (startAddress = endAddress){
+        let combinedMask = startMask & endMask;
+        // Instead of using peek and poke, we can set the memory directly
+        if (color){
+          // The color is black (i.e. 1), so we can check if any of the bits are 1
+          let screenMap[address] = screenMap[address] | combinedMask;
+        }
+        else {
+          // The color is white (i.e. 0)
+          // We only want white on the bit we selected, no-one else
+          // To do this we can invert the bit, so that it's only 0 at the value we want to
+          // turn off, and check if both bits are 1 to turn them on
+          let screenMap[address] = screenMap[address] & (~combinedMask);
+        }
       }
       else {
-        let bitValue = 0;  // false
-      }
-      // NOTE: This does not include treatment of the endAddress
-      while(address < endAddress){
-        let screenMap[address] = bitValue;
+        // Handle case 1 and 2 at the same time
+        if (color){
+          let screenMap[startAddress] = screenMap[startAddress] | startMask;
+          let screenMap[endAddress] = screenMap[endAddress] | endMask;
+        }
+        else {
+          let screenMap[startAddress] = screenMap[startAddress] & (~startMask);
+          let screenMap[endAddress] = screenMap[endAddress] & (~endMask);
+        }
+
+        // Handle the middle
         let address = address + 1;
+        // NOTE: This does not include treatment of the endAddress
+        while(address < endAddress){
+          let screenMap[address] = color;
+          let address = address + 1;
+        }
       }
-      // Handle the end
-      let bitValue = 0;
-      let curBit = endBit;
-      while(curBit > (-1)){
-        let bitValue = bitValue + twoToThe[curBit];
-        let curBit = curBit - 1;
-      }
-
-      // Instead of using peek and poke, we can set the memory directly
-      if (color){
-        // The color is black (i.e. 1), so we can check if any of the bits are 1
-        let screenMap[address] = screenMap[address] | bitValue;
-      }
-      else {
-        // The color is white (i.e. 0)
-        // We only want white on the bit we selected, no-one else
-        // To do this we can invert the bit, so that it's only 0 at the value we want to
-        // turn off, and check if both bits are 1 to turn them on
-        let screenMap[address] = screenMap[address] & (~bitValue);
-      }
+      let counter = counter + 1;
+      let startAddress = startAddress + 32;
+      let endAddress = endAddress + 32;
     }
     return;
   }
@@ -414,7 +392,6 @@ class Screen {
     var int xEnd;
     var int yStart;
     var int yEnd;
-    var int curY;
 
     if (x1<x2){
       let xStart = x1;
@@ -432,14 +409,8 @@ class Screen {
       let yEnd = y1;
     }
 
-    let curY = yStart;
-
     // Draw several straight lines
-    // Plus one as we want to include yEnd
-    while(curY < (yEnd+1)){
-      do Screen.drawHorizontalLine(xStart, xEnd, curY);
-      let curY = curY + 1;
-    }
+    do Screen.drawHorizontalLine(xStart, xEnd, yStart, (yEnd - yStart)+1);
 
     return;
   }
@@ -478,7 +449,7 @@ class Screen {
 
       let curY = y + dy;
 
-      do Screen.drawHorizontalLine(xStart, xEnd, curY);
+      do Screen.drawHorizontalLine(xStart, xEnd, curY, 1);
 
       let dy = dy + 1;
     }
