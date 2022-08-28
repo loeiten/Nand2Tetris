@@ -145,7 +145,8 @@ class Screen {
   /**
    * Draw a line from pixel (x1,y1) to pixel (x2,y2), using the current color.
    *
-   * NOTE: Having the row as first column is opposite of the matrix notation
+   * We will use the Bresenham's line algorithm:
+   * http://en.wikipedia.org/wiki/Bresenham's_line_algorithm
    *
    * \param x1 The start column of the line
    * \param y1 The start row of the line
@@ -153,163 +154,79 @@ class Screen {
    * \param y2 The end row of the line
    */
   function void drawLine(int x1, int y1, int x2, int y2) {
-    var int a;
-    var int b;
-    var int diff;  // diff = a*dy - b*dx
+    var int dx;
+    var int dy;
+    var int slopeX;
+    var int slopeY;
+    var int err;
+    var int e2;
 
     var int xStart;
     var int xEnd;
     var int yStart;
     var int yEnd;
 
-    var int dx;
-    var int dy;
-    var int dxP1;
-    var int dyP1;
+    let dx = Math.abs(x2 - x1);
+    // NOTE: This is usually defined negatively
+    let dy = Math.abs(y2 - y1);
 
-    var int curX;
-    var int curY;
-
-    var boolean draNWToSE;
-
-    let a = 0;
-    let b = 0;
-    let diff = 0;
-
-    // Determine start and end points of x
-    if (x1<x2){
-      let xStart = x1;
-      let xEnd = x2;
-    } else{
-      let xStart = x2;
-      let xEnd = x1;
-    }
-
-    // Special case for drawing straight horizontal line
-    if(y1=y2){
+    // Special case: Horizontal line
+    if (dy=0){
+      if (x1<x2){
+        let xStart = x1;
+        let xEnd = x2;
+      } else{
+        let xStart = x2;
+        let xEnd = x1;
+      }
       do Screen.drawHorizontalLine(xStart, xEnd, y1, 1);
-      return;
     }
 
-    // Determine start and end points of y
-    if(y1<y2){
-      let yStart = y1;
-      let yEnd = y2;
-    } else{
-      let yStart = y2;
-      let yEnd = y1;
-    }
-
-    // Special case for drawing straight vertical line
-    // (No way to speed this up as the addresses is not contiguous in RAM)
-    if(x1=x2){
-      let curY = yStart + b;
-      while(curY < yEnd){
-        do Screen.drawPixel(xStart, curY);
-        let curY = curY+1;
+    // Special case: Vertical line
+    if (dx=0){
+      if (y1<y2){
+        let yStart = y1;
+        let yEnd = y2;
+      } else{
+        let yStart = y2;
+        let yEnd = y1;
       }
-      return;
+      do Screen.drawVerticalLine(yStart, yEnd, x1);
     }
 
-    // Figure out dx and dy
-    let dx = xEnd - xStart;
-    let dy = y2 - y1;  // NOTE: dy can be negative
-    // Plus 1 as we are checking for <=
-    let dxP1 = dx + 1;
-    let dyP1 = dy + 1;
-
-    // When drawing non-straight lines we will have two cases (instead of 4 as we will always have xStart < xEnd)
-    // We will have the following:
-    // - The screen starts with (0, 0) in the top left corner
-    //   - This means that the coordinate is flipped horizontally as compared to a normal coordinate system
-    // - y is increasing downwards
-    // - dy is the end-point of y
-    // - x and a is increasing to the right
-    // - dx is the end-point of x
-    // - dy/dx and b/a will be the gradients
-    // - In the case where we start from NW and move towards SE
-    //     - yStart will be close to y=0 and we will move towards dy
-    //     - b is starting on 0 and increase with increasing y
-    //     - The gradient will be POSITIVE (as we have flipped the coordinate system)
-    // - In the case where we start from SW and move towards NE
-    //     - yStart will be close to dy, and we will move towards y=0
-    //     - b is starting on 0 and decrease with decreasing y
-    //     - The gradient will be NEGATIVE (as we have flipped the coordinate system)
-    // - In both cases:
-    //     - If b/a is steeper than dy/dx we will move towards the right
-    //         - We will check whether (b/a) > (dy/dx), which is the same as (a*dy) < (b*dx), which is the same as diff = (a*dy) - (b*dx) < 0
-    //         - As the gradients are positive in the NW -> SE case this means
-    //             - If the condition is true: We should move right and increase a (diff increase with dy)
-    //             - If the condition is false: We should move down (i.e. increase y) and increase b (diff DECREASE with dx)
-    //         - As the gradients are negative in the SW -> NE case this means
-    //             - If the condition is true, we should move up (i.e. decrease y) and decrease b (diff INCREASE by dx)
-    //             - If the condition is false, we should move right and increase a (diff increase by dy)
-    let curX = xStart;
-
-    if ((y1<y2) & (x1<x2)){
-      // Direction is NW to SE
-      let draNWToSE = true;
-      let curY = y1;
-    }
-    if ((y1>y2) & (x1>x2)){
-      // Direction is SE to NW
-      let draNWToSE = true;
-      let curY = y2;
-      // Fix gradient to be aligned with the expectation of draNWToSE = true
-      let dy = -dy;
-      let dyP1 = -dyP1 + 2;
-    }
-    if ((y1>y2) & (x1<x2)){
-      // Direction is SW to NE
-      let draNWToSE = false;
-      let curX = xStart;
-      let curY = y1;
-    }
-    if ((y1<y2) & (x1>x2)){
-      // Direction is NE to SW
-      let draNWToSE = false;
-      let curY = y2;
-      // Fix gradient to be aligned with the expectation of draNWToSE = false
-      let dy = -dy;
-      let dyP1 = -dyP1;
-    }
-
-    if (draNWToSE){
-      while ((a<dxP1) & (b<dyP1)){
-        do Screen.drawPixel(curX, curY);
-        if(diff < 0){
-          // Go right
-          let a = a + 1;
-          let curX = curX + 1;
-          let diff = diff + dy;
-        }
-        else {
-          // Go down
-          let b = b + 1;
-          let curY = curY + 1;
-          let diff = diff - dx;
-        }
-      }
+    if(x1 < x2) {
+      let slopeX = 1;
     } else {
-      while ((a<dxP1) & ~(b<dy)){
-        do Screen.drawPixel(curX, curY);
-        if(diff < 0){
-          // Go up
-          let b = b - 1;
-          let curY = curY - 1;
-          let diff = diff + dx;
-        }
-        else {
-          // Go right
-          let a = a + 1;
-          let curX = curX + 1;
-          let diff = diff + dy;
-        }
+      let slopeX = -1;
+    }
+
+    if(y1 < y2) {
+      let slopeY = 1;
+    } else {
+      let slopeY = -1;
+    }
+
+    let err = dx - dy;
+
+    while(~((x1 = x2) & (y1 = y2))) {
+      do Screen.drawPixel(x1, y1);
+      let e2 = err + err;
+
+      if(e2 > -dy) {
+        let err = err - dy;
+        let x1 = x1 + slopeX;
+      }
+
+      if(e2 < dx) {
+        let err = err + dx;
+        let y1 = y1 + slopeY;
       }
     }
+
+    do Screen.drawPixel(x1, y1);
+
     return;
   }
-
 
   /**
    * Draw a horizontal line.
@@ -446,6 +363,26 @@ class Screen {
     }
     return;
   }
+
+  /**
+   * Draw a vertical line.
+   *
+   * \param yStart The start of the line
+   * \param yEnd The end of the line
+   * \param x The x-coordinate
+   */
+  function void drawVerticalLine(int yStart, int yEnd, int x){
+    var int y;
+
+    // We start at the lowest y and move to the highest y
+    let y = yStart;
+    while(y < (yEnd+1)){
+      do Screen.drawPixel(x, y);
+      let y = y+1;
+    }
+    return;
+  }
+
 
   /**
    * Draws a filled rectangle whose top left corner is (x1, y1)
