@@ -12,15 +12,22 @@
 class Screen {
   static Array twoToThe;
   static Array screenMap;
+  static Array yCoordinate;
+  static Array xCoordinate;
   static boolean color;
 
   /** Initialize the Screen. */
   function void init() {
+    var int outerLoop;
+    var int innerLoop;
+    var int index;
+    var int value;
+
     let color = true;
     let screenMap = 16384;
 
     // We use the same trick as in the Math class
-    let twoToThe = Array.new(16);
+    let twoToThe = Array.new(17);
     let twoToThe[0] = 1;
     let twoToThe[1] = 2;
     let twoToThe[2] = 4;
@@ -41,6 +48,40 @@ class Screen {
     let twoToThe[15] = 32767 + 1;
     // Needed for masking horizontal lines
     let twoToThe[16] = 0;
+
+    // Make a look-up table which replaces the need for multiplication
+    // http://nand2tetris-questions-and-answers-forum.52.s1.nabble.com/Small-Optimizations-for-Screen-jack-td4036176.html
+    // 256 rows
+    // A speed-up could be to fill these manually
+    // We could have done innerLoop*32 256 times, however, this would have taken long time
+    // Instead we use +
+    let index = 0;
+    let value = 0;
+    let yCoordinate = Array.new(256);
+    while(index < 256){
+      let yCoordinate[index] = value;
+      let index = index + 1;
+      let value = value + 32;
+    }
+    // 512 columns
+    // A speed-up could be to fill these manually
+    // We could have done counter/16 512 times, however, this would take long time
+    // Instead we will exploit that the integer part changes every 16 times
+    let value = 0;
+    let index = 0;
+    let outerLoop = 0;
+    let innerLoop = 0;
+    let xCoordinate = Array.new(512);
+    while(outerLoop < 32){
+      while(innerLoop < 16){
+        let xCoordinate[index] = value;
+        let index = index + 1;
+        let innerLoop = innerLoop + 1;
+      }
+      let innerLoop = 0;
+      let value = value + 1;
+      let outerLoop = outerLoop + 1;
+    }
     return;
   }
 
@@ -81,7 +122,7 @@ class Screen {
     var int address;
     var int bitValue;
 
-    let address = (32*y) + (x/16);
+    let address = xCoordinate[x] + yCoordinate[y];
 
     // We can use modulus 16, but it's cheaper to use bitwise & 15 which gives the same
     let bitValue = twoToThe[x & 15];
@@ -299,8 +340,8 @@ class Screen {
 
     // Set the start and end address
     // | startAddress | startAddress + 1 | ... | endAddress |
-    let startAddress = (32*y) + (xStart/16);
-    let endAddress = (32*y) + (xEnd/16);
+    let startAddress = xCoordinate[xStart] + yCoordinate[y];
+    let endAddress = xCoordinate[xEnd] + yCoordinate[y];
 
     // We can now have three cases
     // Recall that Hack is little-endianness
