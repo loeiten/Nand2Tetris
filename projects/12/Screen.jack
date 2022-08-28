@@ -436,12 +436,9 @@ class Screen {
    * \param r The radius of the circle
    */
   function void drawCircle(int x, int y, int r) {
-    var int curY;
-    var int xStart;
-    var int xEnd;
     var int rSquare;
     var int length;
-
+    var int rP1;
     var int dy;
 
     if (r>181){
@@ -453,15 +450,10 @@ class Screen {
     let rSquare = r*r;
 
     // +1 as we want to include r
-    while(dy < (r+1)){
+    let rP1 = r+1;
+    while(dy < rP1){
       let length = Math.sqrt(rSquare - (dy*dy));
-      let xStart = x - length;
-      let xEnd = x + length;
-
-      let curY = y + dy;
-
-      do Screen.drawHorizontalLine(xStart, xEnd, curY, 1);
-
+      do Screen.drawHorizontalLine(x - length, x + length, y + dy, 1);
       let dy = dy + 1;
     }
 
