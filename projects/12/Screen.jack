@@ -427,7 +427,9 @@ class Screen {
   /**
    * Draw a filled circle of radius r<=181 around (x,y), using the current color.
    *
-   * NOTE: Having the row as first column is opposite of the matrix notation
+   * NOTE: This version includes "spikes" at the N,W,E,S ends of the circle
+   * For an alternative version, see:
+   * http://nand2tetris-questions-and-answers-forum.52.s1.nabble.com/Fast-circle-algorithm-td4030808.html
    *
    * \param x The column of centrum of the circle
    * \param y The row of centrum the circle
