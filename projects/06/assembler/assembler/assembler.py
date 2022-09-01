@@ -10,6 +10,8 @@ from assembler.code import Code
 from assembler.parser import Parser
 from assembler.symbol_table import SymbolTable
 
+MAX_INT = (2**15) - 1
+
 
 def parse_args() -> argparse.Namespace:
     """Parse input arguments.
@@ -106,7 +108,9 @@ def second_pass(in_path: Path, symbol_table: SymbolTable) -> None:
     parser = Parser(str(in_path))
     code = Code()
 
-    with no_symbol_path.open("w") as l_file, hack_path.open("w") as hack_file:
+    with no_symbol_path.open("w") as l_file, hack_path.open(
+        "w", encoding="ASCII"
+    ) as hack_file:
         while parser.has_more_lines():
             parser.advance()
             # NOTE: L-instructions are not translated
@@ -146,10 +150,17 @@ def convert_to_15_bit_binary(decimal: Union[str, int]) -> str:
     Args:
         decimal (Union[str, int]): The decimal to convert.
 
+    Raises:
+        RuntimeError: If the decimal is too large
+
     Returns:
         str: The corresponding binary string.
     """
     decimal = int(decimal)
+    if decimal > MAX_INT:
+        raise RuntimeError(
+            f"{decimal} > {MAX_INT}. Cannot make 15 bit binary representation."
+        )
     binary_string = ""
     # NOTE: range(i) represents the numbers [0, 15)
     for exponent in range(15)[::-1]:
