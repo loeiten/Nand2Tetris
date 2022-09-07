@@ -9,3 +9,4 @@ Implementations for all the [Nand2Tetris](https://www.nand2tetris.org) projects.
 3. [The tetris implementation](https://github.com/loeiten/Nand2Tetris/tree/main/projects/09/Tetris)
 4. [The jack compiler](https://github.com/loeiten/Nand2Tetris/tree/main/projects/11/jack_compiler)
 5. [The operating system](https://github.com/loeiten/Nand2Tetris/tree/main/projects/12)
+6. [Nand2Tetris-FPGA](https://github.com/loeiten/Nand2Tetris/tree/main/projects/13)
