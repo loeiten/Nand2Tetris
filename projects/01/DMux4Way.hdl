@@ -4,7 +4,7 @@
 // File name: projects/01/DMux4Way.hdl
 
 /**
- * 4-way demultiplexor:
+ * 4-way demultiplexer:
  * {a, b, c, d} = {in, 0, 0, 0} if sel == 00
  *                {0, in, 0, 0} if sel == 01
  *                {0, 0, in, 0} if sel == 10
